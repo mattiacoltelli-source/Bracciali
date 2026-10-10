@@ -82,7 +82,6 @@
   }
   function toggleNav() { setNav(!mnav.classList.contains("is-open")); }
   btn.addEventListener("click", toggleNav);
-  fastTap(btn, toggleNav);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") setNav(false); });
   window.addEventListener("resize", function () { if (window.innerWidth >= 900) setNav(false); });
 
