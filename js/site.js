@@ -65,20 +65,7 @@
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") setNav(false); });
   window.addEventListener("resize", function () { if (window.innerWidth >= 900) setNav(false); });
 
-  // ---- il disco yin-yang gira con lo scroll
-  var yy = document.getElementById("yy");
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (yy && !reduce) {
-    var ticking = false;
-    var upd = function () {
-      var r = yy.parentElement.getBoundingClientRect();
-      var prog = (window.innerHeight - r.top) / (window.innerHeight + r.height);
-      yy.style.setProperty("--rot", Math.round(prog * 540) + "deg");
-      ticking = false;
-    };
-    window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(upd); } }, { passive: true });
-    upd();
-  }
 
   // ---- rivelazione morbida delle sezioni
   var rv = document.querySelectorAll(".rv");

@@ -413,7 +413,7 @@ def ld_json():
 
 
 def yy_disc(a="#130a09", b="#f3ece2"):
-    return f'<svg viewBox="0 0 100 100" aria-hidden="true" style="--yy-a:{a};--yy-b:{b}"><use href="#yy"/></svg>'
+    return '<img src="assets/img/logo-stroke.png" alt="" width="350" height="375">'
 
 
 # ---------------------------------------------------------------- HOME
@@ -466,7 +466,7 @@ def page_home():
     <a class="go" href="menu.html#giapponese">Scopri i piatti giapponesi <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
     <div class="ph"><img src="assets/img/tradizione-giapponese.jpg" alt="Sushi e piatti della cucina giapponese" loading="lazy" width="1400" height="1050"></div>
   </div>
-  <div class="yy" id="yy" aria-hidden="true">{yy_disc("#130a09", "#b8180f")}</div>
+  <div class="yy" id="yy" aria-hidden="true">{yy_disc()}</div>
 </section>
 
 <section class="sec" aria-labelledby="h-menu">
@@ -570,8 +570,8 @@ def page_menu():
 <div class="menu-bar" id="menubar">
   <div class="wrap menu-bar-in">
     <div class="switch" role="tablist" aria-label="Tradizione">
-      <button type="button" role="tab" id="tab-giapponese" aria-selected="true" aria-controls="giapponese" data-g="giapponese"><svg class="yy-i" viewBox="0 0 100 100" aria-hidden="true" style="--yy-a:#130a09;--yy-b:#b8180f"><use href="#yy"/></svg>Giapponese</button>
-      <button type="button" role="tab" id="tab-cinese" aria-selected="false" aria-controls="cinese" data-g="cinese"><svg class="yy-i" viewBox="0 0 100 100" aria-hidden="true" style="--yy-a:#130a09;--yy-b:#b8180f"><use href="#yy"/></svg>Cinese</button>
+      <button type="button" role="tab" id="tab-giapponese" aria-selected="true" aria-controls="giapponese" data-g="giapponese"><img class="yy-i" src="assets/img/logo-stroke.png" alt="" width="22" height="24">Giapponese</button>
+      <button type="button" role="tab" id="tab-cinese" aria-selected="false" aria-controls="cinese" data-g="cinese"><img class="yy-i" src="assets/img/logo-stroke.png" alt="" width="22" height="24">Cinese</button>
     </div>
     {chips_html}
   </div>
