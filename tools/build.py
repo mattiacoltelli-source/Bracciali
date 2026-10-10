@@ -306,7 +306,7 @@ def head(title, desc, page, extra=""):
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:image" content="assets/img/sala-hero.jpg">
 <meta property="og:locale" content="it_IT">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon.png" type="image/png">
 <link rel="preload" href="assets/fonts/ShipporiMincho-800.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="stylesheet" href="css/style.css">
 <script>document.documentElement.classList.add('js')</script>
