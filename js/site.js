@@ -87,6 +87,11 @@
 
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  // ---- le tessere DONG si girano al tocco
+  document.querySelectorAll(".dt").forEach(function (t) {
+    t.addEventListener("click", function () { t.classList.toggle("is-flip"); });
+  });
+
   // ---- rivelazione morbida delle sezioni
   var rv = document.querySelectorAll(".rv");
   if ("IntersectionObserver" in window && !reduce) {

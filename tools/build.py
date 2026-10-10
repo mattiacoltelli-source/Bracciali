@@ -286,10 +286,11 @@ ICONS = """<svg width="0" height="0" style="position:absolute" aria-hidden="true
 <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="9.5" r="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
 <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6L5 8zM9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 16l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
-<symbol id="yy" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="var(--yy-b, #f3ece2)"/><path d="M50 0a50 50 0 0 1 0 100a25 25 0 0 1 0-50a25 25 0 0 0 0-50z" fill="var(--yy-a, #130a09)"/><circle cx="50" cy="25" r="8" fill="var(--yy-b, #f3ece2)"/><circle cx="50" cy="75" r="8" fill="var(--yy-a, #130a09)"/></symbol>
+<symbol id="s-dots" viewBox="0 0 24 24"><circle cx="12" cy="6" r="4.2" fill="#2455a4"/><circle cx="6" cy="17" r="4.2" fill="#c4271c"/><circle cx="18" cy="17" r="4.2" fill="#1b7a4e"/></symbol>
+<symbol id="s-bamboo" viewBox="0 0 24 24"><g fill="#1b7a4e"><rect x="3" y="3" width="5" height="18" rx="2.2"/><rect x="9.5" y="3" width="5" height="18" rx="2.2"/><rect x="16" y="3" width="5" height="18" rx="2.2"/></g><g fill="#f8f3e5"><rect x="3" y="11" width="5" height="1.6"/><rect x="9.5" y="11" width="5" height="1.6"/><rect x="16" y="11" width="5" height="1.6"/></g></symbol>
 </svg>"""
 
-NAV = [("index.html", "Home"), ("menu.html", "Menu"), ("prenota.html", "Prenota e ordina"), ("dove-siamo.html", "Dove siamo")]
+NAV = [("index.html", "Home", "東"), ("menu.html", "Menu", "中"), ("prenota.html", "Prenota e ordina", "發"), ("dove-siamo.html", "Dove siamo", "白")]
 
 
 def head(title, desc, page, extra=""):
@@ -300,37 +301,36 @@ def head(title, desc, page, extra=""):
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
-<meta name="theme-color" content="#130a09">
+<meta name="theme-color" content="#0c3a2d">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{e(title)}">
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:image" content="assets/img/sala-hero.jpg">
 <meta property="og:locale" content="it_IT">
 <link rel="icon" href="assets/favicon.png" type="image/png">
-<link rel="preload" href="assets/fonts/ShipporiMincho-800.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="assets/fonts/BricolageGrotesque-800.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="stylesheet" href="css/style.css">
 <script>document.documentElement.classList.add('js')</script>
 {extra}</head>
 """
 
 
-def header(page):
+def header(page, trad=""):
     def cur(h):
         return ' aria-current="page"' if h == page else ""
 
-    links = "".join(f'<a href="{h}"{cur(h)}>{t}</a>' for h, t in NAV)
+    links = "".join(f'<a href="{h}"{cur(h)}>{t}</a>' for h, t, _ in NAV)
     big = "".join(
-        f'<a class="big" href="{h}"{cur(h)}>{t}<svg width="26" height="26" aria-hidden="true"><use href="#i-arrow"/></svg></a>'
-        for h, t in NAV
+        f'<a class="big t3" href="{h}"{cur(h)}><span class="han" aria-hidden="true">{g}</span>{t}</a>' for h, t, g in NAV
     )
-    return f"""<body data-page="{page}">
+    return f"""<body data-page="{page}"{trad}>
 {ICONS}
 <a class="skip" href="#main">Vai al contenuto</a>
 <header class="site-header" id="top">
-  <a class="logo" href="index.html" aria-label="Ristorante Dong, home"><img src="assets/img/logo-inverse.png" alt="Dong, Fine Asian Flavors" width="100" height="53"></a>
+  <a class="logo" href="index.html" aria-label="Ristorante Dong, home"><img src="assets/img/logo-inverse.png" alt="Dong, Fine Asian Flavors" width="91" height="48"></a>
   <nav class="nav" aria-label="Principale">{links}</nav>
   <div class="head-actions">
-    <a class="btn btn--oro" href="tel:{TEL}" style="min-height:44px;padding:0 20px"><svg aria-hidden="true"><use href="#i-phone"/></svg><span class="tel-t">Chiama</span></a>
+    <a class="btn btn--rosso" href="tel:{TEL}" style="min-height:46px;padding:0 20px"><svg aria-hidden="true"><use href="#i-phone"/></svg><span>Chiama</span></a>
     <button class="menu-btn" type="button" aria-label="Apri il menu di navigazione" aria-expanded="false" aria-controls="mnav">
       <svg class="bars" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       <svg class="x" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -377,9 +377,9 @@ def footer():
   </div>
 </footer>
 <nav class="dock" aria-label="Azioni rapide">
-  <a href="tel:{TEL}"><svg aria-hidden="true"><use href="#i-phone"/></svg>Prenota</a>
-  <a href="{SHOP}" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-bag"/></svg>Ordina</a>
-  <a href="{MAPS}" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-pin"/></svg>Dove</a>
+  <a href="tel:{TEL}"><span class="han" aria-hidden="true">中</span>Prenota</a>
+  <a href="{SHOP}" target="_blank" rel="noopener"><span class="han" aria-hidden="true">發</span>Ordina</a>
+  <a href="{MAPS}" target="_blank" rel="noopener"><span class="han" aria-hidden="true">白</span>Dove</a>
 </nav>
 <script src="js/site.js"></script>
 """
@@ -393,14 +393,7 @@ def ld_json():
         "description": "Fusion restaurant: cucina cinese e giapponese alla carta a San Lazzaro di Savena, Bologna.",
         "servesCuisine": ["Cinese", "Giapponese"],
         "telephone": TEL,
-        "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "via Russo, 4",
-            "postalCode": "40068",
-            "addressLocality": "San Lazzaro di Savena",
-            "addressRegion": "BO",
-            "addressCountry": "IT",
-        },
+        "address": {"@type": "PostalAddress", "streetAddress": "via Russo, 4", "postalCode": "40068", "addressLocality": "San Lazzaro di Savena", "addressRegion": "BO", "addressCountry": "IT"},
         "openingHoursSpecification": [
             {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "opens": "12:00", "closes": "14:30"},
             {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "opens": "19:00", "closes": "23:00"},
@@ -412,61 +405,76 @@ def ld_json():
     return '<script type="application/ld+json">' + json.dumps(data, ensure_ascii=False) + "</script>\n"
 
 
-def yy_disc(a="#130a09", b="#f3ece2"):
-    return '<img src="assets/img/logo-stroke.png" alt="" width="350" height="375">'
+def rack(chars):
+    rots = ["-3deg", "2deg", "-1.5deg", "3deg", "-2deg"]
+    return '<div class="rack" aria-hidden="true">' + "".join(
+        f'<span class="t3" style="--r:{rots[i % 5]}"><span class="han">{c}</span></span>' for i, c in enumerate(chars)
+    ) + "</div>"
 
 
 # ---------------------------------------------------------------- HOME
 def page_home():
     tiles_src = [
-        ("tartare", "tartare-dong-tartare.jpg", "Tartare Dong", "Giapponese", "giapponese"),
-        ("uramaki", "uramaki-dragon-uramaki.jpg", "Uramaki Dragon", "Giapponese", "giapponese"),
-        ("makidark", "golden-truffle-maki-dark.jpg", "Golden Truffle", "Giapponese", "giapponese"),
-        ("sashimi", "sashimi-bufala-sashimi.jpg", "Sashimi bufala", "Giapponese", "giapponese"),
-        ("ravioli", "xiao-long-bao-ravioli.jpg", "Xiao Long Bao", "Cinese", "cinese"),
-        ("primi", "riso-dong-primi-piatti.jpg", "Riso Dong", "Cinese", "cinese"),
-        ("carne", "anatra-agli-agrumi-secondi-piatti-di-carne.jpg", "Anatra agli agrumi", "Cinese", "cinese"),
-        ("pesce", "soft-shell-crab-secondi-di-pesce.jpg", "Soft shell crab", "Cinese", "cinese"),
+        ("tartare", "tartare-dong-tartare.jpg", "Tartare Dong", "Giapponese", "giapponese", "-2deg"),
+        ("uramaki", "uramaki-dragon-uramaki.jpg", "Uramaki Dragon", "Giapponese", "giapponese", "1.5deg"),
+        ("makidark", "golden-truffle-maki-dark.jpg", "Golden Truffle", "Giapponese", "giapponese", "-1deg"),
+        ("sashimi", "sashimi-bufala-sashimi.jpg", "Sashimi bufala", "Giapponese", "giapponese", "2deg"),
+        ("ravioli", "xiao-long-bao-ravioli.jpg", "Xiao Long Bao", "Cinese", "cinese", "-1.5deg"),
+        ("primi", "riso-dong-primi-piatti.jpg", "Riso Dong", "Cinese", "cinese", "1deg"),
+        ("carne", "anatra-agli-agrumi-secondi-piatti-di-carne.jpg", "Anatra agli agrumi", "Cinese", "cinese", "-2deg"),
+        ("pesce", "soft-shell-crab-secondi-di-pesce.jpg", "Soft shell crab", "Cinese", "cinese", "1.5deg"),
     ]
     tiles = "".join(
-        f'<a class="tile" data-t="{t}" href="menu.html#{c}"><img src="assets/menu/{c}/{f}" alt="{e(n)}" loading="lazy" width="450" height="562">'
-        f'<span class="tn"><b>{e(n)}</b><small>{lab}</small></span></a>'
-        for c, f, n, lab, t in tiles_src
+        f'<a class="ft t3" data-t="{t}" style="--r:{r}" href="menu.html#{c}"><img src="assets/menu/{c}/{f}" alt="{e(n)}" loading="lazy" width="450" height="562">'
+        f'<span class="tn"><b>{e(n)}</b><small><i></i>{lab}</small></span></a>'
+        for c, f, n, lab, t, r in tiles_src
     )
     atm = "".join(
-        f'<figure class="rv"><img src="assets/img/sala-{n}.jpg" alt="{e(a)}" loading="lazy" width="900" height="1125"></figure>'
+        f'<figure class="t3 rv"><img src="assets/img/sala-{n}.jpg" alt="{e(a)}" loading="lazy" width="900" height="1125"></figure>'
         for n, a in [(1, "La sala del ristorante con la parete rossa"), (2, "Divanetti in pelle nera e rami dipinti sulla parete"), (3, "Ravioli neri al vapore in cestello di bambù"), (4, "Il barman prepara un cocktail"), (6, "Nigiri su foglia e piatto laccato"), (8, "Sashimi di tonno su foglia di bambù")]
+    )
+    dong = "".join(
+        f'<button class="dt t3" type="button" style="--i:{i};--r:{r}" aria-label="Tessera {l}: tocca per girarla"><span class="in"><span class="f"><span class="g han" aria-hidden="true">{w}</span><span class="l">{l}</span></span><span class="b"><img src="assets/img/logo-stroke.png" alt="" width="350" height="375"></span></span></button>'
+        for i, (l, w, r) in enumerate([("D", "東", "-3deg"), ("O", "南", "2deg"), ("N", "西", "-1.5deg"), ("G", "北", "3deg")])
     )
     body = f"""<main id="main">
 <section class="hero">
-  <img src="assets/img/sala-hero.jpg" alt="La sala del ristorante: parete rossa con il calligramma Dong e tavoli in lacca nera" fetchpriority="high" width="1800" height="1200">
-  <div class="hero-in">
-    <h1><span>Due cucine.</span><span class="l2">Un solo tavolo.</span></h1>
-    <p class="lede">Cucina cinese e giapponese alla carta, a San Lazzaro di Savena, Bologna. Ingredienti freschi e selezionati, in un ambiente moderno e minimale ispirato alla filosofia orientale.</p>
-    <div class="btn-row">
-      <a class="btn btn--oro" href="tel:{TEL}"><svg aria-hidden="true"><use href="#i-phone"/></svg>Prenota un tavolo</a>
-      <a class="btn btn--line" href="menu.html">Guarda il menu</a>
+  <div class="hero-room" aria-hidden="true"><img src="assets/img/sala-hero.jpg" alt="" width="1800" height="1200"></div>
+  <div class="wrap">
+    <div class="dong-row" aria-label="Dong">{dong}</div>
+    <h1>Due cucine.<br><em>Un solo tavolo.</em></h1>
+    <p class="lede">Cucina cinese e giapponese alla carta, a San Lazzaro di Savena, Bologna. Come al mahjong: stesse tessere, due tradizioni, e un tavolo dove si gioca insieme.</p>
+    <div class="stat-row">
+      <div class="btn-row">
+        <a class="btn btn--rosso" href="tel:{TEL}"><svg aria-hidden="true"><use href="#i-phone"/></svg>Prenota un tavolo</a>
+        <a class="btn btn--osso" href="menu.html">Guarda il menu</a>
+      </div>
+      <p class="status" id="status" data-state="">Martedì – Domenica · 12:00 – 14:30 · 19:00 – 23:00</p>
     </div>
-    <p class="status" id="status" data-state="">Martedì – Domenica · 12:00 – 14:30 · 19:00 – 23:00</p>
   </div>
 </section>
 
-<section class="yy-wrap" aria-label="Le due tradizioni">
-  <div class="trad trad--cinese">
-    <h2>Tradizione cinese</h2>
-    <p>Un viaggio lungo la Via della Seta alla ricerca dello Yin e Yang, pilastri della religione e della filosofia cinese che la fanno da padrone anche in cucina.</p>
-    <p>I cibi nascono da una <strong>continua ricerca di equilibrio tra gli opposti</strong>: tra i sapori, tra piatti caldi e freddi. Una pietanza cinese deve soddisfare il palato e al contempo la vista e l'olfatto, per regalare un vero viaggio sensoriale in Oriente.</p>
-    <a class="go" href="menu.html#cinese">Scopri i piatti cinesi <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
-    <div class="ph"><img src="assets/img/tradizione-cinese.jpg" alt="Piatti della cucina cinese" loading="lazy" width="1400" height="1050"></div>
+<section class="sec band" aria-label="Le due tradizioni">
+  <div class="wrap">
+    <div class="lett">
+      <article class="trad trad--cinese t3 rv">
+        <span class="wm han" aria-hidden="true">中</span>
+        <h2>Tradizione cinese</h2>
+        <p>Un viaggio lungo la Via della Seta alla ricerca dello Yin e Yang, pilastri della religione e della filosofia cinese che la fanno da padrone anche in cucina.</p>
+        <p>I cibi nascono da una <strong>continua ricerca di equilibrio tra gli opposti</strong>: tra i sapori, tra piatti caldi e freddi. Una pietanza cinese deve soddisfare il palato e al contempo la vista e l'olfatto, per regalare un vero viaggio sensoriale in Oriente.</p>
+        <a class="go" href="menu.html#cinese">Scopri i piatti cinesi <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <div class="ph"><img src="assets/img/tradizione-cinese.jpg" alt="Piatti della cucina cinese" loading="lazy" width="1400" height="1050"></div>
+      </article>
+      <article class="trad trad--giapponese t3 rv">
+        <span class="wm han" aria-hidden="true">東</span>
+        <h2>Tradizione giapponese</h2>
+        <p>La cucina giapponese è prima di tutto vista, bellezza: pensata per essere assaggiata con gli occhi, gioco estetico di forme e colori.</p>
+        <p>Per i nostri chef i coltelli sono strumenti quasi sacri. Il pesce crudo viene servito <strong>perfetto semplicemente grazie al suo taglio</strong>, con ingredienti manipolati il meno possibile per preservare la purezza dei sapori.</p>
+        <a class="go" href="menu.html#giapponese">Scopri i piatti giapponesi <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <div class="ph"><img src="assets/img/tradizione-giapponese.jpg" alt="Sushi e piatti della cucina giapponese" loading="lazy" width="1400" height="1050"></div>
+      </article>
+    </div>
   </div>
-  <div class="trad trad--giapponese">
-    <h2>Tradizione giapponese</h2>
-    <p>La cucina giapponese è prima di tutto vista, bellezza: pensata per essere assaggiata con gli occhi, gioco estetico di forme e colori.</p>
-    <p>Per i nostri chef i coltelli sono strumenti quasi sacri. Il pesce crudo viene servito <strong>perfetto semplicemente grazie al suo taglio</strong>, con ingredienti manipolati il meno possibile per preservare la purezza dei sapori.</p>
-    <a class="go" href="menu.html#giapponese">Scopri i piatti giapponesi <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
-    <div class="ph"><img src="assets/img/tradizione-giapponese.jpg" alt="Sushi e piatti della cucina giapponese" loading="lazy" width="1400" height="1050"></div>
-  </div>
-  <div class="yy" id="yy" aria-hidden="true">{yy_disc()}</div>
 </section>
 
 <section class="sec" aria-labelledby="h-menu">
@@ -475,49 +483,46 @@ def page_home():
       <h2 class="sec-title" id="h-menu">Un assaggio<br>del menu</h2>
       <p class="sec-intro">Dalle tartare ai ravioli, dal sushi all'anatra alla pechinese: due menu alla carta, tutti da scoprire.</p>
     </div>
-    <a class="btn btn--line" href="menu.html">Tutto il menu</a>
+    <a class="btn btn--osso" href="menu.html">Tutto il menu</a>
   </div>
   <div class="strip" tabindex="0" aria-label="Piatti del menu, scorri di lato">{tiles}</div>
 </section>
 
-<section class="sec" aria-labelledby="h-atm" style="background:var(--lacca-2)">
+<section class="sec band" aria-labelledby="h-atm">
   <div class="wrap atm">
     <div class="atm-text rv">
       <h2 class="sec-title" id="h-atm">Atmosfere<br>orientali.</h2>
-      <div class="atm-points" style="margin-top:34px">
+      <div class="atm-points">
         <div><h3>Ingredienti freschi e selezionati</h3><p>Un'esperienza culinaria stimolante sia per gli occhi che per il palato, con le ricette originali della tradizione orientale.</p></div>
         <div><h3>Design moderno e sofisticato</h3><p>È di scena nell'arredamento, nei suoni e sui tavoli del ristorante, con dettagli intimi e minimali.</p></div>
         <div><h3>Tè e cocktail</h3><p>Puoi assaporare l'originale tè cinese o ordinare uno dei cocktail ideati dai nostri barman come accompagnamento a ogni piatto.</p></div>
       </div>
     </div>
-    <div class="atm-grid">{atm}</div>
+    <div class="muro">{atm}</div>
   </div>
 </section>
 
-<section class="sec acts" aria-labelledby="h-act">
+<section class="sec" aria-labelledby="h-act">
   <div class="wrap">
     <h2 class="sec-title rv" id="h-act">Vivi l'esperienza Dong</h2>
-    <div style="margin-top:44px" class="rv">
-      <a class="act" href="tel:{TEL}"><div><h3>Prenota un tavolo</h3><p>Chiamaci dal martedì alla domenica, dalle 10:00 alle 18:30. Anche per la sala privata: compleanni, lauree o una serata tra amici.</p></div><span class="ar"><svg aria-hidden="true"><use href="#i-arrow"/></svg></span></a>
-      <a class="act" href="{SHOP}" target="_blank" rel="noopener"><div><h3>Ordina da asporto</h3><p>Scegli i piatti sul nostro shop e ritira in negozio all'orario che indichi nelle note.</p></div><span class="ar"><svg aria-hidden="true"><use href="#i-arrow"/></svg></span></a>
-      <a class="act" href="{DELIVEROO}" target="_blank" rel="noopener"><div><h3>Consegna a casa</h3><p>Le nostre specialità a domicilio, con Deliveroo.</p></div><span class="ar"><svg aria-hidden="true"><use href="#i-arrow"/></svg></span></a>
+    <div class="draghi">
+      <a class="drago drago--rosso t3 rv" href="tel:{TEL}"><span class="face"><span class="han" aria-hidden="true">中</span></span><span><h3>Prenota un tavolo</h3><p>Chiamaci dal martedì alla domenica, dalle 10:00 alle 18:30. Anche per la sala privata: compleanni, lauree o una serata tra amici.</p><span class="ar">{TEL_VIEW} <svg aria-hidden="true"><use href="#i-arrow"/></svg></span></span></a>
+      <a class="drago drago--verde t3 rv" href="{SHOP}" target="_blank" rel="noopener"><span class="face"><span class="han" aria-hidden="true">發</span></span><span><h3>Ordina da asporto</h3><p>Scegli i piatti sul nostro shop e ritira in negozio all'orario che indichi nelle note.</p><span class="ar">Apri lo shop <svg aria-hidden="true"><use href="#i-arrow"/></svg></span></span></a>
+      <a class="drago drago--bianco t3 rv" href="{DELIVEROO}" target="_blank" rel="noopener"><span class="face"><span class="han" aria-hidden="true" style="opacity:0">白</span></span><span><h3>Consegna a casa</h3><p>Le nostre specialità a domicilio, con Deliveroo.</p><span class="ar">Ordina su Deliveroo <svg aria-hidden="true"><use href="#i-arrow"/></svg></span></span></a>
     </div>
   </div>
 </section>
 
-<section class="sec" aria-labelledby="h-dove">
-  <div class="wrap where">
-    <div class="rv">
-      <h2 class="sec-title" id="h-dove">Dove siamo</h2>
-      <p class="addr" style="margin-top:22px"><a href="{MAPS}" target="_blank" rel="noopener">via Russo, 4<br>San Lazzaro di Savena (BO)</a></p>
-      <dl class="hours">
-        <div><dt>Martedì – Domenica</dt><dd>12:00 – 14:30<br>19:00 – 23:00</dd></div>
-        <div><dt>Lunedì</dt><dd>Chiuso</dd></div>
-        <div><dt>Ordini e prenotazioni</dt><dd>Martedì – Domenica, 10:00 – 18:30</dd></div>
-      </dl>
-      <div class="btn-row" style="margin-top:28px"><a class="btn btn--oro" href="{MAPS}" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-pin"/></svg>Indicazioni</a><a class="btn btn--line" href="tel:{TEL}">{TEL_VIEW}</a></div>
+<section class="sec band" aria-labelledby="h-dove">
+  <div class="wrap">
+    <h2 class="sec-title rv" id="h-dove">Dove siamo</h2>
+    <div class="venti">
+      <div class="vento t3 rv"><span class="han" aria-hidden="true">東</span><span class="lbl">Indirizzo</span><a href="{MAPS}" target="_blank" rel="noopener">via Russo, 4</a><small>San Lazzaro di Savena (BO)</small></div>
+      <div class="vento t3 rv"><span class="han" aria-hidden="true">南</span><span class="lbl">Orari</span><p>12:00 – 14:30<br>19:00 – 23:00</p><small>Martedì – Domenica</small></div>
+      <div class="vento t3 rv"><span class="han" aria-hidden="true">西</span><span class="lbl">Telefono</span><a href="tel:{TEL}">{TEL_VIEW}</a><small>10:00 – 18:30</small></div>
+      <div class="vento t3 rv"><span class="han" aria-hidden="true">北</span><span class="lbl">Lunedì</span><p>Chiuso</p><small>Festivi: chiama per conferma</small></div>
     </div>
-    <a class="map rv" href="{MAPS}" target="_blank" rel="noopener" aria-label="Apri la mappa"><img src="assets/img/mappa.jpg" alt="Mappa: Ristorante Dong, via Russo 4, San Lazzaro di Savena" loading="lazy" width="1200" height="900"><span><svg aria-hidden="true"><use href="#i-pin"/></svg>Apri la mappa</span></a>
+    <a class="map t3 rv" href="{MAPS}" target="_blank" rel="noopener" aria-label="Apri la mappa"><img src="assets/img/mappa.jpg" alt="Mappa: Ristorante Dong, via Russo 4, San Lazzaro di Savena" loading="lazy" width="1200" height="600"><span><svg aria-hidden="true"><use href="#i-pin"/></svg>Apri la mappa</span></a>
   </div>
 </section>
 </main>
@@ -538,15 +543,13 @@ def render_menu():
             strip = ""
             if ph:
                 figs = "".join(
-                    f'<figure><img src="assets/menu/{cid}/{f}" alt="{e(caption(f))}" loading="lazy" width="520" height="650"><figcaption>{e(caption(f))}</figcaption></figure>'
+                    f'<figure class="t3"><img src="assets/menu/{cid}/{f}" alt="{e(caption(f))}" loading="lazy" width="520" height="650"><figcaption>{e(caption(f))}</figcaption></figure>'
                     for f in ph
                 )
                 strip = f'<div class="cat-strip" tabindex="0" aria-label="Foto: {e(title)}">{figs}</div>'
-            lis = "".join(
-                f'<li><h4>{e(n)}</h4>' + (f"<p>{e(d)}</p>" if d else "") + "</li>" for n, d in dishes
-            )
+            lis = "".join(f'<li><h3>{e(n)}</h3>' + (f"<p>{e(d)}</p>" if d else "") + "</li>" for n, d in dishes)
             cats.append(
-                f'<section class="cat" id="{cid}" data-group="{g}"><div class="cat-head"><h2>{e(title)}</h2><p>{e(intro)}</p></div>{strip}<ul class="dishes">{lis}</ul></section>'
+                f'<section class="cat" id="{cid}" data-group="{g}"><div class="cat-head"><span class="cat-n t3" aria-hidden="true"><b>{len(dishes)}</b><small>piatti</small></span><div><h2>{e(title)}</h2><p>{e(intro)}</p></div></div>{strip}<ul class="dishes">{lis}</ul></section>'
             )
         label = "Cucina giapponese" if g == "giapponese" else "Cucina cinese"
         groups.append(f'<div class="group" id="{g}" data-group="{g}" aria-label="{label}">{"".join(cats)}</div>')
@@ -555,23 +558,21 @@ def render_menu():
 
 def page_menu():
     chips, groups = render_menu()
-    chips_html = "".join(
-        f'<div class="chips" data-for="{g}" aria-label="Categorie {g}">{"".join(chips[g])}</div>' for g in ("giapponese", "cinese")
-    )
+    chips_html = "".join(f'<div class="chips" data-for="{g}" aria-label="Categorie {g}">{"".join(chips[g])}</div>' for g in ("giapponese", "cinese"))
     body = f"""<main id="main">
 <section class="page-hero">
-  <img class="bgmark" src="assets/img/logo-stroke.png" alt="" width="520" height="520">
   <div class="wrap">
     <h1>Il menu</h1>
-    <p>Due cucine alla carta: giapponese e cinese. Cambia tradizione con l'interruttore, o cerca un piatto per nome o ingrediente.</p>
+    <p>Due cucine alla carta, un solo tavolo. Scegli la tradizione, scorri le categorie o cerca un piatto per nome o ingrediente.</p>
+    {rack("中東發南")}
   </div>
 </section>
 <div class="wrap menu-search"><div class="search"><svg aria-hidden="true"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Cerca un piatto o un ingrediente" aria-label="Cerca nel menu" autocomplete="off" enterkeyhint="search"></div></div>
 <div class="menu-bar" id="menubar">
   <div class="wrap menu-bar-in">
     <div class="switch" role="tablist" aria-label="Tradizione">
-      <button type="button" role="tab" id="tab-giapponese" aria-selected="true" aria-controls="giapponese" data-g="giapponese"><img class="yy-i" src="assets/img/logo-stroke.png" alt="" width="22" height="24">Giapponese</button>
-      <button type="button" role="tab" id="tab-cinese" aria-selected="false" aria-controls="cinese" data-g="cinese"><img class="yy-i" src="assets/img/logo-stroke.png" alt="" width="22" height="24">Cinese</button>
+      <button type="button" role="tab" id="tab-giapponese" aria-selected="true" aria-controls="giapponese" data-g="giapponese"><svg class="sy" aria-hidden="true"><use href="#s-dots"/></svg>Giapponese</button>
+      <button type="button" role="tab" id="tab-cinese" aria-selected="false" aria-controls="cinese" data-g="cinese"><svg class="sy" aria-hidden="true"><use href="#s-bamboo"/></svg>Cinese</button>
     </div>
     {chips_html}
   </div>
@@ -585,35 +586,35 @@ def page_menu():
 </main>
 """
     desc = "Il menu del Ristorante Dong: sushi, sashimi, tartare, uramaki e specialità giapponesi; ravioli, primi, anatra, pesce e piatti vegetariani della cucina cinese."
-    return head("Menu · Ristorante Dong Bologna", desc, "menu.html") + header("menu.html") + body + footer() + '<script src="js/menu.js"></script>\n</body>\n</html>\n'
+    return head("Menu · Ristorante Dong Bologna", desc, "menu.html") + header("menu.html", ' data-trad="giapponese"') + body + footer() + '<script src="js/menu.js"></script>\n</body>\n</html>\n'
 
 
 # ---------------------------------------------------------------- PRENOTA
 def page_prenota():
     body = f"""<main id="main">
 <section class="page-hero">
-  <img class="bgmark" src="assets/img/logo-stroke.png" alt="" width="520" height="520">
   <div class="wrap">
     <h1>Prenota<br>e ordina</h1>
-    <p>Un tavolo in sala, il cibo a casa tua o da ritirare: scegli come vivere la cucina del Dong.</p>
+    <p>Un tavolo in sala, il cibo a casa tua o da ritirare: scegli come giocare la tua serata.</p>
+    {rack("發中白")}
   </div>
 </section>
 
 <section class="sec" style="padding-top:20px">
   <div class="wrap book">
-    <div class="book-card rv">
+    <div class="book-card t3 rv">
       <h2>Quando vuoi venire?</h2>
-      <p style="color:var(--carta-soft)">Scegli giorno e turno: ti diciamo se siamo aperti. Per prenotare serve una telefonata.</p>
+      <p class="sub">Scegli giorno e turno: ti diciamo se siamo aperti. Per prenotare serve una telefonata.</p>
       <div class="field"><label for="d">Giorno</label><input id="d" type="date"></div>
       <fieldset class="field"><legend>Turno</legend>
         <div class="turni"><label><input type="radio" name="t" value="pranzo" checked><span>Pranzo</span></label><label><input type="radio" name="t" value="cena"><span>Cena</span></label></div>
       </fieldset>
-      <div class="verdict" id="verdict" role="status" aria-live="polite">Scegli un giorno.</div>
-      <a class="btn btn--oro" href="tel:{TEL}"><svg aria-hidden="true"><use href="#i-phone"/></svg>Chiama per prenotare</a>
+      <div class="verdict" id="verdict" role="status" aria-live="polite"><span class="vt han" aria-hidden="true">白</span><span class="vx">Scegli un giorno.</span></div>
+      <a class="btn btn--rosso" href="tel:{TEL}"><svg aria-hidden="true"><use href="#i-phone"/></svg>Chiama per prenotare</a>
     </div>
     <div class="rv">
       <a class="tel-big" href="tel:{TEL}">{TEL_VIEW}</a>
-      <dl class="hours" style="margin-top:24px">
+      <dl class="hours">
         <div><dt>Telefono</dt><dd>Martedì – Domenica, 10:00 – 18:30</dd></div>
         <div><dt>Pranzo</dt><dd>12:00 – 14:30</dd></div>
         <div><dt>Cena</dt><dd>19:00 – 23:00</dd></div>
@@ -624,15 +625,15 @@ def page_prenota():
   </div>
 </section>
 
-<figure class="photo-band"><img src="assets/img/prenota.jpg" alt="Un tavolo apparecchiato al Ristorante Dong" loading="lazy" width="1400" height="613"></figure>
+<figure class="photo-band"><div class="t3"><img src="assets/img/prenota.jpg" alt="Un tavolo apparecchiato al Ristorante Dong" loading="lazy" width="1400" height="525"></div></figure>
 
-<section class="sec" style="background:var(--lacca-2)" aria-labelledby="h-way">
+<section class="sec" aria-labelledby="h-way">
   <div class="wrap">
     <h2 class="sec-title rv" id="h-way">Come ordinare</h2>
-    <div class="way" style="margin-top:44px">
-      <article class="rv"><h3>In sala</h3><p>Il nostro staff è a tua disposizione per illustrarti ogni portata e per consigliarti tra le specialità delle due cucine. Puoi anche riservare una <strong>sala privata</strong> per compleanni, lauree o una serata con gli amici.</p><div class="btn-row"><a class="btn btn--oro" href="tel:{TEL}"><svg aria-hidden="true"><use href="#i-phone"/></svg>{TEL_VIEW}</a></div></article>
-      <article class="rv"><h3>Asporto</h3><p>Chiama il {TEL_VIEW} dal martedì alla domenica, dalle 10:00 alle 18:30, oppure scegli i piatti sul nostro shop e indica nelle note l'orario del ritiro: il tuo ordine ti aspetta pronto nel locale. Il pagamento si può fare online con PayPal o carta di credito o debito, oppure al ritiro.</p><div class="btn-row"><a class="btn btn--oro" href="{SHOP}" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-bag"/></svg>Apri lo shop</a><a class="btn btn--line" href="tel:{TEL}">Chiama</a></div></article>
-      <article class="rv"><h3>Consegna a domicilio</h3><p>Compila il tuo ordine e inviacelo tramite Deliveroo: faremo arrivare le nostre specialità alla destinazione che hai inserito.</p><div class="btn-row"><a class="btn btn--oro" href="{DELIVEROO}" target="_blank" rel="noopener">Ordina su Deliveroo</a></div></article>
+    <div class="way">
+      <article class="rv"><h3>In sala</h3><p>Il nostro staff è a tua disposizione per illustrarti ogni portata e per consigliarti tra le specialità delle due cucine. Puoi anche riservare una <strong>sala privata</strong> per compleanni, lauree o una serata con gli amici.</p><div class="btn-row"><a class="btn btn--rosso" href="tel:{TEL}"><svg aria-hidden="true"><use href="#i-phone"/></svg>{TEL_VIEW}</a></div></article>
+      <article class="rv"><h3>Asporto</h3><p>Chiama il {TEL_VIEW} dal martedì alla domenica, dalle 10:00 alle 18:30, oppure scegli i piatti sul nostro shop e indica nelle note l'orario del ritiro: il tuo ordine ti aspetta pronto nel locale. Il pagamento si può fare online con PayPal o carta di credito o debito, oppure al ritiro.</p><div class="btn-row"><a class="btn btn--osso" href="{SHOP}" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-bag"/></svg>Apri lo shop</a><a class="btn btn--linea" href="tel:{TEL}">Chiama</a></div></article>
+      <article class="rv"><h3>Consegna a domicilio</h3><p>Compila il tuo ordine e inviacelo tramite Deliveroo: faremo arrivare le nostre specialità alla destinazione che hai inserito.</p><div class="btn-row"><a class="btn btn--osso" href="{DELIVEROO}" target="_blank" rel="noopener">Ordina su Deliveroo</a></div></article>
     </div>
   </div>
 </section>
@@ -644,36 +645,33 @@ def page_prenota():
 
 # ---------------------------------------------------------------- DOVE SIAMO
 def page_dove():
-    soc_btns = "".join(f'<a class="btn btn--line" href="{u}" target="_blank" rel="noopener">{n}</a>' for n, u in SOCIAL)
+    soc_btns = "".join(f'<a class="btn btn--linea" href="{u}" target="_blank" rel="noopener">{n}</a>' for n, u in SOCIAL)
     body = f"""<main id="main">
 <section class="page-hero">
-  <img class="bgmark" src="assets/img/logo-stroke.png" alt="" width="520" height="520">
   <div class="wrap">
     <h1>Dove siamo</h1>
     <p>A San Lazzaro di Savena, alle porte di Bologna.</p>
+    {rack("東南西北")}
   </div>
 </section>
 <section class="sec" style="padding-top:24px">
-  <div class="wrap where">
-    <div class="rv">
-      <p class="addr"><a href="{MAPS}" target="_blank" rel="noopener">via Russo, 4<br>40068 San Lazzaro di Savena (BO)</a></p>
-      <p class="status" id="status" data-state="" style="margin-top:22px">Martedì – Domenica</p>
-      <dl class="hours">
-        <div><dt>Pranzo</dt><dd>Martedì – Domenica, 12:00 – 14:30</dd></div>
-        <div><dt>Cena</dt><dd>Martedì – Domenica, 19:00 – 23:00</dd></div>
-        <div><dt>Lunedì</dt><dd>Chiuso</dd></div>
-        <div><dt>Telefono</dt><dd><a href="tel:{TEL}">{TEL_VIEW}</a> · Martedì – Domenica, 10:00 – 18:30</dd></div>
-      </dl>
-      <div class="btn-row" style="margin-top:28px"><a class="btn btn--oro" href="{MAPS}" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-pin"/></svg>Indicazioni</a><a class="btn btn--line" href="tel:{TEL}"><svg aria-hidden="true"><use href="#i-phone"/></svg>Chiama</a></div>
-      <p style="margin-top:22px;color:var(--carta-soft)">Nei giorni festivi gli orari possono variare: chiamaci per conferma.</p>
+  <div class="wrap">
+    <p class="addr rv"><a href="{MAPS}" target="_blank" rel="noopener">via Russo, 4<br>40068 San Lazzaro di Savena (BO)</a></p>
+    <p class="status rv" id="status" data-state="" style="margin-top:20px">Martedì – Domenica</p>
+    <div class="venti">
+      <div class="vento t3 rv"><span class="han" aria-hidden="true">東</span><span class="lbl">Pranzo</span><p>12:00 – 14:30</p><small>Martedì – Domenica</small></div>
+      <div class="vento t3 rv"><span class="han" aria-hidden="true">南</span><span class="lbl">Cena</span><p>19:00 – 23:00</p><small>Martedì – Domenica</small></div>
+      <div class="vento t3 rv"><span class="han" aria-hidden="true">西</span><span class="lbl">Telefono</span><a href="tel:{TEL}">{TEL_VIEW}</a><small>10:00 – 18:30</small></div>
+      <div class="vento t3 rv"><span class="han" aria-hidden="true">北</span><span class="lbl">Lunedì</span><p>Chiuso</p><small>Festivi: chiama per conferma</small></div>
     </div>
-    <a class="map rv" href="{MAPS}" target="_blank" rel="noopener" aria-label="Apri la mappa"><img src="assets/img/mappa.jpg" alt="Mappa: Ristorante Dong, via Russo 4, San Lazzaro di Savena" loading="lazy" width="1200" height="900"><span><svg aria-hidden="true"><use href="#i-pin"/></svg>Apri la mappa</span></a>
+    <div class="btn-row rv" style="margin-top:34px"><a class="btn btn--rosso" href="{MAPS}" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-pin"/></svg>Indicazioni</a><a class="btn btn--osso" href="tel:{TEL}"><svg aria-hidden="true"><use href="#i-phone"/></svg>Chiama</a></div>
+    <a class="map t3 rv" href="{MAPS}" target="_blank" rel="noopener" aria-label="Apri la mappa"><img src="assets/img/mappa.jpg" alt="Mappa: Ristorante Dong, via Russo 4, San Lazzaro di Savena" loading="lazy" width="1200" height="600"><span><svg aria-hidden="true"><use href="#i-pin"/></svg>Apri la mappa</span></a>
   </div>
 </section>
-<section class="sec acts" aria-labelledby="h-c">
+<section class="sec band" aria-labelledby="h-c">
   <div class="wrap">
     <h2 class="sec-title rv" id="h-c">Seguici</h2>
-    <div class="btn-row rv" style="margin-top:28px">{soc_btns}<a class="btn btn--line" href="https://www.ristorantedong.it/lavora-con-noi" target="_blank" rel="noopener">Lavora con noi</a></div>
+    <div class="btn-row rv" style="margin-top:28px">{soc_btns}<a class="btn btn--linea" href="https://www.ristorantedong.it/lavora-con-noi" target="_blank" rel="noopener">Lavora con noi</a></div>
   </div>
 </section>
 </main>

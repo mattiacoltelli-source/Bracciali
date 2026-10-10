@@ -28,7 +28,7 @@
     tabs.forEach(function (t) { t.setAttribute("aria-selected", String(t.dataset.g === g)); });
     chipRows.forEach(function (r) { r.hidden = r.dataset.for !== g; });
     Object.keys(groups).forEach(function (k) { groups[k].hidden = k !== g; });
-    document.querySelector('meta[name="theme-color"]').setAttribute("content", g === "cinese" ? "#b8180f" : "#130a09");
+    document.querySelector('meta[name="theme-color"]').setAttribute("content", g === "cinese" ? "#0c3a2d" : "#10172a");
     syncBarVar();
     chipRows.forEach(fades);
     if (opts.scroll) {
