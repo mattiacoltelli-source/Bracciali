@@ -30,6 +30,7 @@
     Object.keys(groups).forEach(function (k) { groups[k].hidden = k !== g; });
     document.querySelector('meta[name="theme-color"]').setAttribute("content", g === "cinese" ? "#b8180f" : "#130a09");
     syncBarVar();
+    chipRows.forEach(fades);
     if (opts.scroll) {
       var y = groups[g].getBoundingClientRect().top + window.scrollY - offsetTop();
       window.scrollTo(0, Math.max(0, y));
@@ -108,6 +109,15 @@
     r.addEventListener("touchstart", function () { chipsTouched = Date.now(); }, { passive: true });
     r.addEventListener("wheel", function () { chipsTouched = Date.now(); }, { passive: true });
   });
+  function fades(r) {
+    r.classList.toggle("has-left", r.scrollLeft > 6);
+    r.classList.toggle("at-end", r.scrollLeft + r.clientWidth >= r.scrollWidth - 6);
+  }
+  document.querySelectorAll(".chips").forEach(function (r) {
+    r.addEventListener("scroll", function () { fades(r); }, { passive: true });
+    fades(r);
+  });
+  window.addEventListener("resize", function () { chipRows.forEach(fades); });
   ["touchstart", "wheel", "keydown"].forEach(function (ev) {
     window.addEventListener(ev, function () { userTouched = Date.now(); }, { passive: true });
   });

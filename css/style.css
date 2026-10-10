@@ -264,7 +264,9 @@ input, select { caret-color: var(--oro); }
 .chips[hidden] { display: none; }
 .chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
 .chips::-webkit-scrollbar { display: none; }
-.chips { padding-inline: 4px; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 34px), transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 34px), transparent 100%); }
+.chips { padding-inline: 4px; --fl: 0px; --fr: 34px; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--fl), #000 calc(100% - var(--fr)), transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 var(--fl), #000 calc(100% - var(--fr)), transparent 100%); }
+.chips.has-left { --fl: 18px; }
+.chips.at-end { --fr: 0px; }
 .chips a { flex: none; display: inline-flex; align-items: center; min-height: 42px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--rule); text-decoration: none; font-weight: 500; font-size: .98rem; color: var(--ink); transition: background-color .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease); }
 @media (hover: hover) { .chips a:hover { border-color: var(--accent); } }
 .chips a[aria-current="true"] { background: var(--accent); color: var(--lacca); border-color: var(--accent); font-weight: 700; }
