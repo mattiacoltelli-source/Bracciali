@@ -25,8 +25,11 @@
     if (opts.keepHash !== true && history.replaceState) history.replaceState(null, "", "#" + g);
   }
 
+  document.documentElement.style.scrollBehavior = "auto"; // salti diretti, senza scorrimento lungo
   tabs.forEach(function (t) {
-    t.addEventListener("click", function () { if (q.value) { q.value = ""; filter(); } setTradition(t.dataset.g, { scroll: true }); });
+    var go = function () { if (q.value) { q.value = ""; filter(); } setTradition(t.dataset.g, { scroll: true }); };
+    t.addEventListener("click", go);
+    if (window.fastTap) window.fastTap(t, go);
   });
 
   // ---- ricerca
@@ -76,8 +79,30 @@
       }
     });
   }
+  // i filtri rispondono al primo tocco
+  document.querySelectorAll(".chips a").forEach(function (a) {
+    if (window.fastTap) window.fastTap(a, function () { location.hash = a.getAttribute("href"); });
+  });
+
+  // barra che si nasconde scorrendo verso il basso (solo telefono) e ricerca rapida
+  var fab = document.getElementById("fab");
+  var lastY = window.scrollY;
+  function barState() {
+    var y = window.scrollY, small = window.innerWidth < 760;
+    if (small && !q.value) {
+      if (y > lastY + 6 && y > 320) bar.classList.add("is-tucked");
+      else if (y < lastY - 6 || y < 200) bar.classList.remove("is-tucked");
+    } else bar.classList.remove("is-tucked");
+    if (fab) fab.hidden = !(small && y > 500 && !q.value);
+    lastY = y;
+  }
+  if (fab) {
+    var goSearch = function () { q.scrollIntoView({ block: "center" }); setTimeout(function () { q.focus({ preventScroll: true }); }, 150); };
+    fab.addEventListener("click", goSearch);
+    if (window.fastTap) window.fastTap(fab, goSearch);
+  }
   var tick = false;
-  window.addEventListener("scroll", function () { if (!tick) { tick = true; requestAnimationFrame(function () { spy(); tick = false; }); } }, { passive: true });
+  window.addEventListener("scroll", function () { if (!tick) { tick = true; requestAnimationFrame(function () { spy(); barState(); tick = false; }); } }, { passive: true });
 
   // ---- link diretti (menu.html#nigiri, #cinese, ...)
   function fromHash() {

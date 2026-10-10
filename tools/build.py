@@ -511,7 +511,7 @@ def page_home():
       <h2 class="sec-title" id="h-dove">Dove siamo</h2>
       <p class="addr" style="margin-top:22px"><a href="{MAPS}" target="_blank" rel="noopener">via Russo, 4<br>San Lazzaro di Savena (BO)</a></p>
       <dl class="hours">
-        <div><dt>Martedì – Domenica</dt><dd>12:00 – 14:30 · 19:00 – 23:00</dd></div>
+        <div><dt>Martedì – Domenica</dt><dd>12:00 – 14:30<br>19:00 – 23:00</dd></div>
         <div><dt>Lunedì</dt><dd>Chiuso</dd></div>
         <div><dt>Ordini e prenotazioni</dt><dd>Martedì – Domenica, 10:00 – 18:30</dd></div>
       </dl>
@@ -578,6 +578,7 @@ def page_menu():
 </div>
 <div class="wrap">
   <p class="menu-note">Per i prezzi e per eventuali allergie o intolleranze rivolgiti al personale in sala, o consulta lo <a href="{SHOP}" target="_blank" rel="noopener">shop online</a>.</p>
+  <button class="fab-search" id="fab" type="button" aria-label="Cerca nel menu" hidden><svg aria-hidden="true"><use href="#i-search"/></svg></button>
   <p class="empty" id="empty" hidden>Nessun piatto trovato. Prova con un altro ingrediente, per esempio «salmone» o «gambero».</p>
   {groups}
 </div>

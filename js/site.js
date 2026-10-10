@@ -33,6 +33,25 @@
     return { open: false, text: "Chiuso ora · riapre " + when + " alle " + hm(SLOTS[0][0]) };
   }
 
+  // risposta al primo tocco: alcuni visualizzatori incorporati perdono il primo click
+  function fastTap(el, fn) {
+    var sx = 0, sy = 0, t = 0, armed = false, fired = 0;
+    el.addEventListener("pointerdown", function (e) {
+      if (e.pointerType === "mouse") return;
+      armed = true; sx = e.clientX; sy = e.clientY; t = Date.now();
+    });
+    el.addEventListener("pointerup", function (e) {
+      if (!armed || e.pointerType === "mouse") return;
+      armed = false;
+      if (Math.abs(e.clientX - sx) < 10 && Math.abs(e.clientY - sy) < 10 && Date.now() - t < 600) { fired = Date.now(); fn(e); }
+    });
+    el.addEventListener("pointercancel", function () { armed = false; });
+    el.addEventListener("click", function (e) {
+      if (Date.now() - fired < 800) { e.preventDefault(); e.stopImmediatePropagation(); }
+    }, true);
+  }
+
+  window.fastTap = fastTap;
   window.DongHours = { SLOTS: SLOTS, DAYS: DAYS, hm: hm, nowRome: nowRome, statusAt: statusAt };
 
   // ---- stato apertura nell'intestazione della pagina
@@ -61,7 +80,9 @@
     btn.setAttribute("aria-label", open ? "Chiudi il menu di navigazione" : "Apri il menu di navigazione");
     document.body.style.overflow = open ? "hidden" : "";
   }
-  btn.addEventListener("click", function () { setNav(!mnav.classList.contains("is-open")); });
+  function toggleNav() { setNav(!mnav.classList.contains("is-open")); }
+  btn.addEventListener("click", toggleNav);
+  fastTap(btn, toggleNav);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") setNav(false); });
   window.addEventListener("resize", function () { if (window.innerWidth >= 900) setNav(false); });
 
