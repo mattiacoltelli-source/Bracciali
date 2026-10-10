@@ -327,7 +327,7 @@ def header(page, trad=""):
 {ICONS}
 <a class="skip" href="#main">Vai al contenuto</a>
 <header class="site-header" id="top">
-  <a class="logo" href="index.html" aria-label="Ristorante Dong, home"><img src="assets/img/logo-inverse.png" alt="Dong, Fine Asian Flavors" width="91" height="48"></a>
+  <a class="logo" href="index.html" aria-label="Ristorante Dong, home"><img src="assets/img/logo-inverse.png" alt="Dong, Fine Asian Flavors" width="110" height="58"></a>
   <nav class="nav" aria-label="Principale">{links}</nav>
   <div class="head-actions">
     <a class="btn btn--rosso" href="tel:{TEL}" style="min-height:46px;padding:0 20px"><svg aria-hidden="true"><use href="#i-phone"/></svg><span>Chiama</span></a>
@@ -351,7 +351,7 @@ def footer():
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <img class="fl" src="assets/img/logo-dong.png" alt="" width="64" height="64">
+        <img class="fl" src="assets/img/logo-stroke.png" alt="" width="79" height="84">
         <h4>Ristorante Dong</h4>
         <p>Fusion restaurant<br>Cucina cinese e giapponese a Bologna</p>
       </div>
@@ -379,7 +379,7 @@ def footer():
 <nav class="dock" aria-label="Azioni rapide">
   <a href="tel:{TEL}"><span class="han" aria-hidden="true">中</span>Prenota</a>
   <a href="{SHOP}" target="_blank" rel="noopener"><span class="han" aria-hidden="true">發</span>Ordina</a>
-  <a href="{MAPS}" target="_blank" rel="noopener"><span class="han" aria-hidden="true">白</span>Dove</a>
+  <a href="{DELIVEROO}" target="_blank" rel="noopener"><span class="han" aria-hidden="true">白</span>Consegna</a>
 </nav>
 <script src="js/site.js"></script>
 """
@@ -434,12 +434,13 @@ def page_home():
         for n, a in [(1, "La sala del ristorante con la parete rossa"), (2, "Divanetti in pelle nera e rami dipinti sulla parete"), (3, "Ravioli neri al vapore in cestello di bambù"), (4, "Il barman prepara un cocktail"), (6, "Nigiri su foglia e piatto laccato"), (8, "Sashimi di tonno su foglia di bambù")]
     )
     dong = "".join(
-        f'<button class="dt t3" type="button" style="--i:{i};--r:{r}" aria-label="Tessera {l}: tocca per girarla"><span class="in"><span class="f"><span class="g han" aria-hidden="true">{w}</span><span class="l">{l}</span></span><span class="b"><img src="assets/img/logo-stroke.png" alt="" width="350" height="375"></span></span></button>'
+        f'<button class="dt t3 slab" type="button" style="--i:{i};--r:{r}" aria-label="Tessera {l}: tocca per girarla"><span class="in"><span class="f"><span class="g han" aria-hidden="true">{w}</span><span class="l">{l}</span></span><span class="b"><img src="assets/img/logo-stroke.png" alt="" width="350" height="375"></span></span></button>'
         for i, (l, w, r) in enumerate([("D", "東", "-3deg"), ("O", "南", "2deg"), ("N", "西", "-1.5deg"), ("G", "北", "3deg")])
     )
     body = f"""<main id="main">
 <section class="hero">
   <div class="hero-room" aria-hidden="true"><img src="assets/img/sala-hero.jpg" alt="" width="1800" height="1200"></div>
+  <img class="hero-mark" src="assets/img/logo-stroke.png" alt="" width="350" height="375">
   <div class="wrap">
     <div class="dong-row" aria-label="Dong">{dong}</div>
     <h1>Due cucine.<br><em>Un solo tavolo.</em></h1>
@@ -506,9 +507,9 @@ def page_home():
   <div class="wrap">
     <h2 class="sec-title rv" id="h-act">Vivi l'esperienza Dong</h2>
     <div class="draghi">
-      <a class="drago drago--rosso t3 rv" href="tel:{TEL}"><span class="face"><span class="han" aria-hidden="true">中</span></span><span><h3>Prenota un tavolo</h3><p>Chiamaci dal martedì alla domenica, dalle 10:00 alle 18:30. Anche per la sala privata: compleanni, lauree o una serata tra amici.</p><span class="ar">{TEL_VIEW} <svg aria-hidden="true"><use href="#i-arrow"/></svg></span></span></a>
-      <a class="drago drago--verde t3 rv" href="{SHOP}" target="_blank" rel="noopener"><span class="face"><span class="han" aria-hidden="true">發</span></span><span><h3>Ordina da asporto</h3><p>Scegli i piatti sul nostro shop e ritira in negozio all'orario che indichi nelle note.</p><span class="ar">Apri lo shop <svg aria-hidden="true"><use href="#i-arrow"/></svg></span></span></a>
-      <a class="drago drago--bianco t3 rv" href="{DELIVEROO}" target="_blank" rel="noopener"><span class="face"><span class="han" aria-hidden="true" style="opacity:0">白</span></span><span><h3>Consegna a casa</h3><p>Le nostre specialità a domicilio, con Deliveroo.</p><span class="ar">Ordina su Deliveroo <svg aria-hidden="true"><use href="#i-arrow"/></svg></span></span></a>
+      <a class="drago drago--rosso rv" href="tel:{TEL}"><span class="face slab"><span class="han" aria-hidden="true">中</span></span><span class="tx"><h3>Prenota un tavolo</h3><p>Chiamaci dal martedì alla domenica, dalle 10:00 alle 18:30. Anche per la sala privata: compleanni, lauree o una serata tra amici.</p><span class="ar">{TEL_VIEW} <svg aria-hidden="true"><use href="#i-arrow"/></svg></span></span></a>
+      <a class="drago drago--verde rv" href="{SHOP}" target="_blank" rel="noopener"><span class="face slab"><span class="han" aria-hidden="true">發</span></span><span class="tx"><h3>Ordina da asporto</h3><p>Scegli i piatti sul nostro shop e ritira in negozio all'orario che indichi nelle note.</p><span class="ar">Apri lo shop <svg aria-hidden="true"><use href="#i-arrow"/></svg></span></span></a>
+      <a class="drago drago--bianco rv" href="{DELIVEROO}" target="_blank" rel="noopener"><span class="face slab"><span class="han" aria-hidden="true" style="opacity:0">白</span></span><span class="tx"><h3>Consegna a casa</h3><p>Le nostre specialità a domicilio, con Deliveroo.</p><span class="ar">Ordina su Deliveroo <svg aria-hidden="true"><use href="#i-arrow"/></svg></span></span></a>
     </div>
   </div>
 </section>
@@ -522,7 +523,7 @@ def page_home():
       <div class="vento t3 rv"><span class="han" aria-hidden="true">西</span><span class="lbl">Telefono</span><a href="tel:{TEL}">{TEL_VIEW}</a><small>10:00 – 18:30</small></div>
       <div class="vento t3 rv"><span class="han" aria-hidden="true">北</span><span class="lbl">Lunedì</span><p>Chiuso</p><small>Festivi: chiama per conferma</small></div>
     </div>
-    <a class="map t3 rv" href="{MAPS}" target="_blank" rel="noopener" aria-label="Apri la mappa"><img src="assets/img/mappa.jpg" alt="Mappa: Ristorante Dong, via Russo 4, San Lazzaro di Savena" loading="lazy" width="1200" height="600"><span><svg aria-hidden="true"><use href="#i-pin"/></svg>Apri la mappa</span></a>
+    <a class="map t3 rv" href="{MAPS}" target="_blank" rel="noopener" aria-label="Apri la mappa"><span class="mi"><img src="assets/img/mappa.jpg" alt="Mappa: Ristorante Dong, via Russo 4, San Lazzaro di Savena" loading="lazy" width="1200" height="600"></span><span class="mb"><svg aria-hidden="true"><use href="#i-pin"/></svg>Apri la mappa</span></a>
   </div>
 </section>
 </main>
@@ -564,7 +565,6 @@ def page_menu():
   <div class="wrap">
     <h1>Il menu</h1>
     <p>Due cucine alla carta, un solo tavolo. Scegli la tradizione, scorri le categorie o cerca un piatto per nome o ingrediente.</p>
-    {rack("中東發南")}
   </div>
 </section>
 <div class="wrap menu-search"><div class="search"><svg aria-hidden="true"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Cerca un piatto o un ingrediente" aria-label="Cerca nel menu" autocomplete="off" enterkeyhint="search"></div></div>
@@ -596,7 +596,6 @@ def page_prenota():
   <div class="wrap">
     <h1>Prenota<br>e ordina</h1>
     <p>Un tavolo in sala, il cibo a casa tua o da ritirare: scegli come giocare la tua serata.</p>
-    {rack("發中白")}
   </div>
 </section>
 
@@ -651,29 +650,24 @@ def page_dove():
   <div class="wrap">
     <h1>Dove siamo</h1>
     <p>A San Lazzaro di Savena, alle porte di Bologna.</p>
-    {rack("東南西北")}
   </div>
 </section>
 <section class="sec" style="padding-top:24px">
   <div class="wrap">
     <p class="addr rv"><a href="{MAPS}" target="_blank" rel="noopener">via Russo, 4<br>40068 San Lazzaro di Savena (BO)</a></p>
     <p class="status rv" id="status" data-state="" style="margin-top:20px">Martedì – Domenica</p>
-    <div class="venti">
-      <div class="vento t3 rv"><span class="han" aria-hidden="true">東</span><span class="lbl">Pranzo</span><p>12:00 – 14:30</p><small>Martedì – Domenica</small></div>
-      <div class="vento t3 rv"><span class="han" aria-hidden="true">南</span><span class="lbl">Cena</span><p>19:00 – 23:00</p><small>Martedì – Domenica</small></div>
-      <div class="vento t3 rv"><span class="han" aria-hidden="true">西</span><span class="lbl">Telefono</span><a href="tel:{TEL}">{TEL_VIEW}</a><small>10:00 – 18:30</small></div>
-      <div class="vento t3 rv"><span class="han" aria-hidden="true">北</span><span class="lbl">Lunedì</span><p>Chiuso</p><small>Festivi: chiama per conferma</small></div>
-    </div>
+    <dl class="hours rv" style="max-width:640px">
+      <div><dt>Pranzo</dt><dd>Martedì – Domenica, 12:00 – 14:30</dd></div>
+      <div><dt>Cena</dt><dd>Martedì – Domenica, 19:00 – 23:00</dd></div>
+      <div><dt>Lunedì</dt><dd>Chiuso</dd></div>
+      <div><dt>Telefono</dt><dd><a href="tel:{TEL}">{TEL_VIEW}</a> · 10:00 – 18:30</dd></div>
+    </dl>
+    <p class="rv" style="margin-top:18px;color:var(--carta-soft)">Nei giorni festivi gli orari possono variare: chiamaci per conferma.</p>
     <div class="btn-row rv" style="margin-top:34px"><a class="btn btn--rosso" href="{MAPS}" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-pin"/></svg>Indicazioni</a><a class="btn btn--osso" href="tel:{TEL}"><svg aria-hidden="true"><use href="#i-phone"/></svg>Chiama</a></div>
-    <a class="map t3 rv" href="{MAPS}" target="_blank" rel="noopener" aria-label="Apri la mappa"><img src="assets/img/mappa.jpg" alt="Mappa: Ristorante Dong, via Russo 4, San Lazzaro di Savena" loading="lazy" width="1200" height="600"><span><svg aria-hidden="true"><use href="#i-pin"/></svg>Apri la mappa</span></a>
+    <a class="map t3 rv" href="{MAPS}" target="_blank" rel="noopener" aria-label="Apri la mappa"><span class="mi"><img src="assets/img/mappa.jpg" alt="Mappa: Ristorante Dong, via Russo 4, San Lazzaro di Savena" loading="lazy" width="1200" height="600"></span><span class="mb"><svg aria-hidden="true"><use href="#i-pin"/></svg>Apri la mappa</span></a>
   </div>
 </section>
-<section class="sec band" aria-labelledby="h-c">
-  <div class="wrap">
-    <h2 class="sec-title rv" id="h-c">Seguici</h2>
-    <div class="btn-row rv" style="margin-top:28px">{soc_btns}<a class="btn btn--linea" href="https://www.ristorantedong.it/lavora-con-noi" target="_blank" rel="noopener">Lavora con noi</a></div>
-  </div>
-</section>
+
 </main>
 """
     desc = "Ristorante Dong si trova in via Russo 4, a San Lazzaro di Savena (Bologna). Orari, telefono e indicazioni."
