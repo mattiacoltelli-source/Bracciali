@@ -5,124 +5,69 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Prenota e ordina · Ristorante Dong Bologna</title>
 <meta name="description" content="Prenota un tavolo al Ristorante Dong, ordina da asporto sullo shop o fatti consegnare a casa con Deliveroo. Martedì – Domenica.">
-<meta name="theme-color" content="#0c3a2d">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Prenota e ordina · Ristorante Dong Bologna">
-<meta property="og:description" content="Prenota un tavolo al Ristorante Dong, ordina da asporto sullo shop o fatti consegnare a casa con Deliveroo. Martedì – Domenica.">
-<meta property="og:image" content="assets/img/sala-hero.jpg">
-<meta property="og:locale" content="it_IT">
-<link rel="icon" href="assets/favicon.png" type="image/png">
-<link rel="preload" href="assets/fonts/BricolageGrotesque-800.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="stylesheet" href="css/style.css">
-<script>document.documentElement.classList.add('js')</script>
+<meta name="theme-color" content="#0c0a0a">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preload" href="assets/fonts2/ShipporiMincho-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/app.css">
+<script>document.documentElement.classList.add("js")</script>
 </head>
-<body data-page="prenota.html">
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-<symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
-<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="9.5" r="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
-<symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6L5 8zM9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></symbol>
-<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 16l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
-<symbol id="s-dots" viewBox="0 0 24 24"><circle cx="12" cy="6" r="4.2" fill="#2455a4"/><circle cx="6" cy="17" r="4.2" fill="#c4271c"/><circle cx="18" cy="17" r="4.2" fill="#1b7a4e"/></symbol>
-<symbol id="s-bamboo" viewBox="0 0 24 24"><g fill="#1b7a4e"><rect x="3" y="3" width="5" height="18" rx="2.2"/><rect x="9.5" y="3" width="5" height="18" rx="2.2"/><rect x="16" y="3" width="5" height="18" rx="2.2"/></g><g fill="#f8f3e5"><rect x="3" y="11" width="5" height="1.6"/><rect x="9.5" y="11" width="5" height="1.6"/><rect x="16" y="11" width="5" height="1.6"/></g></symbol>
-</svg>
+<body class="pg-book">
 <a class="skip" href="#main">Vai al contenuto</a>
-<header class="site-header" id="top">
-  <a class="logo" href="index.html" aria-label="Ristorante Dong, home"><img src="assets/img/logo-inverse.png" alt="Dong, Fine Asian Flavors" width="110" height="58"></a>
-  <nav class="nav" aria-label="Principale"><a href="index.html">Home</a><a href="menu.html">Menu</a><a href="prenota.html" aria-current="page">Prenota e ordina</a><a href="dove-siamo.html">Dove siamo</a></nav>
-  <div class="head-actions">
-    <a class="btn btn--rosso" href="tel:+390516255139" style="min-height:46px;padding:0 20px"><svg aria-hidden="true"><use href="#i-phone"/></svg><span>Chiama</span></a>
-    <button class="menu-btn" type="button" aria-label="Apri il menu di navigazione" aria-expanded="false" aria-controls="mnav">
-      <svg class="bars" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <svg class="x" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    </button>
-  </div>
+<header class="top" id="top">
+  <a href="./" aria-label="Ristorante Dong, home"><img src="assets/img/logo-inverse.png" alt="Dong" width="83" height="44"></a>
+  <nav class="nav" aria-label="Principale"><a href="menu.html">Menu</a><a href="prenota.html" aria-current="page">Prenota e ordina</a><a href="dove-siamo.html">Dove siamo</a><a href="tel:+390516255139">051 625 5139</a></nav>
+  <a class="btn red" href="prenota.html">Prenota</a>
 </header>
-<div class="mobile-nav" id="mnav">
-  <a class="big t3" href="index.html"><span class="han" aria-hidden="true">東</span>Home</a><a class="big t3" href="menu.html"><span class="han" aria-hidden="true">中</span>Menu</a><a class="big t3" href="prenota.html" aria-current="page"><span class="han" aria-hidden="true">發</span>Prenota e ordina</a><a class="big t3" href="dove-siamo.html"><span class="han" aria-hidden="true">白</span>Dove siamo</a>
-  <p class="mn-note">Martedì – Domenica<br>12:00 – 14:30 · 19:00 – 23:00<br>Lunedì chiuso</p>
-</div>
 <main id="main">
-<section class="page-hero">
-  <div class="wrap">
-    <h1>Prenota<br>e ordina</h1>
-    <p>Un tavolo in sala, il cibo a casa tua o da ritirare: scegli come giocare la tua serata.</p>
+<section class="phero"><div class="w"><span class="rule"></span><h1>Prenota e ordina</h1><p class="lead">Un tavolo in sala, il cibo a casa tua o da ritirare.</p></div></section>
+
+<section class="sec bk" aria-labelledby="h-bk" style="padding-top:8px">
+  <div class="w">
+    <form class="bcard" id="bform" novalidate>
+      <h2 id="h-bk">Prenota un tavolo</h2>
+      <fieldset><legend><b>1</b>Giorno</legend><div class="opts days" id="days"></div></fieldset>
+      <fieldset id="fs-turno" disabled><legend><b>2</b>Turno</legend><div class="opts" id="turni"></div></fieldset>
+      <fieldset id="fs-ora" disabled><legend><b>3</b>Orario</legend><div class="opts" id="ore"><span class="hint">Scegli prima giorno e turno.</span></div></fieldset>
+      <fieldset><legend><b>4</b>Persone</legend>
+        <div class="step"><button type="button" id="minus" aria-label="Una persona in meno">−</button><output id="n" aria-live="polite">2</output><button type="button" id="plus" aria-label="Una persona in più">+</button></div>
+        <p class="hint">Per gruppi più grandi o per la sala privata chiamaci.</p></fieldset>
+      <fieldset><legend><b>5</b>A nome di</legend><input id="nome" type="text" autocomplete="name" placeholder="Nome e cognome" aria-label="Nome e cognome"></fieldset>
+      <p class="sum" id="sum" role="status" aria-live="polite">Scegli giorno, turno e orario.</p>
+      <button class="btn red wa" id="send" type="submit" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.8 7L4 20l1.1-4A8 8 0 1 1 20 12z"/><path d="M9 9.5c.3 2 1.800 3.700 4 4.500l1.200-1.200-1.600-.9-.7.600c-.8-.4-1.500-1.100-1.900-1.900l.6-.7-.9-1.600z"/></svg>Invia su WhatsApp</button>
+      <a class="btn line" href="tel:+390516255139"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>Preferisci chiamare? 051 625 5139</a>
+      <p class="hint">Telefono: martedì – domenica, 10:00 – 18:30. Nei giorni festivi gli orari possono cambiare: chiamaci per conferma.</p>
+    </form>
   </div>
 </section>
-
-<section class="sec" style="padding-top:20px">
-  <div class="wrap book">
-    <div class="book-card t3 rv">
-      <h2>Quando vuoi venire?</h2>
-      <p class="sub">Scegli giorno e turno: ti diciamo se siamo aperti. Per prenotare serve una telefonata.</p>
-      <div class="field"><label for="d">Giorno</label><input id="d" type="date"></div>
-      <fieldset class="field"><legend>Turno</legend>
-        <div class="turni"><label><input type="radio" name="t" value="pranzo" checked><span>Pranzo</span></label><label><input type="radio" name="t" value="cena"><span>Cena</span></label></div>
-      </fieldset>
-      <div class="verdict" id="verdict" role="status" aria-live="polite"><span class="vt han" aria-hidden="true">白</span><span class="vx">Scegli un giorno.</span></div>
-      <a class="btn btn--rosso" href="tel:+390516255139"><svg aria-hidden="true"><use href="#i-phone"/></svg>Chiama per prenotare</a>
-    </div>
-    <div class="rv">
-      <a class="tel-big" href="tel:+390516255139">051 625 5139</a>
-      <dl class="hours">
-        <div><dt>Telefono</dt><dd>Martedì – Domenica, 10:00 – 18:30</dd></div>
-        <div><dt>Pranzo</dt><dd>12:00 – 14:30</dd></div>
-        <div><dt>Cena</dt><dd>19:00 – 23:00</dd></div>
-        <div><dt>Lunedì</dt><dd>Chiuso</dd></div>
-      </dl>
-      <p style="margin-top:20px;color:var(--carta-soft)">Nei giorni festivi gli orari possono cambiare: chiamaci per conferma.</p>
-    </div>
-  </div>
-</section>
-
-<figure class="photo-band"><div class="t3"><img src="assets/img/prenota.jpg" alt="Un tavolo apparecchiato al Ristorante Dong" loading="lazy" width="1400" height="525"></div></figure>
-
+<figure class="band"><img src="assets/img/prenota.jpg" alt="Un tavolo apparecchiato al Ristorante Dong" loading="lazy" width="1000" height="500"></figure>
 <section class="sec" aria-labelledby="h-way">
-  <div class="wrap">
-    <h2 class="sec-title rv" id="h-way">Come ordinare</h2>
+  <div class="w">
+    <div class="rv"><span class="rule"></span><h2 id="h-way">Come ordinare</h2></div>
     <div class="way">
-      <article class="rv"><h3>In sala</h3><p>Il nostro staff è a tua disposizione per illustrarti ogni portata e per consigliarti tra le specialità delle due cucine. Puoi anche riservare una <strong>sala privata</strong> per compleanni, lauree o una serata con gli amici.</p><div class="btn-row"><a class="btn btn--rosso" href="tel:+390516255139"><svg aria-hidden="true"><use href="#i-phone"/></svg>051 625 5139</a></div></article>
-      <article class="rv"><h3>Asporto</h3><p>Chiama il 051 625 5139 dal martedì alla domenica, dalle 10:00 alle 18:30, oppure scegli i piatti sul nostro shop e indica nelle note l'orario del ritiro: il tuo ordine ti aspetta pronto nel locale. Il pagamento si può fare online con PayPal o carta di credito o debito, oppure al ritiro.</p><div class="btn-row"><a class="btn btn--osso" href="https://shop.ristorantedong.it/" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-bag"/></svg>Apri lo shop</a><a class="btn btn--linea" href="tel:+390516255139">Chiama</a></div></article>
-      <article class="rv"><h3>Consegna a domicilio</h3><p>Compila il tuo ordine e inviacelo tramite Deliveroo: faremo arrivare le nostre specialità alla destinazione che hai inserito.</p><div class="btn-row"><a class="btn btn--osso" href="https://deliveroo.it/it/menu/bologna/san-lazzaro/ristorante-dong" target="_blank" rel="noopener">Ordina su Deliveroo</a></div></article>
+      <article class="rv"><h3>In sala</h3><p>Il nostro staff è a tua disposizione per illustrarti ogni portata e per consigliarti tra le specialità delle due cucine. Puoi anche riservare una <strong>sala privata</strong> per compleanni, lauree o una serata con gli amici.</p><div class="ctas"><a class="btn red" href="tel:+390516255139"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>051 625 5139</a></div></article>
+      <article class="rv"><h3>Asporto</h3><p>Chiama il 051 625 5139 dal martedì alla domenica, dalle 10:00 alle 18:30, oppure scegli i piatti sul nostro shop e indica nelle note l'orario del ritiro: il tuo ordine ti aspetta pronto nel locale. Il pagamento si può fare online con PayPal o carta di credito o debito, oppure al ritiro.</p><div class="ctas"><a class="btn line" href="https://shop.ristorantedong.it/" target="_blank" rel="noopener">Apri lo shop</a><a class="btn line" href="tel:+390516255139">Chiama</a></div></article>
+      <article class="rv"><h3>Consegna a domicilio</h3><p>Compila il tuo ordine e inviacelo tramite Deliveroo: faremo arrivare le nostre specialità alla destinazione che hai inserito.</p><div class="ctas"><a class="btn line" href="https://deliveroo.it/it/menu/bologna/san-lazzaro/ristorante-dong" target="_blank" rel="noopener">Ordina su Deliveroo</a></div></article>
     </div>
   </div>
 </section>
 </main>
-<footer class="foot">
-  <div class="wrap">
-    <div class="foot-grid">
-      <div>
-        <img class="fl" src="assets/img/logo-stroke.png" alt="" width="79" height="84">
-        <h4>Ristorante Dong</h4>
-        <p>Fusion restaurant<br>Cucina cinese e giapponese a Bologna</p>
-      </div>
-      <div>
-        <h4>Ti aspettiamo in</h4>
-        <p><a href="https://maps.app.goo.gl/Y1UoydMFwZTkH6NLA" target="_blank" rel="noopener">via Russo, 4<br>40068 San Lazzaro di Savena (BO)</a></p>
-        <p style="margin-top:12px"><a href="tel:+390516255139">051 625 5139</a></p>
-      </div>
-      <div>
-        <h4>Orari</h4>
-        <p>Martedì – Domenica<br>12:00 – 14:30<br>19:00 – 23:00<br>Lunedì chiuso</p>
-      </div>
-      <div>
-        <h4>Seguici</h4>
-        <ul><li><a href="https://www.facebook.com/ristorantedong/" target="_blank" rel="noopener">Facebook</a></li><li><a href="https://www.instagram.com/ristorantedong/" target="_blank" rel="noopener">Instagram</a></li><li><a href="https://www.tripadvisor.it/Restaurant_Review-g968423-d12347451-Reviews-Dong-San_Lazzaro_di_Savena_Province_of_Bologna_Emilia_Romagna.html" target="_blank" rel="noopener">Tripadvisor</a></li></ul>
-        <ul style="margin-top:10px"><li><a href="https://www.ristorantedong.it/lavora-con-noi" target="_blank" rel="noopener">Lavora con noi</a></li></ul>
-      </div>
-    </div>
-    <div class="legal">
-      <span>Mizuumi SRL · P.IVA 03504171202</span>
-      <a href="https://www.ristorantedong.it/note-legali" target="_blank" rel="noopener">Note legali</a><a href="https://www.ristorantedong.it/privacy-policy" target="_blank" rel="noopener">Privacy</a><a href="https://www.ristorantedong.it/cookie-policy" target="_blank" rel="noopener">Cookie</a><a href="https://www.ristorantedong.it/condizioni-duso" target="_blank" rel="noopener">Condizioni d'uso</a>
-    </div>
+<footer>
+  <div class="w">
+    <div class="brand"><img class="fseal" src="assets/img/logo-stroke.png" alt="" width="60" height="64"><img src="assets/img/logo-inverse.png" alt="Dong" width="76" height="40"></div>
+    <p>Ristorante Dong · Fusion restaurant · Cucina cinese e giapponese a Bologna</p>
+    <p><a href="https://maps.app.goo.gl/Y1UoydMFwZTkH6NLA" target="_blank" rel="noopener">via Russo, 4 · 40068 San Lazzaro di Savena (BO)</a> · <a href="tel:+390516255139">051 625 5139</a></p>
+    <div class="soc"><a href="https://www.facebook.com/ristorantedong/" target="_blank" rel="noopener">Facebook</a><a href="https://www.instagram.com/ristorantedong/" target="_blank" rel="noopener">Instagram</a><a href="https://www.tripadvisor.it/Restaurant_Review-g968423-d12347451-Reviews-Dong-San_Lazzaro_di_Savena_Province_of_Bologna_Emilia_Romagna.html" target="_blank" rel="noopener">Tripadvisor</a><a href="https://www.ristorantedong.it/lavora-con-noi" target="_blank" rel="noopener">Lavora con noi</a></div>
+    <p>Mizuumi SRL · P.IVA 03504171202</p>
+    <div class="leg"><a href="https://www.ristorantedong.it/note-legali" target="_blank" rel="noopener">Note legali</a><a href="https://www.ristorantedong.it/privacy-policy" target="_blank" rel="noopener">Privacy</a><a href="https://www.ristorantedong.it/cookie-policy" target="_blank" rel="noopener">Cookie</a><a href="https://www.ristorantedong.it/condizioni-duso" target="_blank" rel="noopener">Condizioni d'uso</a></div>
   </div>
 </footer>
-<nav class="dock" aria-label="Azioni rapide">
-  <a href="tel:+390516255139"><span class="han" aria-hidden="true">中</span>Prenota</a>
-  <a href="https://shop.ristorantedong.it/" target="_blank" rel="noopener"><span class="han" aria-hidden="true">發</span>Ordina</a>
-  <a href="https://deliveroo.it/it/menu/bologna/san-lazzaro/ristorante-dong" target="_blank" rel="noopener"><span class="han" aria-hidden="true">白</span>Consegna</a>
+<nav class="tabs" aria-label="Azioni rapide">
+  <a href="menu.html"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3v8M9 3v8M6 7h3M7.5 11v10M17 3c-2 2-3 5-3 8h3v10"/></svg>Menu</a>
+  <a class="cta on" href="prenota.html"><b><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg></b>Prenota</a>
+  <a href="tel:+390516255139"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>Chiama</a>
+  <a href="https://maps.app.goo.gl/Y1UoydMFwZTkH6NLA" target="_blank" rel="noopener"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Mappa</a>
 </nav>
-<script src="js/site.js"></script>
-<script src="js/prenota.js"></script>
+<script src="js/app.js" defer></script>
+<script src="js/prenota.js" defer></script>
 </body>
 </html>
