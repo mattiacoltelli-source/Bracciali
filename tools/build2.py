@@ -21,6 +21,7 @@ LD = {"@context": "https://schema.org", "@type": "Restaurant", "name": "Ristoran
       "hasMenu": "menu.html", "image": "assets/img/sala-hero.jpg", "sameAs": [u for _, u in B.SOCIAL]}
 
 ICON = {
+    "home": '<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-6h4v6"/>',
     "menu": '<path d="M6 3v8M9 3v8M6 7h3M7.5 11v10M17 3c-2 2-3 5-3 8h3v10"/>',
     "cal": '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>',
     "tel": '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
@@ -76,6 +77,7 @@ def footer(page):
   </div>
 </footer>
 <nav class="tabs" aria-label="Azioni rapide">
+  {tab("index.html", "Home", "home")}
   {tab("menu.html", "Menu", "menu")}
   {tab("prenota.html", "Prenota", "cal", "cta")}
   {tab("tel:" + TEL, "Chiama", "tel")}
