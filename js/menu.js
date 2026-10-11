@@ -16,7 +16,8 @@
     });
   }
   function setGroup(g){
-    cur = g;
+    cur = g; document.body.dataset.trad = g;
+    var tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute("content", g === "cinese" ? "#6b0f20" : "#0c0a0a");
     tabs.forEach(function(t){ t.setAttribute("aria-selected", String(t.dataset.g === g)); });
     rows.forEach(function(r){ r.hidden = r.dataset.for !== g; });
     Object.keys(groups).forEach(function(k){ groups[k].hidden = k !== g; });
@@ -51,7 +52,7 @@
   // ricerca su tutto il menu
   q.addEventListener("input", function(){
     var v = norm(q.value.trim()), any = false;
-    document.body.classList.toggle("searching", !!v);
+    document.body.classList.toggle("searching", !!v); document.body.dataset.trad = v ? "" : cur;
     $$(".mcat").forEach(function(c){
       var n = 0;
       $$(".dl li", c).forEach(function(li){ var m = !v || li.dataset.s.indexOf(v) > -1; li.hidden = !m; if (m) n++; });

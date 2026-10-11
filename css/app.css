@@ -210,3 +210,18 @@ footer a:hover{border-color:var(--oro)}
 .way .ctas{margin-top:14px}
 @media (min-width:820px){.way{grid-template-columns:repeat(3,1fr)}.bcard{max-width:640px}.band img{height:340px}}
 .addr a{text-decoration:none;border-bottom:1px solid var(--oro)}
+/* menu: tema rosso per la cucina cinese (colori invertiti rispetto al giapponese) */
+.pg-menu{transition:background-color .3s ease}
+.pg-menu[data-trad="cinese"]{--nero:#6b0f20;--lacca:#7b1528;--lacca2:#8b1c31;--mute:#f0cfc8;--line:rgba(242,234,221,.28);background:#6b0f20}
+.pg-menu[data-trad="cinese"] .top,.pg-menu[data-trad="cinese"] .top.solid{background:rgba(74,10,22,.94);box-shadow:0 1px 0 var(--line)}
+.pg-menu[data-trad="cinese"] .mbar{background:rgba(107,15,32,.96)}
+.pg-menu[data-trad="cinese"] .tabs{background:rgba(74,10,22,.97)}
+.pg-menu[data-trad="cinese"] .phero{background:linear-gradient(180deg,#7b1528,#6b0f20)}
+.pg-menu[data-trad="cinese"] .switch{background:rgba(12,10,10,.35)}
+.pg-menu[data-trad="cinese"] .switch button[aria-selected="true"]{background:var(--nero-fisso,#0c0a0a);color:var(--carta)}
+.pg-menu[data-trad="cinese"] .chips a.on{background:#0c0a0a;border-color:#0c0a0a;color:var(--carta)}
+.pg-menu[data-trad="cinese"] .search input{background:rgba(12,10,10,.28);color:var(--carta)}
+.pg-menu[data-trad="cinese"] .mstrip img{background:rgba(12,10,10,.3)}
+.pg-menu[data-trad="cinese"] .tabs a.cta b{box-shadow:0 6px 18px rgba(0,0,0,.4),0 0 0 4px #4a0a16}
+.pg-menu[data-trad="cinese"] .gt{color:var(--oro2)}
+@media (prefers-reduced-motion:reduce){.pg-menu{transition:none}}
