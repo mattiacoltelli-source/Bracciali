@@ -218,7 +218,7 @@ footer a:hover{border-color:var(--oro)}
 .pg-menu[data-trad="cinese"] .tabs{background:rgba(74,10,22,.97)}
 .pg-menu[data-trad="cinese"] .phero{background:linear-gradient(180deg,#7b1528,#6b0f20)}
 .pg-menu[data-trad="cinese"] .switch{background:rgba(12,10,10,.35)}
-.pg-menu[data-trad="cinese"] .switch button[aria-selected="true"]{background:var(--nero-fisso,#0c0a0a);color:var(--carta)}
+.pg-menu[data-trad="cinese"] .switch button[aria-selected="true"]{background:var(--nero-fisso,#0c0a0a);color:var(--carta);box-shadow:inset 0 0 0 1.5px var(--oro)}
 .pg-menu[data-trad="cinese"] .search input{background:rgba(12,10,10,.28);color:var(--carta)}
 .pg-menu[data-trad="cinese"] .mstrip img{background:rgba(12,10,10,.3)}
 .pg-menu[data-trad="cinese"] .tabs a.cta b{box-shadow:0 6px 18px rgba(0,0,0,.4),0 0 0 4px #4a0a16}
