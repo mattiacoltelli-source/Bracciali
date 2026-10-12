@@ -1,5 +1,5 @@
 // Solo la "shell" dell'app: i video e l'API di GitHub non passano da qui.
-const CACHE = "videolab-shell-v1";
+const CACHE = "videolab-shell-v2";
 const SHELL = ["./", "index.html", "style.css", "app.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {
