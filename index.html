@@ -1,111 +1,78 @@
 <!doctype html>
-<html lang="it">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Menny's Bracelets – Bracciali incisi in acciaio</title>
-  <meta name="description" content="Bracciali in acciaio con incisione personalizzata: un nome, una data, un luogo, una frase. Prova la tua incisione e scegli il modello.">
-  <meta name="theme-color" content="#101c19">
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="preload" href="assets/fonts/Antonio-700.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <a class="skip" href="#collezione">Vai alla collezione</a>
-
-  <header class="top">
-    <a class="brand" href="#top" aria-label="Menny's Bracelets, inizio pagina">
-      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M8 16h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-      <span>Menny's<br class="brand-br"> Bracelets</span>
-    </a>
-    <nav class="nav" aria-label="Principale">
-      <a href="#collezione">Collezione</a>
-      <a href="#come-funziona">Come funziona</a>
-      <a href="#contatti" class="nav-cta">Scrivici</a>
-    </nav>
-  </header>
-
-  <main id="top">
-    <section class="bench" aria-labelledby="h1">
-      <h1 id="h1">Il tuo messaggio,<br><em>inciso nell'acciaio.</em></h1>
-      <p class="lede">Scrivi un nome, una data, un luogo. Guarda come resta sul bracciale, poi scegli il modello.</p>
-
-      <div class="plate-wrap">
-        <div class="plate" id="plate" role="img" aria-label="Anteprima dell'incisione">
-          <span class="plate-screw plate-screw--l" aria-hidden="true"></span>
-          <span class="plate-screw plate-screw--r" aria-hidden="true"></span>
-          <div class="plate-face">
-            <span class="engraving" id="engraving" data-style="corsivo"></span>
-            <span class="laser" id="laser" aria-hidden="true"></span>
-          </div>
-        </div>
-        <p class="plate-note">Anteprima indicativa: l'incisione vera segue le proporzioni del modello scelto.</p>
-      </div>
-
-      <form class="burin" id="burin" autocomplete="off" onsubmit="return false">
-        <label class="burin-label" for="text">Cosa vuoi incidere?</label>
-        <div class="burin-row">
-          <input id="text" name="text" type="text" maxlength="30" value="Sempre al tuo fianco" spellcheck="false" enterkeyhint="done">
-          <span class="count" id="count" aria-live="polite">20/30</span>
-        </div>
-        <fieldset class="styles">
-          <legend>Stile</legend>
-          <label><input type="radio" name="style" value="corsivo" checked><span class="chip chip--corsivo">Corsivo</span></label>
-          <label><input type="radio" name="style" value="romano"><span class="chip chip--romano">Romano</span></label>
-          <label><input type="radio" name="style" value="blocco"><span class="chip chip--blocco">Blocco</span></label>
-        </fieldset>
-        <div class="ideas" aria-label="Idee veloci">
-          <span class="ideas-label">Prova con</span>
-          <button type="button" data-idea="Sempre al tuo fianco">una frase</button>
-          <button type="button" data-idea="12.06.2019">una data</button>
-          <button type="button" data-idea="44°15'25&quot;N 12°21'19&quot;E">coordinate</button>
-          <button type="button" data-idea="Marco &amp; Giulia">due nomi</button>
-        </div>
-      </form>
-
-      <a class="btn btn--brass" href="#collezione">Scegli il modello <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v13M4 11l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-    </section>
-
-    <section class="collection" id="collezione" aria-labelledby="h-coll">
-      <header class="sec-head">
-        <h2 id="h-coll">Sei modelli, tutti da incidere</h2>
-        <p>Acciaio inossidabile, incisione laser. Ogni scheda ti dice com'è fatto e cosa puoi scriverci.</p>
-      </header>
-      <div id="catalogo" class="catalogo"></div>
-    </section>
-
-    <section class="steps" id="come-funziona" aria-labelledby="h-steps">
-      <h2 id="h-steps">Come funziona</h2>
-      <ol>
-        <li><strong>Scegli il bracciale.</strong> <span>Catena, rigido, pietre, cinturino o set di coppia.</span></li>
-        <li><strong>Scrivi cosa incidere.</strong> <span>Un nome, una data, un luogo, una frase breve. Anche un messaggio segreto all'interno, dove previsto.</span></li>
-        <li><strong>Ci scrivi su WhatsApp.</strong> <span>Il messaggio parte già compilato con il modello e il tuo testo. Confermiamo insieme tutti i dettagli.</span></li>
-      </ol>
-    </section>
-
-    <section class="material" aria-labelledby="h-mat">
-      <div class="material-in">
-        <h2 id="h-mat">Perché l'acciaio</h2>
-        <p>Tutti i componenti sono in acciaio inossidabile: resistente, ipoallergenico, non si ossida e non cambia colore. L'incisione laser scurisce il metallo stesso, senza smalti che si consumano: resta nitida nel tempo.</p>
-      </div>
-    </section>
-
-    <section class="contact" id="contatti" aria-labelledby="h-cont">
-      <h2 id="h-cont">Parliamone</h2>
-      <p>Hai già in mente cosa incidere? Scrivici e ti rispondiamo con tutti i dettagli.</p>
-      <div class="contact-actions">
-        <a class="btn btn--brass" id="contact-wa" href="#" target="_blank" rel="noopener">Scrivici su WhatsApp</a>
-        <a class="btn btn--line" id="contact-mail" href="#">Oppure via email</a>
-      </div>
-    </section>
-  </main>
-
-  <footer class="foot">
-    <span class="foot-brand">Menny's Bracelets</span>
-    <p>Sito dimostrativo: foto, testi e prezzi sono di esempio e verranno sostituiti con quelli reali.</p>
-  </footer>
-
-  <script src="js/products.js"></script>
-  <script src="js/app.js"></script>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #0a0a0a;
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      }
+      #title {
+        color: #f4f4f5;
+        font-size: 120px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+      #sub {
+        color: #a1a1aa;
+        font-size: 44px;
+        font-weight: 500;
+      }
+      #bar {
+        width: 420px;
+        height: 8px;
+        border-radius: 4px;
+        background: #f97316;
+        transform-origin: left center;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="5"
+      data-width="1920"
+      data-height="1080"
+    >
+      <h1 id="title" class="clip" data-start="0" data-duration="5" data-track-index="0">
+        Video Lab
+      </h1>
+      <div id="bar" class="clip" data-start="0" data-duration="5" data-track-index="1"></div>
+      <p id="sub" class="clip" data-start="0" data-duration="5" data-track-index="2">
+        Rendered with HyperFrames on GitHub Actions
+      </p>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#title", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, 0.2);
+      tl.fromTo("#bar", { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: "power2.inOut" }, 0.9);
+      tl.fromTo("#sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 1.5);
+      tl.to(["#title", "#bar", "#sub"], { opacity: 0, duration: 0.5, ease: "power1.in" }, 4.4);
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
 </html>
