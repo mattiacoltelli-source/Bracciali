@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b0c">
+  <title>Video Lab</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Video Lab</h1>
+    <button id="refresh" class="icon-btn" aria-label="Aggiorna" type="button">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <p id="status" class="status" role="status" hidden></p>
+    <div id="grid" class="grid" aria-live="polite"></div>
+    <div id="empty" class="empty" hidden>
+      <p>Nessun video ancora.</p>
+      <p class="muted">Appena un render termina, compare qui.</p>
+    </div>
+    <div id="error" class="empty" hidden>
+      <p>Non riesco a caricare i video.</p>
+      <button id="retry" class="btn" type="button">Riprova</button>
+    </div>
+  </main>
+
+  <dialog id="player" aria-label="Video">
+    <div class="sheet">
+      <button id="close" class="icon-btn close" aria-label="Chiudi" type="button">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <video id="video" controls playsinline preload="metadata"></video>
+      <h2 id="p-title"></h2>
+      <p id="p-meta" class="muted"></p>
+      <div class="actions">
+        <a id="p-download" class="btn primary" download>Scarica</a>
+        <button id="p-share" class="btn" type="button">Condividi</button>
+      </div>
+      <p id="p-msg" class="muted" role="status"></p>
+    </div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
