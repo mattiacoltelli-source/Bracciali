@@ -1,76 +1,170 @@
 <!doctype html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=1920, height=1080" />
+    <meta name="viewport" content="width=1080, height=1920" />
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        margin: 0;
-        width: 1920px;
-        height: 1080px;
-        overflow: hidden;
-        background: #0a0a0a;
-      }
-      #root {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 28px;
-        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-      }
-      #title {
-        color: #f4f4f5;
-        font-size: 120px;
-        font-weight: 700;
-        letter-spacing: -0.03em;
-      }
-      #sub {
-        color: #a1a1aa;
-        font-size: 44px;
-        font-weight: 500;
-      }
-      #bar {
-        width: 420px;
-        height: 8px;
-        border-radius: 4px;
-        background: #f97316;
-        transform-origin: left center;
-      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      @font-face { font-family: "Inter"; font-weight: 600; src: url("assets/fonts/inter-latin-600-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 700; src: url("assets/fonts/inter-latin-700-normal.woff2") format("woff2"); }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #0b0b0c; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Inter", sans-serif; color: #fff; }
+      .scene { position: absolute; inset: 0; overflow: hidden; }
+      .fade { position: absolute; inset: 0; }
+      .photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .bgblur { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .land { position: absolute; left: 0; top: 656px; width: 1080px; height: 608px; object-fit: cover; }
+      .shade { position: absolute; left: 0; width: 100%; }
+      .shade-bottom { bottom: 0; height: 760px; background: linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0)); }
+      .shade-full { top: 0; height: 100%; background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.1) 100%); }
+      .shade-dark { top: 0; height: 100%; background: rgba(8,8,9,0.72); }
+      .bar { width: 96px; height: 10px; border-radius: 5px; background: #ff8a3d; margin-bottom: 28px; }
+      .cap { position: absolute; left: 72px; right: 72px; bottom: 330px; }
+      .cap h2 { font-size: 88px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; text-shadow: 0 4px 24px rgba(0,0,0,0.45); }
+      .intro { position: absolute; left: 72px; right: 72px; bottom: 380px; }
+      .intro h1 { font-size: 112px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.04; text-shadow: 0 4px 28px rgba(0,0,0,0.5); }
+      .intro p { margin-top: 28px; font-size: 48px; font-weight: 600; color: #f1f1f2; }
+      .outro { position: absolute; left: 72px; right: 72px; top: 50%; margin-top: -170px; }
+      .outro h1 { font-size: 118px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.04; }
+      .outro p { margin-top: 28px; font-size: 52px; font-weight: 600; color: #e4e4e6; }
     </style>
   </head>
   <body>
-    <div
-      id="root"
-      data-composition-id="main"
-      data-start="0"
-      data-duration="5"
-      data-width="1920"
-      data-height="1080"
-    >
-      <h1 id="title" class="clip" data-start="0" data-duration="5" data-track-index="0">
-        Video Lab
-      </h1>
-      <div id="bar" class="clip" data-start="0" data-duration="5" data-track-index="1"></div>
-      <p id="sub" class="clip" data-start="0" data-duration="5" data-track-index="2">
-        Rendered with HyperFrames on GitHub Actions
-      </p>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="36.5" data-width="1080" data-height="1920">
+      <div id="s-intro" class="clip scene" data-start="0" data-duration="3.6" data-track-index="1">
+        <div id="s-intro-fade" class="fade">
+          <img id="s-intro-img" class="photo" src="assets/photos/hero.jpg" alt="" />
+          <div class="shade shade-full"></div>
+          <div id="s-intro-txt" class="intro">
+            <div class="bar"></div>
+            <h1>Casa con giardino<br>e porticato</h1>
+            <p>Tour della casa</p>
+          </div>
+        </div>
+      </div>
+      <div id="s-ingresso" class="clip scene" data-start="3.1" data-duration="3.4" data-track-index="2">
+        <div id="s-ingresso-fade" class="fade">
+          <img id="s-ingresso-img" class="photo" src="assets/photos/ingresso.jpg" alt="" />
+          <div class="shade shade-bottom"></div>
+          <div id="s-ingresso-cap" class="cap"><div class="bar"></div><h2>Ingresso</h2></div>
+        </div>
+      </div>
+      <div id="s-soggiorno" class="clip scene" data-start="6.0" data-duration="3.4" data-track-index="1">
+        <div id="s-soggiorno-fade" class="fade">
+          <img id="s-soggiorno-img" class="photo" src="assets/photos/soggiorno.jpg" alt="" />
+          <div class="shade shade-bottom"></div>
+          <div id="s-soggiorno-cap" class="cap"><div class="bar"></div><h2>Soggiorno</h2></div>
+        </div>
+      </div>
+      <div id="s-cucina" class="clip scene" data-start="8.9" data-duration="3.4" data-track-index="2">
+        <div id="s-cucina-fade" class="fade">
+          <img id="s-cucina-img" class="photo" src="assets/photos/cucina.jpg" alt="" />
+          <div class="shade shade-bottom"></div>
+          <div id="s-cucina-cap" class="cap"><div class="bar"></div><h2>Cucina open space</h2></div>
+        </div>
+      </div>
+      <div id="s-camera" class="clip scene" data-start="11.8" data-duration="3.4" data-track-index="1">
+        <div id="s-camera-fade" class="fade">
+          <img id="s-camera-img" class="photo" src="assets/photos/camera.jpg" alt="" />
+          <div class="shade shade-bottom"></div>
+          <div id="s-camera-cap" class="cap"><div class="bar"></div><h2>Camera da letto</h2></div>
+        </div>
+      </div>
+      <div id="s-stanza" class="clip scene" data-start="14.7" data-duration="3.4" data-track-index="2">
+        <div id="s-stanza-fade" class="fade">
+          <img id="s-stanza-img" class="photo" src="assets/photos/stanza.jpg" alt="" />
+          <div class="shade shade-bottom"></div>
+          <div id="s-stanza-cap" class="cap"><div class="bar"></div><h2>Seconda stanza</h2></div>
+        </div>
+      </div>
+      <div id="s-bagno" class="clip scene" data-start="17.6" data-duration="3.4" data-track-index="1">
+        <div id="s-bagno-fade" class="fade">
+          <img id="s-bagno-img" class="photo" src="assets/photos/bagno.jpg" alt="" />
+          <div class="shade shade-bottom"></div>
+          <div id="s-bagno-cap" class="cap"><div class="bar"></div><h2>Bagno</h2></div>
+        </div>
+      </div>
+      <div id="s-portico" class="clip scene" data-start="20.5" data-duration="3.4" data-track-index="2">
+        <div id="s-portico-fade" class="fade">
+          <img id="s-portico-img" class="photo" src="assets/photos/portico.jpg" alt="" />
+          <div class="shade shade-bottom"></div>
+          <div id="s-portico-cap" class="cap"><div class="bar"></div><h2>Porticato</h2></div>
+        </div>
+      </div>
+      <div id="s-relax" class="clip scene" data-start="23.4" data-duration="3.4" data-track-index="1">
+        <div id="s-relax-fade" class="fade">
+          <img class="bgblur" src="assets/photos/relax-bg.jpg" alt="" />
+          <img id="s-relax-img" class="land" src="assets/photos/relax.jpg" alt="" />
+          <div class="shade shade-bottom"></div>
+          <div id="s-relax-cap" class="cap"><div class="bar"></div><h2>Angolo relax</h2></div>
+        </div>
+      </div>
+      <div id="s-travi" class="clip scene" data-start="26.3" data-duration="3.4" data-track-index="2">
+        <div id="s-travi-fade" class="fade">
+          <img id="s-travi-img" class="photo" src="assets/photos/travi.jpg" alt="" />
+          <div class="shade shade-bottom"></div>
+          <div id="s-travi-cap" class="cap"><div class="bar"></div><h2>Vista sul giardino</h2></div>
+        </div>
+      </div>
+      <div id="s-giardino" class="clip scene" data-start="29.2" data-duration="3.4" data-track-index="1">
+        <div id="s-giardino-fade" class="fade">
+          <img class="bgblur" src="assets/photos/giardino-bg.jpg" alt="" />
+          <img id="s-giardino-img" class="land" src="assets/photos/giardino.jpg" alt="" />
+          <div class="shade shade-bottom"></div>
+          <div id="s-giardino-cap" class="cap"><div class="bar"></div><h2>Il giardino</h2></div>
+        </div>
+      </div>
+      <div id="s-outro" class="clip scene" data-start="32.1" data-duration="4.4" data-track-index="2">
+        <div id="s-outro-fade" class="fade">
+          <img id="s-outro-img" class="photo" src="assets/photos/hero-end.jpg" alt="" />
+          <div class="shade shade-dark"></div>
+          <div id="s-outro-txt" class="outro">
+            <div class="bar"></div>
+            <h1>Vieni a visitarla</h1>
+            <p>Contattaci per fissare una visita</p>
+          </div>
+        </div>
+      </div>
     </div>
     <script>
       const tl = gsap.timeline({ paused: true });
-      tl.fromTo("#title", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, 0.2);
-      tl.fromTo("#bar", { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: "power2.inOut" }, 0.9);
-      tl.fromTo("#sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 1.5);
-      tl.to(["#title", "#bar", "#sub"], { opacity: 0, duration: 0.5, ease: "power1.in" }, 4.4);
+      tl.fromTo("#s-intro-img",{scale:1.0},{scale:1.08,duration:3.6,ease:"none",transformOrigin:"50% 45%"},0);
+      tl.fromTo("#s-intro-txt",{opacity:0,y:40},{opacity:1,y:0,duration:0.9,ease:"power3.out"},0.5);
+      tl.fromTo("#s-ingresso-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},3.1);
+      tl.fromTo("#s-ingresso-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 60%"},3.1);
+      tl.fromTo("#s-ingresso-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},3.6);
+      tl.fromTo("#s-soggiorno-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},6.0);
+      tl.fromTo("#s-soggiorno-img",{scale:1.12},{scale:1.18,duration:3.4,ease:"none",transformOrigin:"50% 0%"},6.0);
+      tl.fromTo("#s-soggiorno-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},6.5);
+      tl.fromTo("#s-cucina-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},8.9);
+      tl.fromTo("#s-cucina-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 40%"},8.9);
+      tl.fromTo("#s-cucina-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},9.4);
+      tl.fromTo("#s-camera-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},11.8);
+      tl.fromTo("#s-camera-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 55%"},11.8);
+      tl.fromTo("#s-camera-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},12.3);
+      tl.fromTo("#s-stanza-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},14.7);
+      tl.fromTo("#s-stanza-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 50%"},14.7);
+      tl.fromTo("#s-stanza-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},15.2);
+      tl.fromTo("#s-bagno-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},17.6);
+      tl.fromTo("#s-bagno-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 50%"},17.6);
+      tl.fromTo("#s-bagno-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},18.1);
+      tl.fromTo("#s-portico-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},20.5);
+      tl.fromTo("#s-portico-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 55%"},20.5);
+      tl.fromTo("#s-portico-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},21.0);
+      tl.fromTo("#s-relax-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},23.4);
+      tl.fromTo("#s-relax-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 50%"},23.4);
+      tl.fromTo("#s-relax-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},23.9);
+      tl.fromTo("#s-travi-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},26.3);
+      tl.fromTo("#s-travi-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 50%"},26.3);
+      tl.fromTo("#s-travi-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},26.8);
+      tl.fromTo("#s-giardino-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},29.2);
+      tl.fromTo("#s-giardino-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 50%"},29.2);
+      tl.fromTo("#s-giardino-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},29.7);
+      tl.fromTo("#s-outro-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},32.1);
+      tl.fromTo("#s-outro-img",{scale:1.08},{scale:1.0,duration:4.4,ease:"none",transformOrigin:"50% 45%"},32.1);
+      tl.fromTo("#s-outro-txt",{opacity:0,y:40},{opacity:1,y:0,duration:0.9,ease:"power3.out"},32.7);
+      tl.to("#s-outro-fade",{opacity:0,duration:0.5,ease:"power1.in"},36.0);
       window.__timelines["main"] = tl;
       tl.seek(0);
     </script>
