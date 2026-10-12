@@ -2,6 +2,10 @@ name: Render video
 
 on:
   workflow_dispatch:
+    inputs:
+      title:
+        description: "Titolo del video nella galleria"
+        required: false
   push:
     paths:
       - ".github/workflows/render.yml"
@@ -14,6 +18,8 @@ jobs:
   render:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -48,3 +54,17 @@ jobs:
           name: video
           path: out/video.mp4
           if-no-files-found: error
+
+      - name: Publish release (gallery)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE_INPUT: ${{ inputs.title }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          N="${{ github.run_number }}"
+          TITLE="${TITLE_INPUT:-$(printf '%s' "$COMMIT_MSG" | head -n1)}"
+          TITLE="${TITLE:-Video $N}"
+          cp out/video.mp4 "out/video-$N.mp4"
+          ffmpeg -y -loglevel error -ss 1 -i out/video.mp4 -frames:v 1 -vf scale=540:-2 "out/video-$N.jpg"
+          gh release create "video-$N" "out/video-$N.mp4" "out/video-$N.jpg" \
+            --title "$TITLE" --notes "Render automatico (run #$N)" --target "$GITHUB_SHA"
