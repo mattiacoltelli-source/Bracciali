@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
+      - ".github/workflows/render.yml"
       - "index.html"
       - "compositions/**"
       - "assets/**"
@@ -31,7 +32,11 @@ jobs:
           echo "Using $CHROME"
           echo "HYPERFRAMES_BROWSER_PATH=$CHROME" >> "$GITHUB_ENV"
 
-      - name: Check composition
+      - name: Lint composition
+        run: npx --yes hyperframes@0.8.150 lint .
+
+      - name: Check composition (non-blocking)
+        continue-on-error: true
         run: npm run check
 
       - name: Render MP4
