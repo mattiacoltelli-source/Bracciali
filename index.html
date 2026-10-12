@@ -8,163 +8,140 @@
       * { margin: 0; padding: 0; box-sizing: border-box; }
       @font-face { font-family: "Inter"; font-weight: 600; src: url("assets/fonts/inter-latin-600-normal.woff2") format("woff2"); }
       @font-face { font-family: "Inter"; font-weight: 700; src: url("assets/fonts/inter-latin-700-normal.woff2") format("woff2"); }
-      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #0b0b0c; }
-      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Inter", sans-serif; color: #fff; }
-      .scene { position: absolute; inset: 0; overflow: hidden; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #070a12; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: #070a12; font-family: "Inter", sans-serif; color: #fff; }
+      .scene { position: absolute; inset: 0; overflow: hidden; background: #070a12; }
       .fade { position: absolute; inset: 0; }
-      .photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-      .bgblur { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-      .land { position: absolute; left: 0; top: 656px; width: 1080px; height: 608px; object-fit: cover; }
+      .glow { position: absolute; border-radius: 50%; filter: blur(120px); }
+      .g1 { width: 800px; height: 800px; left: -300px; top: 150px; background: rgba(56,160,230,0.28); }
+      .g2 { width: 700px; height: 700px; right: -300px; top: 850px; background: rgba(255,150,70,0.20); }
+      .phone { position: absolute; left: 249px; top: 190px; width: 582px; height: 1300px; border-radius: 64px; padding: 12px; background: #1b2336; box-shadow: 0 30px 90px rgba(0,0,0,0.6), 0 0 0 2px #2c3852; }
+      .screen { position: relative; width: 100%; height: 100%; border-radius: 52px; overflow: hidden; background: #0a0e18; }
+      .scr { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
       .shade { position: absolute; left: 0; width: 100%; }
-      .shade-bottom { bottom: 0; height: 760px; background: linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0)); }
-      .shade-full { top: 0; height: 100%; background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.1) 100%); }
-      .shade-dark { top: 0; height: 100%; background: rgba(8,8,9,0.72); }
-      .bar { width: 96px; height: 10px; border-radius: 5px; background: #ff8a3d; margin-bottom: 28px; }
-      .cap { position: absolute; left: 72px; right: 72px; bottom: 330px; }
-      .cap h2 { font-size: 88px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; text-shadow: 0 4px 24px rgba(0,0,0,0.45); }
-      .intro { position: absolute; left: 72px; right: 72px; bottom: 380px; }
-      .intro h1 { font-size: 112px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.04; text-shadow: 0 4px 28px rgba(0,0,0,0.5); }
-      .intro p { margin-top: 28px; font-size: 48px; font-weight: 600; color: #f1f1f2; }
-      .outro { position: absolute; left: 72px; right: 72px; top: 50%; margin-top: -170px; }
-      .outro h1 { font-size: 118px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.04; }
-      .outro p { margin-top: 28px; font-size: 52px; font-weight: 600; color: #e4e4e6; }
+      .shade-bottom { bottom: 0; height: 520px; background: linear-gradient(to top, rgba(7,10,18,0.95), rgba(7,10,18,0)); }
+      .bar { width: 96px; height: 10px; border-radius: 5px; background: linear-gradient(90deg,#4fb8ff,#ff9f4d); margin-bottom: 24px; }
+      .cap { position: absolute; left: 72px; right: 72px; bottom: 300px; }
+      .cap h2 { font-size: 76px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.06; text-shadow: 0 4px 24px rgba(0,0,0,0.5); }
+      .logo { font-weight: 700; letter-spacing: -0.03em; background: linear-gradient(90deg,#4fc3ff 0%,#8fd0ff 40%,#ffb066 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .intro { position: absolute; left: 0; right: 0; top: 50%; margin-top: -260px; text-align: center; }
+      .intro .emoji { font-size: 1px; }
+      .intro h1 { font-size: 170px; line-height: 1.05; }
+      .intro p { margin-top: 36px; font-size: 56px; font-weight: 600; color: #aeb9cf; }
+      .outro-h { position: absolute; left: 72px; right: 72px; top: 1330px; text-align: center; }
+      .outro-h h1 { font-size: 150px; line-height: 1.05; }
+      .outro-h p { margin-top: 24px; font-size: 54px; font-weight: 600; color: #cfd8ea; }
+      .phone.small { left: 316px; top: 120px; width: 448px; height: 1000px; border-radius: 52px; padding: 10px; }
+      .phone.small .screen { border-radius: 42px; }
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="36.5" data-width="1080" data-height="1920">
+    <div id="root" data-composition-id="main" data-start="0" data-duration="36.6" data-width="1080" data-height="1920">
       <div id="s-intro" class="clip scene" data-start="0" data-duration="3.6" data-track-index="1">
         <div id="s-intro-fade" class="fade">
-          <img id="s-intro-img" class="photo" src="assets/photos/hero.jpg" alt="" />
-          <div class="shade shade-full"></div>
+          <div class="glow g1"></div><div class="glow g2"></div>
           <div id="s-intro-txt" class="intro">
-            <div class="bar"></div>
-            <h1>Casa con giardino<br>e porticato</h1>
-            <p>Tour della casa</p>
+            <h1 class="logo">CineFighi</h1>
+            <p>Film e serie TV, insieme</p>
           </div>
         </div>
       </div>
-      <div id="s-ingresso" class="clip scene" data-start="3.1" data-duration="3.4" data-track-index="2">
-        <div id="s-ingresso-fade" class="fade">
-          <img id="s-ingresso-img" class="photo" src="assets/photos/ingresso.jpg" alt="" />
+      <div id="s-home" class="clip scene" data-start="3.1" data-duration="3.5" data-track-index="2">
+        <div id="s-home-fade" class="fade">
+          <div class="glow g1"></div><div class="glow g2"></div>
+          <div id="s-home-ph" class="phone"><div class="screen"><img class="scr" src="assets/app/home.jpg" alt="" /></div></div>
           <div class="shade shade-bottom"></div>
-          <div id="s-ingresso-cap" class="cap"><div class="bar"></div><h2>Ingresso</h2></div>
+          <div id="s-home-cap" class="cap"><div class="bar"></div><h2>Cerca ogni film e serie TV</h2></div>
         </div>
       </div>
-      <div id="s-soggiorno" class="clip scene" data-start="6.0" data-duration="3.4" data-track-index="1">
-        <div id="s-soggiorno-fade" class="fade">
-          <img id="s-soggiorno-img" class="photo" src="assets/photos/soggiorno.jpg" alt="" />
+      <div id="s-dett" class="clip scene" data-start="6.1" data-duration="3.5" data-track-index="1">
+        <div id="s-dett-fade" class="fade">
+          <div class="glow g1"></div><div class="glow g2"></div>
+          <div id="s-dett-ph" class="phone"><div class="screen"><img class="scr" src="assets/app/dettaglio.jpg" alt="" /></div></div>
           <div class="shade shade-bottom"></div>
-          <div id="s-soggiorno-cap" class="cap"><div class="bar"></div><h2>Soggiorno</h2></div>
+          <div id="s-dett-cap" class="cap"><div class="bar"></div><h2>Vota e confronta<br>con il gruppo</h2></div>
         </div>
       </div>
-      <div id="s-cucina" class="clip scene" data-start="8.9" data-duration="3.4" data-track-index="2">
-        <div id="s-cucina-fade" class="fade">
-          <img id="s-cucina-img" class="photo" src="assets/photos/cucina.jpg" alt="" />
+      <div id="s-class" class="clip scene" data-start="9.1" data-duration="5.0" data-track-index="2">
+        <div id="s-class-fade" class="fade">
+          <div class="glow g1"></div><div class="glow g2"></div>
+          <div id="s-class-ph" class="phone"><div class="screen"><video id="v-class" class="scr" src="assets/app/stats-classifica.mp4" muted playsinline data-start="9.1" data-duration="5.0" data-track-index="4"></video></div></div>
           <div class="shade shade-bottom"></div>
-          <div id="s-cucina-cap" class="cap"><div class="bar"></div><h2>Cucina open space</h2></div>
+          <div id="s-class-cap" class="cap"><div class="bar"></div><h2>La classifica<br>del gruppo</h2></div>
         </div>
       </div>
-      <div id="s-camera" class="clip scene" data-start="11.8" data-duration="3.4" data-track-index="1">
-        <div id="s-camera-fade" class="fade">
-          <img id="s-camera-img" class="photo" src="assets/photos/camera.jpg" alt="" />
+      <div id="s-gen" class="clip scene" data-start="13.6" data-duration="5.0" data-track-index="1">
+        <div id="s-gen-fade" class="fade">
+          <div class="glow g1"></div><div class="glow g2"></div>
+          <div id="s-gen-ph" class="phone"><div class="screen"><video id="v-gen" class="scr" src="assets/app/stats-generi.mp4" muted playsinline data-start="13.6" data-duration="5.0" data-track-index="3"></video></div></div>
           <div class="shade shade-bottom"></div>
-          <div id="s-camera-cap" class="cap"><div class="bar"></div><h2>Camera da letto</h2></div>
+          <div id="s-gen-cap" class="cap"><div class="bar"></div><h2>I generi<br>più votati</h2></div>
         </div>
       </div>
-      <div id="s-stanza" class="clip scene" data-start="14.7" data-duration="3.4" data-track-index="2">
-        <div id="s-stanza-fade" class="fade">
-          <img id="s-stanza-img" class="photo" src="assets/photos/stanza.jpg" alt="" />
+      <div id="s-dna" class="clip scene" data-start="18.1" data-duration="6.5" data-track-index="2">
+        <div id="s-dna-fade" class="fade">
+          <div class="glow g1"></div><div class="glow g2"></div>
+          <div id="s-dna-ph" class="phone"><div class="screen"><video id="v-dna" class="scr" src="assets/app/dna.mp4" muted playsinline data-start="18.1" data-duration="6.5" data-track-index="4"></video></div></div>
           <div class="shade shade-bottom"></div>
-          <div id="s-stanza-cap" class="cap"><div class="bar"></div><h2>Seconda stanza</h2></div>
+          <div id="s-dna-cap" class="cap"><div class="bar"></div><h2>Il DNA del gruppo:<br>la mappa dei gusti</h2></div>
         </div>
       </div>
-      <div id="s-bagno" class="clip scene" data-start="17.6" data-duration="3.4" data-track-index="1">
-        <div id="s-bagno-fade" class="fade">
-          <img id="s-bagno-img" class="photo" src="assets/photos/bagno.jpg" alt="" />
+      <div id="s-rep" class="clip scene" data-start="24.1" data-duration="5.0" data-track-index="1">
+        <div id="s-rep-fade" class="fade">
+          <div class="glow g1"></div><div class="glow g2"></div>
+          <div id="s-rep-ph" class="phone"><div class="screen"><video id="v-rep" class="scr" src="assets/app/report-profilo.mp4" muted playsinline data-start="24.1" data-duration="5.0" data-track-index="3"></video></div></div>
           <div class="shade shade-bottom"></div>
-          <div id="s-bagno-cap" class="cap"><div class="bar"></div><h2>Bagno</h2></div>
+          <div id="s-rep-cap" class="cap"><div class="bar"></div><h2>Il tuo profilo,<br>scritto da Claude</h2></div>
         </div>
       </div>
-      <div id="s-portico" class="clip scene" data-start="20.5" data-duration="3.4" data-track-index="2">
-        <div id="s-portico-fade" class="fade">
-          <img id="s-portico-img" class="photo" src="assets/photos/portico.jpg" alt="" />
+      <div id="s-tit" class="clip scene" data-start="28.6" data-duration="4.5" data-track-index="2">
+        <div id="s-tit-fade" class="fade">
+          <div class="glow g1"></div><div class="glow g2"></div>
+          <div id="s-tit-ph" class="phone"><div class="screen"><video id="v-tit" class="scr" src="assets/app/report-titoli.mp4" muted playsinline data-start="28.6" data-duration="4.5" data-track-index="4"></video></div></div>
           <div class="shade shade-bottom"></div>
-          <div id="s-portico-cap" class="cap"><div class="bar"></div><h2>Porticato</h2></div>
+          <div id="s-tit-cap" class="cap"><div class="bar"></div><h2>10 titoli per te</h2></div>
         </div>
       </div>
-      <div id="s-relax" class="clip scene" data-start="23.4" data-duration="3.4" data-track-index="1">
-        <div id="s-relax-fade" class="fade">
-          <img class="bgblur" src="assets/photos/relax-bg.jpg" alt="" />
-          <img id="s-relax-img" class="land" src="assets/photos/relax.jpg" alt="" />
-          <div class="shade shade-bottom"></div>
-          <div id="s-relax-cap" class="cap"><div class="bar"></div><h2>Angolo relax</h2></div>
-        </div>
-      </div>
-      <div id="s-travi" class="clip scene" data-start="26.3" data-duration="3.4" data-track-index="2">
-        <div id="s-travi-fade" class="fade">
-          <img id="s-travi-img" class="photo" src="assets/photos/travi.jpg" alt="" />
-          <div class="shade shade-bottom"></div>
-          <div id="s-travi-cap" class="cap"><div class="bar"></div><h2>Vista sul giardino</h2></div>
-        </div>
-      </div>
-      <div id="s-giardino" class="clip scene" data-start="29.2" data-duration="3.4" data-track-index="1">
-        <div id="s-giardino-fade" class="fade">
-          <img class="bgblur" src="assets/photos/giardino-bg.jpg" alt="" />
-          <img id="s-giardino-img" class="land" src="assets/photos/giardino.jpg" alt="" />
-          <div class="shade shade-bottom"></div>
-          <div id="s-giardino-cap" class="cap"><div class="bar"></div><h2>Il giardino</h2></div>
-        </div>
-      </div>
-      <div id="s-outro" class="clip scene" data-start="32.1" data-duration="4.4" data-track-index="2">
+      <div id="s-outro" class="clip scene" data-start="32.6" data-duration="4.0" data-track-index="2">
         <div id="s-outro-fade" class="fade">
-          <img id="s-outro-img" class="photo" src="assets/photos/hero-end.jpg" alt="" />
-          <div class="shade shade-dark"></div>
-          <div id="s-outro-txt" class="outro">
-            <div class="bar"></div>
-            <h1>Vieni a visitarla</h1>
-            <p>Contattaci per fissare una visita</p>
+          <div class="glow g1"></div><div class="glow g2"></div>
+          <div id="s-outro-ph" class="phone small"><div class="screen"><img class="scr" src="assets/app/login.jpg" alt="" /></div></div>
+          <div id="s-outro-txt" class="outro-h">
+            <h1 class="logo">CineFighi</h1>
+            <p>Chi sei tu? Entra e vota.</p>
           </div>
         </div>
       </div>
     </div>
     <script>
+      window.__timelines = window.__timelines || {};
       const tl = gsap.timeline({ paused: true });
-      tl.fromTo("#s-intro-img",{scale:1.0},{scale:1.08,duration:3.6,ease:"none",transformOrigin:"50% 45%"},0);
-      tl.fromTo("#s-intro-txt",{opacity:0,y:40},{opacity:1,y:0,duration:0.9,ease:"power3.out"},0.5);
-      tl.fromTo("#s-ingresso-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},3.1);
-      tl.fromTo("#s-ingresso-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 60%"},3.1);
-      tl.fromTo("#s-ingresso-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},3.6);
-      tl.fromTo("#s-soggiorno-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},6.0);
-      tl.fromTo("#s-soggiorno-img",{scale:1.12},{scale:1.18,duration:3.4,ease:"none",transformOrigin:"50% 0%"},6.0);
-      tl.fromTo("#s-soggiorno-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},6.5);
-      tl.fromTo("#s-cucina-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},8.9);
-      tl.fromTo("#s-cucina-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 40%"},8.9);
-      tl.fromTo("#s-cucina-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},9.4);
-      tl.fromTo("#s-camera-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},11.8);
-      tl.fromTo("#s-camera-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 55%"},11.8);
-      tl.fromTo("#s-camera-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},12.3);
-      tl.fromTo("#s-stanza-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},14.7);
-      tl.fromTo("#s-stanza-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 50%"},14.7);
-      tl.fromTo("#s-stanza-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},15.2);
-      tl.fromTo("#s-bagno-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},17.6);
-      tl.fromTo("#s-bagno-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 50%"},17.6);
-      tl.fromTo("#s-bagno-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},18.1);
-      tl.fromTo("#s-portico-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},20.5);
-      tl.fromTo("#s-portico-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 55%"},20.5);
-      tl.fromTo("#s-portico-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},21.0);
-      tl.fromTo("#s-relax-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},23.4);
-      tl.fromTo("#s-relax-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 50%"},23.4);
-      tl.fromTo("#s-relax-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},23.9);
-      tl.fromTo("#s-travi-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},26.3);
-      tl.fromTo("#s-travi-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 50%"},26.3);
-      tl.fromTo("#s-travi-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},26.8);
-      tl.fromTo("#s-giardino-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},29.2);
-      tl.fromTo("#s-giardino-img",{scale:1.0},{scale:1.07,duration:3.4,ease:"none",transformOrigin:"50% 50%"},29.2);
-      tl.fromTo("#s-giardino-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},29.7);
-      tl.fromTo("#s-outro-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},32.1);
-      tl.fromTo("#s-outro-img",{scale:1.08},{scale:1.0,duration:4.4,ease:"none",transformOrigin:"50% 45%"},32.1);
-      tl.fromTo("#s-outro-txt",{opacity:0,y:40},{opacity:1,y:0,duration:0.9,ease:"power3.out"},32.7);
-      tl.to("#s-outro-fade",{opacity:0,duration:0.5,ease:"power1.in"},36.0);
+      tl.fromTo("#s-intro-txt",{opacity:0,y:50,scale:0.96},{opacity:1,y:0,scale:1,duration:0.9,ease:"power3.out"},0.2);
+      tl.fromTo("#s-home-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},3.1);
+      tl.fromTo("#s-home-ph",{scale:1.0,y:40},{scale:1.035,y:0,duration:3.5,ease:"none",transformOrigin:"50% 50%"},3.1);
+      tl.fromTo("#s-home-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},3.5);
+      tl.fromTo("#s-dett-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},6.1);
+      tl.fromTo("#s-dett-ph",{scale:1.0,y:40},{scale:1.035,y:0,duration:3.5,ease:"none",transformOrigin:"50% 50%"},6.1);
+      tl.fromTo("#s-dett-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},6.5);
+      tl.fromTo("#s-class-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},9.1);
+      tl.fromTo("#s-class-ph",{scale:1.0,y:40},{scale:1.035,y:0,duration:5.0,ease:"none",transformOrigin:"50% 50%"},9.1);
+      tl.fromTo("#s-class-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},9.5);
+      tl.fromTo("#s-gen-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},13.6);
+      tl.fromTo("#s-gen-ph",{scale:1.0,y:40},{scale:1.035,y:0,duration:5.0,ease:"none",transformOrigin:"50% 50%"},13.6);
+      tl.fromTo("#s-gen-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},14.0);
+      tl.fromTo("#s-dna-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},18.1);
+      tl.fromTo("#s-dna-ph",{scale:1.0,y:40},{scale:1.035,y:0,duration:6.5,ease:"none",transformOrigin:"50% 50%"},18.1);
+      tl.fromTo("#s-dna-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},18.5);
+      tl.fromTo("#s-rep-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},24.1);
+      tl.fromTo("#s-rep-ph",{scale:1.0,y:40},{scale:1.035,y:0,duration:5.0,ease:"none",transformOrigin:"50% 50%"},24.1);
+      tl.fromTo("#s-rep-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},24.5);
+      tl.fromTo("#s-tit-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},28.6);
+      tl.fromTo("#s-tit-ph",{scale:1.0,y:40},{scale:1.035,y:0,duration:4.5,ease:"none",transformOrigin:"50% 50%"},28.6);
+      tl.fromTo("#s-tit-cap",{opacity:0,y:30},{opacity:1,y:0,duration:0.6,ease:"power2.out"},29.0);
+      tl.fromTo("#s-outro-fade",{opacity:0},{opacity:1,duration:0.5,ease:"power1.inOut"},32.6);
+      tl.fromTo("#s-outro-ph",{scale:1.0,y:40},{scale:1.03,y:0,duration:4.0,ease:"none",transformOrigin:"50% 50%"},32.6);
+      tl.fromTo("#s-outro-txt",{opacity:0,y:40},{opacity:1,y:0,duration:0.8,ease:"power3.out"},33.0);
+      tl.to("#s-outro-fade",{opacity:0,duration:0.5,ease:"power1.in"},36.1);
       window.__timelines["main"] = tl;
       tl.seek(0);
     </script>
