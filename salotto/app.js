@@ -21,7 +21,7 @@ function showErr(msg) { const e = $('err'); e.textContent = msg; e.hidden = fals
 // ---------- scena ----------
 let renderer;
 try {
-  renderer = new THREE.WebGLRenderer({ canvas: $('c'), antialias: true });
+  renderer = new THREE.WebGLRenderer({ canvas: $('c'), antialias: (window.devicePixelRatio || 1) < 2 }); // sui telefoni ad alta densità si evita: pesa e non serve
 } catch {
   showErr('Il tuo browser non riesce a mostrare il 3D (WebGL non disponibile).');
   throw new Error('WebGL');
@@ -29,12 +29,14 @@ try {
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#0b0b0c');
-const camera = new THREE.PerspectiveCamera(60, 1, 0.05, 80);
+const camera = new THREE.PerspectiveCamera(60, 1, 0.02, 200);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.minDistance = 0.05;
 controls.maxDistance = 25;
 
-const { pieces, groups } = buildRoom(scene);
+const roomRoot = new THREE.Group(); // tutto il modello a blocchi: si nasconde quando si guarda la scansione
+scene.add(roomRoot);
+const { pieces, groups } = buildRoom(roomRoot);
 addLights(scene);
 
 let needs = true;
@@ -48,6 +50,10 @@ function resize() {
   render();
 }
 window.addEventListener('resize', resize);
+
+// ---------- scansione fotorealistica (caricata solo quando serve) ----------
+let scanApi = null, scanLoading = null;
+const getScan = () => (scanLoading ??= import('./scan.js').then((m) => (scanApi = m.createScan(scanCtx))));
 
 // ---------- viste ----------
 const VIEWS = {
@@ -136,6 +142,7 @@ function select(id) {
   setOutline(false);
   selected = id;
   setOutline(true);
+  scanApi?.onSelect(id);
   refreshPanels();
   if (id) openTab('paintings');
 }
@@ -163,16 +170,19 @@ function refreshPanels() {
   const p = byId(selected);
   $('editor').hidden = !p;
   $('plist').hidden = !!p; // con un quadro scelto la lista lascia spazio ai comandi
-  if (p) { $('e-name').textContent = p.name; $('e-info').textContent = info(p); }
+  const inScan = !!scanApi?.active();
+  $('e-hang').hidden = !(p && inScan);
+  if (p) { $('e-name').textContent = p.name; $('e-info').textContent = inScan ? scanApi.info(p) : info(p); }
 }
 function openTab(name) {
+  if (name === 'scan') getScan().then((s) => s.onOpen());
   $('sheet').hidden = false;
   document.querySelectorAll('[data-panel]').forEach((el) => { el.hidden = el.dataset.panel !== name; });
   refreshPanels();
 }
 document.querySelectorAll('.bar [data-tab]').forEach((b) => { b.onclick = () => openTab(b.dataset.tab); });
 $('sheet-close').onclick = () => { $('sheet').hidden = true; };
-document.querySelectorAll('[data-view]').forEach((b) => { b.onclick = () => { goTo(b.dataset.view); $('sheet').hidden = true; }; });
+document.querySelectorAll('[data-view]').forEach((b) => { b.onclick = () => { scanApi?.setMode('model'); goTo(b.dataset.view); $('sheet').hidden = true; }; });
 document.querySelectorAll('[data-step]').forEach((b) => {
   b.onclick = () => {
     step = Number(b.dataset.step) / 100;
@@ -184,17 +194,20 @@ document.querySelectorAll('[data-nudge]').forEach((b) => {
     const p = byId(selected);
     if (!p) return;
     const d = b.dataset.nudge;
+    if (scanApi?.active()) { scanApi.nudge(p, d, step); refreshPanels(); return; }
     if (d === 'left') p.u -= step; if (d === 'right') p.u += step;
     if (d === 'up') p.y += step; if (d === 'down') p.y -= step;
     place(p); save(); refreshPanels();
   };
 });
 $('e-back').onclick = () => select(null);
-$('e-rot').onclick = () => { const p = byId(selected); if (!p) return; [p.w, p.h] = [p.h, p.w]; rebuild(p); place(p); save(); refreshPanels(); };
+$('e-hang').onclick = () => scanApi?.startHang();
+$('e-rot').onclick = () => { const p = byId(selected); if (!p) return; [p.w, p.h] = [p.h, p.w]; rebuild(p); place(p); scanApi?.rebuild(p); save(); refreshPanels(); };
 $('e-del').onclick = () => {
   const p = byId(selected);
   if (!p || !confirm(`Eliminare "${p.name}" dal salotto?`)) return;
   removeObj(p.id);
+  scanApi?.remove(p.id);
   paintings = paintings.filter((x) => x !== p);
   selected = null;
   save(); refreshPanels(); render();
@@ -202,6 +215,7 @@ $('e-del').onclick = () => {
 $('reset').onclick = () => {
   if (!confirm('Ripristinare i quadri iniziali? I quadri aggiunti da te verranno rimossi.')) return;
   [...objs.keys()].forEach(removeObj);
+  scanApi?.reset();
   paintings = defaults();
   paintings.forEach(makeObj);
   selected = null;
@@ -222,6 +236,7 @@ const pickWall = () => ray.intersectObjects(pieces, false)[0];
 let drag = null, down = null;
 const cv = renderer.domElement;
 cv.addEventListener('pointerdown', (e) => {
+  if (scanApi?.active()) return; // nella scansione i tocchi li gestisce scan.js
   $('hint').classList.add('off');
   setRay(e);
   const hit = pickPainting();
@@ -235,6 +250,7 @@ cv.addEventListener('pointerdown', (e) => {
 });
 function local(wh) { const q = groups[wh.object.userData.wall].worldToLocal(wh.point.clone()); return [q.x, q.y]; }
 cv.addEventListener('pointermove', (e) => {
+  if (scanApi?.active()) return;
   if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) down.moved = true;
   if (!drag) return;
   setRay(e);
@@ -247,6 +263,7 @@ cv.addEventListener('pointermove', (e) => {
   refreshPanels();
 });
 function end() {
+  if (scanApi?.active()) { drag = null; down = null; return; }
   if (drag) { drag = null; controls.enabled = true; save(); }
   else if (down && !down.moved) select(down.id);
   down = null;
@@ -281,6 +298,33 @@ $('add-form').onsubmit = async (e) => {
     select(p.id);
   } catch { showErr('Non riesco a leggere quella foto.'); }
   btn.disabled = false;
+};
+
+const scanCtx = {
+  renderer, scene, camera, controls, roomRoot,
+  paintings: () => paintings, byId, selected: () => selected, select, render, save, showErr, openTab,
+  closeSheet: () => { $('sheet').hidden = true; }, refreshPanels,
+};
+
+// ---------- salvare l'immagine della vista ----------
+$('snap').onclick = async () => {
+  const outl = [...objs.values()].map((o) => o.outline);
+  const was = outl.map((o) => o.visible);
+  outl.forEach((o) => { o.visible = false; });
+  scanApi?.hideOutlines(true);
+  renderer.render(scene, camera); // subito prima della copia: il canvas non conserva l'immagine
+  const blob = await new Promise((res) => cv.toBlob(res, 'image/png'));
+  outl.forEach((o, i) => { o.visible = was[i]; });
+  scanApi?.hideOutlines(false);
+  render();
+  if (!blob) { showErr('Non riesco a salvare l\'immagine.'); return; }
+  const file = new File([blob], 'salotto.png', { type: 'image/png' });
+  try {
+    if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: 'Salotto' }); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'salotto.png'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 };
 
 // ---------- avvio ----------

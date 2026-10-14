@@ -9,18 +9,24 @@
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="stylesheet" href="style.css">
-  <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+  <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js", "three/addons/postprocessing/Pass.js": "./vendor/Pass.js" } }</script>
 </head>
 <body>
   <canvas id="c" aria-label="Salotto in 3D"></canvas>
+  <button id="snap" class="snap" type="button" aria-label="Salva immagine della vista">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13.5" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+  </button>
   <p id="hint" class="hint">Trascina per girare · due dita per zoom · tocca un quadro per selezionarlo</p>
   <p id="err" class="err" hidden></p>
 
   <nav class="bar" aria-label="Strumenti">
     <button data-tab="views" type="button">Viste</button>
     <button data-tab="paintings" type="button">Quadri</button>
+    <button data-tab="scan" type="button">Scansione</button>
     <button data-tab="add" type="button" class="accent">+ Nuovo</button>
   </nav>
+
+  <div id="tool-pill" class="pill" hidden><span id="tool-text"></span><button id="tool-done" type="button">Fine</button></div>
 
   <section id="sheet" class="sheet" hidden>
     <div class="grab"><button id="sheet-close" type="button" aria-label="Chiudi">✕</button></div>
@@ -53,12 +59,62 @@
           <button data-nudge="down" type="button" aria-label="Giù">▼</button>
           <button data-nudge="right" type="button" aria-label="Destra">▶</button>
         </div>
+        <button id="e-hang" type="button" class="primary" hidden>Appendi nella scansione: tocca la parete</button>
         <div class="row">
           <button id="e-rot" type="button">Ruota 90°</button>
           <button id="e-del" type="button" class="danger">Elimina</button>
         </div>
       </div>
       <button id="reset" type="button" class="link">Ripristina quadri iniziali</button>
+    </div>
+
+    <div data-panel="scan" hidden>
+      <p class="muted">Carica la scansione 3D della stanza (file .ply, .spz o .splat). Resta nel telefono: non viene caricata da nessuna parte.</p>
+      <label class="file">Scansione<input id="s-file" type="file" accept=".ply,.spz,.splat,.ksplat,.sog"></label>
+      <button id="s-reopen" type="button" hidden></button>
+      <p id="s-status" class="muted" role="status"></p>
+      <div id="s-tools" hidden>
+        <div class="steps" role="group" aria-label="Vista">
+          <button data-smode="scan" type="button" aria-pressed="true">Scansione</button>
+          <button data-smode="model" type="button">Modello a blocchi</button>
+        </div>
+        <h3>1 · Pavimento e verticale</h3>
+        <p class="muted">Inclina la vista verso il basso finché vedi il pavimento, poi tocca 3 punti ben distanti. L'app raddrizza la scansione e mette il pavimento a quota zero.</p>
+        <div class="row">
+          <button id="s-flip" type="button">Capovolgi</button>
+          <button id="s-roll" type="button">Gira 90°</button>
+          <button id="s-floor" type="button" class="primary">Tocca il pavimento</button>
+        </div>
+        <h3>2 · Scala</h3>
+        <p class="muted">Tocca due punti di cui conosci la distanza (es. i lati dell'arco), poi scrivi la misura vera.</p>
+        <div class="row">
+          <button id="s-measure" type="button" class="primary">Misura due punti</button>
+        </div>
+        <p id="s-measured" class="muted"></p>
+        <div class="row">
+          <label>Misura vera (cm)<input id="s-real" type="number" inputmode="decimal" min="1" max="2000"></label>
+          <button id="s-apply" type="button">Imposta scala</button>
+        </div>
+        <div class="steps" role="group" aria-label="Misure note">
+          <button data-real="107" type="button">Arco 107</button>
+          <button data-real="210" type="button">Porta 210</button>
+          <button data-real="300" type="button">Divano 300</button>
+        </div>
+        <h3>3 · Quadri</h3>
+        <label>Luminosità dei quadri<input id="s-bright" type="range" min="40" max="140" value="85"></label>
+        <p class="muted">Per appendere: scegli un quadro in "Quadri" e premi "Appendi nella scansione".</p>
+      </div>
+      <button id="s-remove" type="button" class="link" hidden>Rimuovi la scansione dal telefono</button>
+      <details class="guide">
+        <summary>Come girare il video della stanza</summary>
+        <ul>
+          <li>Luce uniforme (di giorno e luci accese), niente zoom, tieni fissi esposizione e fuoco se puoi.</li>
+          <li>Cammina piano, 2-3 minuti: un giro lungo i muri a circa 1,5 m, poi uno in diagonale e uno a due altezze diverse.</li>
+          <li>Inquadra sempre qualcosa di "ricco" (mobili, quadri): i muri bianchi lisci confondono l'app. Puoi attaccare qualche pezzetto di nastro di carta.</li>
+          <li>Niente persone in movimento. Per il marmo lucido: evita i riflessi forti delle luci.</li>
+          <li>Esporta in formato .spz (più leggero) o .ply e caricalo qui. Meglio sotto i 50 MB.</li>
+        </ul>
+      </details>
     </div>
 
     <form data-panel="add" id="add-form" hidden>
