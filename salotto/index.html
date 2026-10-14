@@ -70,7 +70,7 @@
 
     <div data-panel="scan" hidden>
       <p class="muted">Carica la scansione 3D della stanza (file .ply, .spz o .splat). Resta nel telefono: non viene caricata da nessuna parte.</p>
-      <label class="file">Scansione<input id="s-file" type="file" accept=".ply,.spz,.splat,.ksplat,.sog"></label>
+      <label class="file">Scansione<input id="s-file" type="file"></label>
       <button id="s-reopen" type="button" hidden></button>
       <p id="s-status" class="muted" role="status"></p>
       <div id="s-tools" hidden>
@@ -105,6 +105,17 @@
         <p class="muted">Per appendere: scegli un quadro in "Quadri" e premi "Appendi nella scansione".</p>
       </div>
       <button id="s-remove" type="button" class="link" hidden>Rimuovi la scansione dal telefono</button>
+      <details class="guide" id="s-video-help">
+        <summary>Ho già un video: come lo trasformo in scansione?</summary>
+        <ul>
+          <li>Un video non basta: va trasformato in una scansione 3D (file .ply o .spz). Lo fa un'app o un sito con un server potente, non il telefono.</li>
+          <li><b>KIRI Engine</b> (app o sito): + → 3DGS → carica il video → attendi (da 10 minuti a un'ora) → Esporta .PLY.</li>
+          <li><b>Luma AI</b> (app o sito): carica il video → esporta .PLY. Controlla che il piano gratuito lo permetta.</li>
+          <li><b>Scaniverse</b> (app): non parte da un video già girato; riprendi la stanza dentro l'app, crea la scansione sul telefono e la esporta in .SPZ o .PLY. Niente caricamento su server altrui.</li>
+          <li>Con KIRI e Luma il video va sui loro server: se non vuoi, usa Scaniverse.</li>
+          <li>Se il file supera 100 MB, riducilo da PC con SuperSplat (superspl.at/editor): importa, cancella i punti vaganti, esporta in .spz.</li>
+        </ul>
+      </details>
       <details class="guide">
         <summary>Come girare il video della stanza</summary>
         <ul>
