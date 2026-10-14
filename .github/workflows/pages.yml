@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "gallery/**"
+      - "salotto/**"
       - "assets/fonts/**"
       - ".github/workflows/pages.yml"
 
@@ -30,6 +31,7 @@ jobs:
           mkdir _site
           cp -r gallery/. _site/
           cp -r assets/fonts _site/fonts
+          cp -r salotto _site/salotto
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

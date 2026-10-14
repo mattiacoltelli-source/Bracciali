@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b0c">
+  <title>Salotto 3D</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+</head>
+<body>
+  <canvas id="c" aria-label="Salotto in 3D"></canvas>
+  <p id="hint" class="hint">Trascina per girare · due dita per zoom · tocca un quadro per selezionarlo</p>
+  <p id="err" class="err" hidden></p>
+
+  <nav class="bar" aria-label="Strumenti">
+    <button data-tab="views" type="button">Viste</button>
+    <button data-tab="paintings" type="button">Quadri</button>
+    <button data-tab="add" type="button" class="accent">+ Nuovo</button>
+  </nav>
+
+  <section id="sheet" class="sheet" hidden>
+    <div class="grab"><button id="sheet-close" type="button" aria-label="Chiudi">✕</button></div>
+
+    <div data-panel="views" hidden>
+      <div class="chips">
+        <button data-view="top" type="button">Dall'alto</button>
+        <button data-view="door" type="button">Dall'ingresso</button>
+        <button data-view="sofa" type="button">Dal divano</button>
+        <button data-view="tv" type="button">Dalla TV</button>
+        <button data-view="window" type="button">Dalla finestra</button>
+        <button data-view="split" type="button">Dallo split</button>
+      </div>
+    </div>
+
+    <div data-panel="paintings" hidden>
+      <ul id="plist" class="plist"></ul>
+      <div id="editor" class="editor" hidden>
+        <button id="e-back" type="button" class="link back">‹ Tutti i quadri</button>
+        <h2 id="e-name"></h2>
+        <p id="e-info" class="muted"></p>
+        <div class="steps" role="group" aria-label="Passo">
+          <button data-step="1" type="button">1 cm</button>
+          <button data-step="5" type="button" aria-pressed="true">5 cm</button>
+          <button data-step="20" type="button">20 cm</button>
+        </div>
+        <div class="pad">
+          <button data-nudge="up" type="button" aria-label="Su">▲</button>
+          <button data-nudge="left" type="button" aria-label="Sinistra">◀</button>
+          <button data-nudge="down" type="button" aria-label="Giù">▼</button>
+          <button data-nudge="right" type="button" aria-label="Destra">▶</button>
+        </div>
+        <div class="row">
+          <button id="e-rot" type="button">Ruota 90°</button>
+          <button id="e-del" type="button" class="danger">Elimina</button>
+        </div>
+      </div>
+      <button id="reset" type="button" class="link">Ripristina quadri iniziali</button>
+    </div>
+
+    <form data-panel="add" id="add-form" hidden>
+      <label class="file">Foto del quadro<input id="a-file" type="file" accept="image/*" required></label>
+      <label>Nome<input id="a-name" type="text" placeholder="Nuovo quadro" maxlength="40"></label>
+      <div class="row">
+        <label>Larghezza (cm)<input id="a-w" type="number" inputmode="decimal" min="5" max="400" value="75" required></label>
+        <label>Altezza (cm)<input id="a-h" type="number" inputmode="decimal" min="5" max="400" value="50" required></label>
+      </div>
+      <button type="submit" class="primary">Appendi sulla parete che guardi</button>
+      <p class="muted">La foto resta nel tuo telefono: non viene caricata da nessuna parte.</p>
+    </form>
+  </section>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
