@@ -1,5 +1,5 @@
 // Solo l'app (codice e libreria 3D): le foto dei quadri stanno nel telefono, non qui.
-const CACHE = "salotto-v3";
+const CACHE = "salotto-v4";
 const SHELL = ["./", "index.html", "style.css", "app.js", "scene.js", "room.js", "vendor/three.module.min.js", "vendor/three.core.min.js", "scan.js", "vendor/OrbitControls.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"];
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", (e) => {
