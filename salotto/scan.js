@@ -140,6 +140,12 @@ export function createScan(ctx) {
     saveXf(); updateAll();
   }
   async function loadFile(file) {
+    if (file.type.startsWith('video/') || /\.(mp4|mov|m4v|webm|3gp|mkv)$/i.test(file.name)) {
+      $('s-video-help').open = true;
+      status('Questo è un video, non una scansione 3D: va prima trasformato in .ply o .spz (vedi qui sotto).');
+      return;
+    }
+    if (file.size > 200e6 && !confirm(`Il file pesa ${Math.round(file.size / 1e6)} MB: sul telefono potrebbe bloccarsi. Provare lo stesso?`)) return;
     try {
       const buf = await file.arrayBuffer();
       await attach(buf, file.name, false);
