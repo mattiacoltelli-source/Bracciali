@@ -9,16 +9,28 @@ const DEPTH = 0.03; // spessore del quadro (tela)
 
 // ---------- dati dei quadri ----------
 const defaults = () => PAINTINGS.map((p) => ({ id: p.id, name: p.name, w: p.w, h: p.h, wall: p.wall, u: WALLS[p.wall].toU(p.s), y: p.y, art: p.art }));
+const FRAME_KEY = 'salotto.frame';
+const markFrame = () => { try { localStorage.setItem(FRAME_KEY, '2'); } catch { /* ok */ } };
 function load() {
+  let ver = 0;
+  try { ver = Number(localStorage.getItem(FRAME_KEY)) || 0; } catch { /* ok */ }
   try {
     const v = JSON.parse(localStorage.getItem(KEY));
-    if (!Array.isArray(v)) return null;
+    if (!Array.isArray(v)) { markFrame(); return null; }
+    const fresh = new Set();
     for (const p of v) { // quadri mai spostati: dalle vecchie stime alle misure nuove
       const o = OLD_POS[p.id], d = defaults().find((x) => x.id === p.id);
-      if (o && d && p.wall === d.wall && Math.abs(p.u - o[0]) < 1e-6 && Math.abs(p.y - o[1]) < 1e-6) { p.u = d.u; p.y = d.y; }
+      if (o && d && p.wall === d.wall && Math.abs(p.u - o[0]) < 1e-6 && Math.abs(p.y - o[1]) < 1e-6) { p.u = d.u; p.y = d.y; fresh.add(p.id); }
     }
+    // l'origine delle misure sulla parete TV si è spostata sulla parete split vera (-30 cm): le posizioni salvate prima vanno corrette una volta sola
+    let saved = true;
+    if (ver < 2) {
+      for (const p of v) if (p.wall === 'T' && !fresh.has(p.id)) p.u = Math.max(p.w / 2 + 0.02, p.u - 0.30);
+      try { localStorage.setItem(KEY, JSON.stringify(v)); } catch { saved = false; } // si riscrive subito: al prossimo avvio le posizioni sono già quelle nuove
+    }
+    if (saved) markFrame();
     return v;
-  } catch { return null; }
+  } catch { markFrame(); return null; }
 }
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(paintings)); return true; }
@@ -78,13 +90,13 @@ const getReal = () => (realLoading ??= Promise.all([import('./real.js'), import(
 
 // ---------- viste ----------
 const VIEWS = {
-  pano: { pos: [3.7, 9.2, 8.2], at: [3.7, 0.6, 2.0] },
-  top: { pos: [3.7, 11, 3.2], at: [3.7, 0, 2.25] },
-  door: { pos: [1.7, 1.6, 4.0], at: [4.2, 1.4, 0], inside: true },
-  sofa: { pos: [5.6, 1.15, 3.75], at: [5.6, 1.3, 0], inside: true },
-  tv: { pos: [5.2, 1.55, 0.7], at: [3.6, 1.4, 4.5], inside: true },
-  window: { pos: [6.7, 1.6, 1.5], at: [0, 1.5, 2.6], inside: true },
-  split: { pos: [0.7, 1.6, 2.4], at: [7.4, 1.4, 2.0], inside: true },
+  pano: { pos: [3.55, 9.2, 8.2], at: [3.55, 0.6, 2.0] },
+  top: { pos: [3.55, 11, 3.2], at: [3.55, 0, 2.25] },
+  door: { pos: [1.4, 1.6, 4.0], at: [3.9, 1.4, 0], inside: true },
+  sofa: { pos: [5.3, 1.15, 3.75], at: [5.3, 1.3, 0], inside: true },
+  tv: { pos: [4.9, 1.55, 0.7], at: [3.3, 1.4, 4.5], inside: true },
+  window: { pos: [6.4, 1.6, 1.5], at: [0, 1.5, 2.6], inside: true },
+  split: { pos: [0.4, 1.6, 2.4], at: [7.1, 1.4, 2.0], inside: true },
 };
 let tween = null;
 function goTo(name, instant) {

@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { ROOM, WALLS } from './room.js';
 
-const PACK_URL = 'pack/salotto.bin?v=2'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
+const PACK_URL = 'pack/salotto.bin?v=3'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
 const KEY_STORE = 'salotto.key';
 const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 
@@ -153,7 +153,7 @@ export function createReal(ctx) {
     const black = new THREE.MeshBasicMaterial({ color: '#0f0f11', toneMapped: false });
     const warm = new THREE.MeshBasicMaterial({ color: '#fff0cc', toneMapped: false });
     const BEAM = { w: 0.33, drop: 0.14 };
-    for (const cx of [2.38, 5.22]) {
+    for (const cx of [2.08, 4.92]) {
       const beam = new THREE.Mesh(new THREE.BoxGeometry(BEAM.w, BEAM.drop, ROOM.W), [mk(0.86), mk(0.82), mk(0.97), mk(0.97), mk(0.9), mk(0.9)]);
       beam.position.set(cx, ROOM.H - BEAM.drop / 2, ROOM.W / 2);
       const rail = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.028, ROOM.W - 0.9), black);

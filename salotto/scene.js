@@ -189,31 +189,32 @@ function buildBeams(scene) {
 function buildFurniture(scene) {
   const { L, W } = ROOM;
   // --- parete TV (z = 0, s = x) ---
-  box(scene, 0.83, 1.3, 0.35, M.dark, 4.345, 0.78, 0.175); // pensile alto
-  [1.0, 1.4, 1.8].forEach((y) => box(scene, 0.21, 0.03, 0.22, M.walnut, 3.825, y, 0.11));
-  box(scene, 2.54, 0.42, 0.42, M.cream, 5.45, 0.17, 0.21); // base TV
-  box(scene, 2.85, 0.04, 0.45, M.walnut, 5.725, 0.59, 0.225);
-  box(scene, 0.43, 0.42, 0.42, M.walnut, 6.935, 0.17, 0.21);
-  box(scene, 1.45, 0.82, 0.05, new THREE.MeshStandardMaterial({ color: '#0c0d10', roughness: 0.3, emissive: '#10161f', emissiveIntensity: 0.6 }), 5.755, 0.70, 0.12);
-  box(scene, 0.9, 0.06, 0.1, M.black, 5.76, 0.63, 0.2);
-  for (const [a, b, ps] of [[5.0, 5.93, [5.15, 5.46, 5.77]], [6.22, 7.26, [6.4, 6.72, 7.04]]]) {
+  box(scene, 0.83, 1.3, 0.35, M.dark, 4.045, 0.78, 0.175); // pensile alto
+  [1.0, 1.4, 1.8].forEach((y) => box(scene, 0.21, 0.03, 0.22, M.walnut, 3.525, y, 0.11));
+  box(scene, 2.54, 0.42, 0.42, M.cream, 5.15, 0.17, 0.21); // base TV
+  box(scene, 2.85, 0.04, 0.45, M.walnut, 5.425, 0.59, 0.225);
+  box(scene, 0.43, 0.42, 0.42, M.walnut, 6.635, 0.17, 0.21);
+  box(scene, 1.45, 0.82, 0.05, new THREE.MeshStandardMaterial({ color: '#0c0d10', roughness: 0.3, emissive: '#10161f', emissiveIntensity: 0.6 }), 5.455, 0.70, 0.12);
+  box(scene, 0.9, 0.06, 0.1, M.black, 5.46, 0.63, 0.2);
+  for (const [a, b, ps] of [[4.7, 5.63, [4.85, 5.16, 5.47]], [5.92, 6.96, [6.1, 6.42, 6.74]]]) {
     box(scene, b - a, 0.03, 0.1, M.dark, (a + b) / 2, 1.77, 0.05);
     ps.forEach((x, i) => {
       box(scene, 0.22, 0.3, 0.025, M.black, x, 1.8, 0.05);
-      box(scene, 0.19, 0.27, 0.005, mat(['#c9b8a8', '#cfd6dc', '#e2b13c', '#2c5f9a', '#3a77b8', '#2b2b2b'][(ps[0] > 6 ? 3 : 0) + i]), x, 1.815, 0.065);
+      box(scene, 0.19, 0.27, 0.005, mat(['#c9b8a8', '#cfd6dc', '#e2b13c', '#2c5f9a', '#3a77b8', '#2b2b2b'][(ps[0] > 5.5 ? 3 : 0) + i]), x, 1.815, 0.065);
     });
   }
-  box(scene, 0.08, 0.08, 0.02, M.white, 2.02, 1.35, 0.01); // termostato
-  box(scene, 0.09, 0.11, 0.015, M.dark, 2.0, 1.05, 0.008); // interruttori
+  box(scene, 0.08, 0.08, 0.02, M.white, 1.72, 1.35, 0.01); // termostato
+  box(scene, 0.09, 0.11, 0.015, M.dark, 1.7, 1.05, 0.008); // interruttori
 
   // --- parete split (x = 0, s = z dall'ingresso: z = W - s) ---
-  box(scene, 0.45, 0.6, 2.04, M.dark, 0.225, 0.18, W - 3.18); // credenza
-  box(scene, 0.47, 0.02, 2.06, mat('#26282a'), 0.235, 0.78, W - 3.18);
+  box(scene, 0.42, 0.556, 1.87, M.dark, 0.21, 0.216, 1.31); // credenza (misure dalle foto di dettaglio)
+  box(scene, 0.445, 0.029, 1.93, mat('#26282a'), 0.2225, 0.772, 1.31);
+  for (const z of [0.702, 1.871]) box(scene, 0.22, 0.216, 0.03, M.black, 0.24, 0, z);
   box(scene, 0.2, 0.29, 0.84, M.white, 0.1, 2.55, W - 1.38); // climatizzatore
   box(scene, 0.1, 0.64, 0.66, M.white, 0.05, 0.08, W - 0.44); // radiatore
 
   // --- parete ingresso (z = W, s = x dall'angolo split) ---
-  for (const x of [2.63, 2.77]) box(scene, 0.03, 0.57, 0.04, M.glow, x, 1.46, W - 0.03); // applique
+  for (const x of [2.33, 2.47]) box(scene, 0.03, 0.57, 0.04, M.glow, x, 1.46, W - 0.03); // applique
 
   // --- divano a L (stime: 3 m lungo l'ingresso, chaise lungo la finestra) ---
   const sofa = new THREE.Group();
