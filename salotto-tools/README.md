@@ -23,7 +23,13 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
    - divano: `scan/sofa_hf.py` → `sofa_hf2.py` → `sofa_hf3.py` ricavano un campo di quote a 2 cm (senza i cuscini, che hanno `cushions.py` / `cushions2.py`);
      `reg/sofa_bake.py` ne ricava la texture a 5 mm dalle foto (occlusione del campo stesso), `reg/sofa_export.py` riempie i buchi e prepara quote e texture
      `scan/sofa_cut.py` toglie dal campo di quote il bracciolo e il piano del tavolino con le rotelle che la scansione aveva incluso (parte sempre dall'originale)
-   - oggetti sulla console: `scan/cons_vox.py` li trasforma in voxel da 6 mm; `reg/vox_photo.py` li ricolora con le foto
+   - oggetti sulla console (versione vecchia, ora non piu' nel pacchetto): `scan/cons_vox.py` li trasforma in voxel da 6 mm; `reg/vox_photo.py` li ricolora con le foto
+   - oggetti sulla console in 3D vero (`reg/console_obj.py`): le figure Funko (Art, Pennywise, Mandalorian, Daredevil) sono rilievi fotografici: da una foto frontale si ricava la maschera della sagoma
+     (`console/seglib.py` e gli script `console/seg_*.py`, GrabCut con semi a mano; `console/prep_console.py` salva ritagli e maschere in `CONSOLE_ASSETS`, fuori dal repository perche' sono foto di casa), la
+     profondita' di ogni punto viene dalla distanza dal bordo (profilo tondeggiante), il colore e' la foto stessa con la maschera alfa (`alphaMap`). La custodia del fumetto ha il frontale rettificato
+     dalla foto (omografia sui quattro angoli), pannelli acrilici trasparenti (`alpha`), spigoli chiari e base nera; lampada plissettata, telecamera bianca, ciotola nera con i cioccolatini, basi, pozza di sangue di
+     Pennywise e il piano di legno (texture sintetica con le ombre di contatto) sono mesh a colori per vertice o con texture sintetiche. Con `CONSOLE_ASSETS` impostata `build_pack.py` le aggiunge al
+     pacchetto (blocchi `cm_*`, texture `cobj_*`) e toglie voxel e vecchia lampada.
    - vaso rosso nel vano del mobile TV: la scansione (splat + mesh) conferma un cilindro semplice; le misure (raggio 5,3 cm, alto 21,5 cm, in piedi a x 6,68 e z 0,30) vengono
      dal contorno nella foto registrata (`reg/vase_profile.py`: diametro a ogni quota, nel piano dell'asse), perche' la scala delle scansioni non e' affidabile; `reg/vase_tex.py` ricava
      la texture intorno al cilindro (colonne = angolo, righe = quota). Il vano e' vero (fondo e divisorio in `scene_def.py`), il vaso e' una `cylt` nel pacchetto.

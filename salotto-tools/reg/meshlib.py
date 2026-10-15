@@ -22,9 +22,11 @@ def rot_z(a):
 
 class Mesh:
     def __init__(s):
-        s.P = []; s.C = []; s.I = []
-    def _add(s, pts, cols, tris):
+        s.P = []; s.C = []; s.I = []; s.UV = []; s.has_uv = False
+    def _add(s, pts, cols, tris, uvs=None):
         i0 = len(s.P); s.P += [tuple(float(v) for v in p) for p in pts]; s.C += [tuple(float(v) for v in c) for c in cols]
+        if uvs is not None: s.has_uv = True
+        s.UV += [tuple(float(v) for v in u) for u in uvs] if uvs is not None else [(0.0, 0.0)] * len(pts)
         s.I += [(i0 + a, i0 + b, i0 + c) for a, b, c in tris]; return i0
     def tri(s, a, b, c, col, ref=None, two=False, k=1.0):
         a, b, c = (np.asarray(v, float) for v in (a, b, c))
@@ -138,16 +140,28 @@ class Mesh:
                 i00 = si * nc + t; i01 = i00 + 1; i10 = (si + 1) * nc + t; i11 = i10 + 1
                 T += [(i00, i01, i11), (i00, i11, i10)]
         s._add(V, Cc, T)
+    def extend(s, other, fn=None):
+        """accoda un'altra mesh, con una trasformazione dei punti fn(P: (n,3)) -> (n,3) (rotazione, scala)"""
+        if not other.P: return
+        P = np.array(other.P, float)
+        if fn is not None: P = fn(P)
+        uv = other.UV if other.has_uv else None
+        s._add(P, other.C, other.I, uv)
     # --- salvataggio ---
     def arrays(s):
         P = np.array(s.P, np.float32); C = np.clip(np.round(np.array(s.C)), 0, 255).astype(np.uint8); I = np.array(s.I, np.uint32)
         return P, C, I
     def pack(s):
-        """blob per il pacchetto: posizioni float32 (nv*3), colori uint8 (nv*3, riempiti a 4 byte), indici uint16 (ni)"""
+        """blob per il pacchetto: posizioni float32 (nv*3), colori uint8 (nv*3, riempiti a 4 byte), [uv float32 (nv*2) se ci sono], indici uint16 (ni)"""
         P, C, I = s.arrays(); nv = len(P)
         assert nv < 65536, nv
         cb = C.tobytes(); cb += b'\0' * ((-len(cb)) % 4)
-        return dict(nv=nv, ni=int(I.size)), P.tobytes() + cb + I.astype(np.uint16).tobytes()
-    def to_json(s, path):
+        uvb = np.array(s.UV, np.float32).tobytes() if s.has_uv else b''
+        meta = dict(nv=nv, ni=int(I.size))
+        if s.has_uv: meta['uv'] = 1
+        return meta, P.tobytes() + cb + uvb + I.astype(np.uint16).tobytes()
+    def to_json(s, path, **extra):
         import json
-        P, C, I = s.arrays(); json.dump(dict(pos=np.round(P, 5).ravel().tolist(), col=C.ravel().tolist(), idx=I.ravel().tolist()), open(path, 'w'))
+        P, C, I = s.arrays(); d = dict(pos=np.round(P, 5).ravel().tolist(), col=C.ravel().tolist(), idx=I.ravel().tolist())
+        if s.has_uv: d['uv'] = np.round(np.array(s.UV, np.float32), 5).ravel().tolist()
+        d.update(extra); json.dump(d, open(path, 'w')); return d

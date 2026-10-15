@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { ROOM, WALLS, OPENINGS } from './room.js';
 
-const PACK_URL = 'pack/salotto.bin?v=7'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
+const PACK_URL = 'pack/salotto.bin?v=8'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
 const KEY_STORE = 'salotto.key';
 const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 
@@ -167,16 +167,24 @@ function primMesh(p, T = {}, B = null) {
     m = new THREE.Group(); m.add(outer, inner, rim, bottom);
     m.position.set(p.p[0], p.p[1] + h / 2, p.p[2]);
   } else if (p.t === 'vmesh' && B) {
-    // posizioni float32 (nv*3), colori uint8 sRGB (nv*3, riempiti a 4 byte), indici uint16 (ni): le ombre sono gia' nei colori
+    // posizioni float32 (nv*3), colori uint8 sRGB (nv*3, riempiti a 4 byte), [uv float32 (nv*2)], indici uint16 (ni): le ombre sono gia' nei colori;
+    // con `map` la texture si moltiplica ai colori, con `amap` (maschera) i bordi si ritagliano, con `alpha` la mesh e' trasparente (vetro)
     const buf = B(p.bin), nv = p.nv, ni = p.ni;
-    const pos = new Float32Array(buf, 0, nv * 3), cb = new Uint8Array(buf, nv * 12, nv * 3), idx = new Uint16Array(buf, nv * 12 + ((nv * 3 + 3) & ~3), ni);
+    const cOff = nv * 12, uOff = cOff + ((nv * 3 + 3) & ~3), iOff = uOff + (p.uv ? nv * 8 : 0);
+    const pos = new Float32Array(buf, 0, nv * 3), cb = new Uint8Array(buf, cOff, nv * 3), idx = new Uint16Array(buf, iOff, ni);
     const col = new Float32Array(nv * 3), c = new THREE.Color();
     for (let i = 0; i < nv; i++) { c.setRGB(cb[i * 3] / 255, cb[i * 3 + 1] / 255, cb[i * 3 + 2] / 255, THREE.SRGBColorSpace); col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b; }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos.slice(), 3));
     g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    if (p.uv) g.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(buf, uOff, nv * 2).slice(), 2));
     g.setIndex(new THREE.BufferAttribute(idx.slice(), 1));
-    m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false, side: THREE.DoubleSide }));
+    const o = { vertexColors: true, toneMapped: false, side: THREE.DoubleSide };
+    if (p.map && T[p.map]) o.map = T[p.map];
+    if (p.amap && T[p.amap]) { T[p.amap].colorSpace = THREE.NoColorSpace; o.alphaMap = T[p.amap]; o.alphaTest = p.atest ?? 0.5; }
+    if (p.alpha) { o.transparent = true; o.opacity = p.alpha; o.depthWrite = false; }
+    m = new THREE.Mesh(g, new THREE.MeshBasicMaterial(o));
+    if (p.alpha) m.renderOrder = 2;
   } else m = new THREE.Group();
   return m;
 }
