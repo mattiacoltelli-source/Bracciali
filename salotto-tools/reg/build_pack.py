@@ -5,7 +5,7 @@ sys.path.insert(0, '/tmp/claude-0/s/reg')
 import numpy as np, cv2
 from fill import diffuse_fill, scene_complete, wall_fill
 from scene_def import BOXES, PRIMS, ITEMS
-import shelf_unit, shelf_tex, console_obj, ledges
+import shelf_unit, shelf_tex, console_obj, ledges, credenza_obj, wall_obj
 
 R = '/tmp/claude-0/s/reg/out'
 KEYFILE = '/tmp/claude-0/s/pack.key'
@@ -25,7 +25,8 @@ def erode_valid(valid, k=7):
 
 # (u0, u1, y0, y1, morbido) in metri, sistema nuovo: fasce della parete TV da rifare per diffusione. A sinistra e sopra il mobile a mensole (x 3,54-4,25) la pianta e i tralci si proiettavano sul muro
 # (morbido = tiene anche l'intonaco piu' scuro, per non schiarire il gradiente della luce); dietro alle mensole portaquadri e ai sei quadretti, ora in 3D, la parete va ripulita (fill nitido).
-WALL_EXCL = {'T': [(3.18, 3.58, 0.55, 2.68, True), (3.18, 4.50, 2.20, 2.68, True), (4.70, 5.84, 1.94, 2.34, False), (5.98, 7.10, 1.94, 2.34, False)]}
+WALL_EXCL = {'T': [(3.18, 3.58, 0.55, 2.68, True), (3.18, 4.50, 2.20, 2.68, True), (4.70, 5.84, 1.94, 2.34, False), (5.98, 7.10, 1.94, 2.34, False)],
+             'A': wall_obj.wall_rects(L_A_O)}       # parete A: interruttore e presa (ora in 3D, nella texture avevano la doppia immagine)
 
 def walls(tag):
     P = json.load(open(f'{R}/paintings_final.json'))
@@ -266,7 +267,7 @@ def main():
             tag_ = vn[4:-4]; vm = json.load(open(f'{SD}/vox_{tag_}.json'))
             bins[f'vox_{tag_}'] = open(f'{SD}/{vn}', 'rb').read(); vm['bin'] = f'vox_{tag_}'; voxs.append(vm)
     # mobile a mensole: mesh a colori per vertice (mensole, pianta, vasi, fumetti)
-    prims = [p for p in PRIMS if not (USE_CONSOLE and p.get('grp') == 'lampada')]
+    prims = [p for p in PRIMS if not (USE_CONSOLE and p.get('grp') in ('lampada', 'credenza'))]
     um = shelf_unit.build(); meta, blob_u = um.pack(); bins['shelf_unit'] = blob_u
     prims.append(dict(t='vmesh', bin='shelf_unit', nv=meta['nv'], ni=meta['ni']))
     print('mesh mensole: vertici', meta['nv'], 'indici', meta['ni'], round(len(blob_u) / 1e3), 'KB', flush=True)
@@ -292,6 +293,20 @@ def main():
             if meta.get('uv'): d['uv'] = 1
             if lp.get('map'): d['map'] = lp['map']
             prims.append(d)
+    wparts, wimgs = wall_obj.build(); images.update(wimgs)      # interruttore e presa sulla parete A
+    for wp in wparts:
+        meta, blob_w = wp['mesh'].pack(); bins[f"cm_{wp['name']}"] = blob_w
+        prims.append(dict(t='vmesh', bin=f"cm_{wp['name']}", nv=meta['nv'], ni=meta['ni']))
+    if USE_CONSOLE:       # vaso grande, portabottiglie con etichette e ciotola di rame sulla credenza (colori cotti dalle foto registrate)
+        credenza_obj.MASKS = os.environ.get('VASE_MASKS', os.environ['CONSOLE_ASSETS'])        # maschere del vaso e ritagli delle etichette stanno con gli altri ritagli
+        qparts, qimgs = credenza_obj.build(); images.update(qimgs); nvq = 0
+        for qp in qparts:
+            meta, blob_q = qp['mesh'].pack(); bins[f"cm_{qp['name']}"] = blob_q; nvq += meta['nv']
+            d = dict(t='vmesh', bin=f"cm_{qp['name']}", nv=meta['nv'], ni=meta['ni'])
+            if meta.get('uv'): d['uv'] = 1
+            if qp.get('map'): d['map'] = qp['map']
+            prims.append(d)
+        print('oggetti credenza: parti', len(qparts), 'vertici', nvq, flush=True)
     boxes = []
     for b in BOXES:
         d = dict(name=b['name'], min=b['min'], max=b['max'], grp=b['grp'], solid=b['solid'])
