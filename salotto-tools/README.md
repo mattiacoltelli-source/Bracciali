@@ -10,7 +10,7 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
    La parete split sta 30 cm più in dentro del primo piano trovato: `frame.py` ha `XSHIFT = 0.30` e la stanza è lunga **7,10 m** (non 7,4).
 3. `reg/scene_def.py` — i mobili come scatole (misure da foto, sovrapposizioni e triangolazioni), le primitive (lampada, vaso a tornio, portabottiglie) e quali facce prendono la foto.
    Le misure scritte nel vecchio sistema si spostano da sole (`DX`).
-   Il **tavolino rosso a C** e' lamiera da 4 mm (`c_dorso`, `c_piano`): il montante sta a terra fuori dal bracciolo, il piano si appoggia sopra il bracciolo (1 cm sopra) e il ramo basso
+   Il **tavolino rosso a C** e' lamiera da 4 mm (`c_dorso`, `c_piano`): il montante sta a terra fuori dal bracciolo, il piano si appoggia sopra il bracciolo (4 mm sopra) e il ramo basso
    sta sotto il divano (non si vede, non e' modellato): non aggiunge volume al divano. Il bracciolo e' una scatola smussata con le foto sul fronte (`s_bracciolo`), non parte del campo di quote.
    Attenzione: le foto registrate dopo (`sfm/reg_new.py`) hanno pose meno precise delle prime: per misurare si controlla sempre con due viste.
 4. Bake delle texture, ciascuna da più foto con occlusione (`reg/cams_sel.py` esclude le foto scattate dal corridoio). **Lanciarli con `FRAME_EXT=1`**: senza, usano solo le prime foto e non le 12 nuove:

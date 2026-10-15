@@ -37,7 +37,7 @@ BOXES = [
     B('s_chaise', 6.08 + DX, 7.00 + DX, 0.08, 0.40, 1.97, 4.20, FAB, [], ['-z', '-x', '+y'], round=0.05, **{**SOFA, 'margin': 0.05}),
     B('s_chaise_dorso', 6.95 + DX, 7.08 + DX, 0.34, 0.72, 2.00, 4.20, FAB, [], ['-x', '-z', '+y'], round=0.05, **{**SOFA, 'margin': 0.02}),
     # tavolino rosso a C (lamiera da 4 mm): montante a terra fuori dal bracciolo (faccia esterna a x 4.16), piano alto appoggiato sopra il bracciolo,
-    # ramo basso sotto il divano (non si vede). Non aggiunge volume al divano: il piano sta 1 cm sopra il bracciolo.
+    # ramo basso sotto il divano (non si vede). Non aggiunge volume al divano: il piano sta appoggiato sul bracciolo (4 mm sopra).
     B('c_dorso', 4.156 + DX, 4.160 + DX, 0.0, 0.64, 3.54, 3.85, '#4a1511', ['-x'], ['-z', '+z', '+x'], ppm=300, margin=0.0, grp='cdue'),
     B('c_piano', 4.156 + DX, 4.59 + DX, 0.636, 0.640, 3.54, 3.85, '#47251f', [], ['+y', '-z', '+z', '+x', '-x'], ppm=200, margin=0.0, grp='cdue'),
     # --- consolle dietro la chaise (finestra) ---
