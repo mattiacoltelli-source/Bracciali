@@ -5,7 +5,7 @@ sys.path.insert(0, '/tmp/claude-0/s/reg')
 import numpy as np, cv2
 from fill import diffuse_fill, scene_complete, wall_fill
 from scene_def import BOXES, PRIMS, ITEMS
-import shelf_unit, shelf_tex, console_obj
+import shelf_unit, shelf_tex, console_obj, ledges
 
 R = '/tmp/claude-0/s/reg/out'
 KEYFILE = '/tmp/claude-0/s/pack.key'
@@ -23,8 +23,9 @@ def jpg(img, q=88):
 def erode_valid(valid, k=7):
     return cv2.erode(valid.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
 
-# (u0, u1, y0, y1) in metri, sistema nuovo: a sinistra e sopra il mobile a mensole (x 3,54-4,25), dove la pianta e i tralci si proiettavano sul muro
-WALL_EXCL = {'T': [(3.18, 3.58, 0.55, 2.68), (3.18, 4.50, 2.20, 2.68)]}
+# (u0, u1, y0, y1, morbido) in metri, sistema nuovo: fasce della parete TV da rifare per diffusione. A sinistra e sopra il mobile a mensole (x 3,54-4,25) la pianta e i tralci si proiettavano sul muro
+# (morbido = tiene anche l'intonaco piu' scuro, per non schiarire il gradiente della luce); dietro alle mensole portaquadri e ai sei quadretti, ora in 3D, la parete va ripulita (fill nitido).
+WALL_EXCL = {'T': [(3.18, 3.58, 0.55, 2.68, True), (3.18, 4.50, 2.20, 2.68, True), (4.70, 5.84, 1.94, 2.34, False), (5.98, 7.10, 1.94, 2.34, False)]}
 
 def walls(tag):
     P = json.load(open(f'{R}/paintings_final.json'))
@@ -39,15 +40,18 @@ def walls(tag):
             v[max(y0, 0):y1, max(x0, 0):x1] = False
         img = img.copy(); img[~v] = 0
         out[wid] = wall_fill(img, v, PPM_W)
-        if WALL_EXCL.get(wid):      # fasce da rifare per diffusione: ai bordi del mobile a mensole le foto portano sbavature di pianta e mensole; sfumate sui bordi
-            v2 = v.copy(); M = np.zeros(v.shape, np.float32)
-            for (ua, ub, ya, yb) in WALL_EXCL[wid]:
-                sl = (slice(max(int((H - yb) * PPM_W), 0), int((H - ya) * PPM_W)), slice(max(int(ua * PPM_W), 0), int(ub * PPM_W)))
-                v2[sl] = False; M[sl] = 1.0
-            img2 = img.copy(); img2[~v2] = 0
-            fill2 = wall_fill(img2, v2, PPM_W, soft=True).astype(np.float32)
-            al = np.clip(cv2.GaussianBlur(M, (0, 0), 0.035 * PPM_W) * 1.6, 0, 1)[..., None]
-            out[wid] = (out[wid].astype(np.float32) * (1 - al) + fill2 * al).clip(0, 255).astype(np.uint8)
+        if WALL_EXCL.get(wid):      # fasce da rifare per diffusione, sfumate sui bordi
+            for soft in (True, False):
+                rects = [r for r in WALL_EXCL[wid] if r[4] == soft]
+                if not rects: continue
+                v2 = v.copy(); M = np.zeros(v.shape, np.float32)
+                for (ua, ub, ya, yb, _s) in rects:
+                    sl = (slice(max(int((H - yb) * PPM_W), 0), int((H - ya) * PPM_W)), slice(max(int(ua * PPM_W), 0), int(ub * PPM_W)))
+                    v2[sl] = False; M[sl] = 1.0
+                img2 = img.copy(); img2[~v2] = 0
+                fill2 = wall_fill(img2, v2, PPM_W, soft=soft).astype(np.float32)
+                al = np.clip(cv2.GaussianBlur(M, (0, 0), 0.035 * PPM_W) * 1.6, 0, 1)[..., None]
+                out[wid] = (out[wid].astype(np.float32) * (1 - al) + fill2 * al).clip(0, 255).astype(np.uint8)
         # ombra morbida sulla parete sotto i mobili sospesi (li' le foto non vedono: si sarebbe riempito di bianco)
         Hh, Ww = out[wid].shape[:2]
         floaters = []
@@ -279,6 +283,15 @@ def main():
             if cp.get('alpha'): d['alpha'] = cp['alpha']
             prims.append(d)
         print('oggetti console: parti', len(cparts), 'vertici', nvt, flush=True)
+    if USE_CONSOLE:       # mensole portaquadri e quadretti (ritagli rettificati dalle foto, stesso insieme di ritagli della console)
+        ledges.ASSETS = os.environ['CONSOLE_ASSETS']
+        lparts, limgs = ledges.build(); images.update(limgs)
+        for lp in lparts:
+            meta, blob_l = lp['mesh'].pack(); bins[f"cm_{lp['name']}"] = blob_l
+            d = dict(t='vmesh', bin=f"cm_{lp['name']}", nv=meta['nv'], ni=meta['ni'])
+            if meta.get('uv'): d['uv'] = 1
+            if lp.get('map'): d['map'] = lp['map']
+            prims.append(d)
     boxes = []
     for b in BOXES:
         d = dict(name=b['name'], min=b['min'], max=b['max'], grp=b['grp'], solid=b['solid'])
