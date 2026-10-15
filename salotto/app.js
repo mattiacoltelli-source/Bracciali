@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { ROOM, WALLS, PAINTINGS } from './room.js';
+import { ROOM, WALLS, PAINTINGS, OLD_POS } from './room.js';
 import { buildRoom, addLights, artTexture } from './scene.js';
 
 const $ = (id) => document.getElementById(id);
@@ -9,7 +9,17 @@ const DEPTH = 0.03; // spessore del quadro (tela)
 
 // ---------- dati dei quadri ----------
 const defaults = () => PAINTINGS.map((p) => ({ id: p.id, name: p.name, w: p.w, h: p.h, wall: p.wall, u: WALLS[p.wall].toU(p.s), y: p.y, art: p.art }));
-function load() { try { const v = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(v) ? v : null; } catch { return null; } }
+function load() {
+  try {
+    const v = JSON.parse(localStorage.getItem(KEY));
+    if (!Array.isArray(v)) return null;
+    for (const p of v) { // quadri mai spostati: dalle vecchie stime alle misure nuove
+      const o = OLD_POS[p.id], d = defaults().find((x) => x.id === p.id);
+      if (o && d && p.wall === d.wall && Math.abs(p.u - o[0]) < 1e-6 && Math.abs(p.y - o[1]) < 1e-6) { p.u = d.u; p.y = d.y; }
+    }
+    return v;
+  } catch { return null; }
+}
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(paintings)); return true; }
   catch { showErr('Spazio del telefono pieno: il progetto non viene salvato. Elimina qualche quadro.'); return false; }
@@ -47,6 +57,7 @@ function resize() {
   renderer.setSize(w, h, false);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
+  walkApi?.refov();
   render();
 }
 window.addEventListener('resize', resize);
@@ -54,6 +65,16 @@ window.addEventListener('resize', resize);
 // ---------- scansione fotorealistica (caricata solo quando serve) ----------
 let scanApi = null, scanLoading = null;
 const getScan = () => (scanLoading ??= import('./scan.js').then((m) => (scanApi = m.createScan(scanCtx))));
+
+// ---------- stanza a foto + camminata (pacchetto cifrato, caricato solo quando serve) ----------
+let realApi = null, walkApi = null, realMod = null, realLoading = null, look = 'blocks';
+const LOOK_KEY = 'salotto.look';
+const getReal = () => (realLoading ??= Promise.all([import('./real.js'), import('./walk.js')]).then(([r, w]) => {
+  realMod = r;
+  realApi = r.createReal({ renderer, roomRoot, groups, pieces, render });
+  walkApi = w.createWalk({ camera, controls, canvas: renderer.domElement, render, real: realApi });
+  return realApi;
+}));
 
 // ---------- viste ----------
 const VIEWS = {
@@ -68,6 +89,10 @@ const VIEWS = {
 let tween = null;
 function goTo(name, instant) {
   const v = VIEWS[name];
+  if (walkApi?.active()) {
+    if (v.inside) { walkApi.place(v.pos, v.at, v.pos[1] < 1.3 ? 1.12 : 1.6); return; } // dal divano: seduti
+    walkApi.exit();
+  }
   let pos = new THREE.Vector3(...v.pos);
   let at = new THREE.Vector3(...v.at);
   if (!v.inside && camera.aspect < 1) pos = at.clone().add(pos.sub(at).multiplyScalar(Math.min(1.8, 1 / (camera.aspect * 1.25)))); // telefono in verticale: più lontano
@@ -90,13 +115,17 @@ const objs = new Map(); // id -> { group, box, outline, mat }
 const loader = new THREE.TextureLoader();
 const sideMat = new THREE.MeshStandardMaterial({ color: '#e7e4dd', roughness: 0.9 });
 
+const BRIGHT = 0.92; // il quadro stampato sulla parete fotografata è un po' meno brillante dello schermo
 function frontMaterial(p) {
-  const m = new THREE.MeshStandardMaterial({ roughness: 0.7 });
+  const real = look === 'real';
+  const m = real ? new THREE.MeshBasicMaterial({ toneMapped: false }) : new THREE.MeshStandardMaterial({ roughness: 0.7 });
+  if (real) m.color.setScalar(BRIGHT);
+  const base = real ? m.color.clone() : null;
   if (p.img) {
     m.map = null; m.color.set('#888');
-    loader.load(p.img, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; m.map = t; m.color.set('#ffffff'); m.needsUpdate = true; render(); });
+    loader.load(p.img, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; m.map = t; if (real) m.color.copy(base); else m.color.set('#ffffff'); m.needsUpdate = true; render(); });
   } else {
-    m.map = artTexture(p.art || ['#999', '#ccc', '#666']);
+    m.map = (real && realApi?.art(p.id)) || artTexture(p.art || ['#999', '#ccc', '#666']);
   }
   return m;
 }
@@ -112,15 +141,39 @@ function place(p) {
   o.group.position.set(p.u, p.y, DEPTH / 2 + 0.002);
   render();
 }
+let shadowTex = null;
+function shadowTexture() { // ombra morbida sotto e a destra del quadro (luce dal soffitto)
+  if (shadowTex) return shadowTex;
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  for (let i = 0; i < 14; i++) {
+    const m = 6 + i * 1.8;
+    g.fillStyle = 'rgba(0,0,0,0.045)';
+    g.beginPath(); g.roundRect(m, m, 64 - 2 * m, 64 - 2 * m, 4); g.fill();
+  }
+  shadowTex = new THREE.CanvasTexture(c);
+  shadowTex.colorSpace = THREE.SRGBColorSpace;
+  return shadowTex;
+}
 function makeObj(p) {
   const group = new THREE.Group();
+  group.userData.keep = true; // i quadri restano visibili cambiando aspetto
   const front = frontMaterial(p);
   const bx = new THREE.Mesh(new THREE.BoxGeometry(p.w, p.h, DEPTH), [sideMat, sideMat, sideMat, sideMat, front, sideMat]);
   bx.userData.pid = p.id;
   const outline = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(p.w + 0.02, p.h + 0.02, DEPTH + 0.01)), new THREE.LineBasicMaterial({ color: '#ff8a3d' }));
   outline.visible = false;
   group.add(bx, outline);
-  objs.set(p.id, { group, box: bx, outline, front });
+  let shadow = null;
+  if (look === 'real') {
+    const grow = 0.16;
+    shadow = new THREE.Mesh(new THREE.PlaneGeometry(p.w + grow, p.h + grow), new THREE.MeshBasicMaterial({ map: shadowTexture(), transparent: true, depthWrite: false, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+    shadow.position.set(0.012, -0.02, -DEPTH / 2 - 0.0015);
+    shadow.renderOrder = 1;
+    group.add(shadow);
+  }
+  objs.set(p.id, { group, box: bx, outline, front, shadow });
   place(p);
 }
 function removeObj(id) {
@@ -128,7 +181,9 @@ function removeObj(id) {
   if (!o) return;
   o.group.parent?.remove(o.group);
   o.box.geometry.dispose(); o.outline.geometry.dispose();
-  o.front.map?.dispose(); o.front.dispose();
+  if (o.shadow) { o.shadow.geometry.dispose(); o.shadow.material.dispose(); }
+  if (!(realApi && o.front.map === realApi.art(id))) o.front.map?.dispose(); // la foto del pacchetto è condivisa: non si butta
+  o.front.dispose();
   objs.delete(id);
 }
 function rebuild(p) { removeObj(p.id); makeObj(p); if (selected === p.id) setOutline(true); }
@@ -241,7 +296,7 @@ cv.addEventListener('pointerdown', (e) => {
   setRay(e);
   const hit = pickPainting();
   down = { x: e.clientX, y: e.clientY, id: hit?.object.userData.pid || null, moved: false };
-  if (hit && hit.object.userData.pid === selected) {
+  if (hit && hit.object.userData.pid === selected && !walkApi?.active()) {
     const p = byId(selected), wh = pickWall();
     drag = { off: wh && wh.object.userData.wall === p.wall ? local(wh).map((v, i) => [p.u, p.y][i] - v) : [0, 0] };
     controls.enabled = false;
@@ -327,6 +382,54 @@ $('snap').onclick = async () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 };
 
+// ---------- aspetto: blocchi / foto, camminata ----------
+const MSG = {
+  nokey: 'Serve la chiave della stanza: apri il link che ti ho dato, oppure incollala qui sotto.',
+  badkey: 'La chiave non è quella giusta: incolla quella corretta.',
+  assente: 'Il pacchetto della stanza non è ancora online: dopo il merge ci vuole qualche minuto.',
+  rete: 'Non riesco a scaricare la stanza: controlla la connessione e riprova.',
+  pacchetto: 'Il pacchetto della stanza è danneggiato.',
+  errore: 'Non riesco ad aprire la stanza.',
+};
+const setStatus = (t) => { $('real-status').textContent = t || ''; };
+function syncLookUi() {
+  document.querySelectorAll('[data-look]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.look === look)));
+  $('walk-go').hidden = look !== 'real';
+}
+async function setLook(next) {
+  if (next === look) { syncLookUi(); return true; }
+  if (next === 'real') {
+    setStatus('Preparo…');
+    const real = await getReal();
+    const r = await real.load(setStatus);
+    $('real-key').hidden = !(r === 'nokey' || r === 'badkey');
+    if (r !== 'ok') { setStatus(MSG[r] || MSG.errore); syncLookUi(); return false; }
+    setStatus('');
+  }
+  look = next;
+  realApi?.setLook(next === 'real');
+  try { localStorage.setItem(LOOK_KEY, next); } catch { /* ok */ }
+  paintings.forEach(rebuild); // i quadri cambiano materiale: illuminati nel modello a blocchi, "stampati" nella stanza a foto
+  if (next !== 'real') walkApi?.exit();
+  syncLookUi(); render();
+  return true;
+}
+document.querySelectorAll('[data-look]').forEach((b) => { b.onclick = () => setLook(b.dataset.look); });
+$('real-key-go').onclick = async () => {
+  await getReal();
+  if (!realMod.saveKey($('real-key-in').value)) { setStatus('Quella non sembra una chiave: sono 43 caratteri, senza spazi.'); return; }
+  $('real-key-in').value = '';
+  setLook('real');
+};
+$('walk-go').onclick = () => {
+  if (!realApi?.ready || look !== 'real') return;
+  scanApi?.setMode('model');
+  $('sheet').hidden = true;
+  walkApi.enter();
+  const h = $('hint'); h.textContent = 'Joystick per muoverti · trascina per guardare · tocca un quadro per selezionarlo'; h.classList.remove('off');
+  setTimeout(() => h.classList.add('off'), 6000);
+};
+
 // ---------- avvio ----------
 resize();
 goTo('pano', true);
@@ -334,6 +437,7 @@ const wallN = Object.fromEntries(Object.entries(WALLS).map(([id, w]) => [id, new
 const tmp = new THREE.Vector3();
 renderer.setAnimationLoop((now) => {
   stepTween(now);
+  if (walkApi?.step(now)) needs = true;
   if (needs) {
     needs = false;
     for (const id in groups) { // da fuori la parete (con quello che ha attaccato) sparisce: si vede dentro la stanza
@@ -344,4 +448,9 @@ renderer.setAnimationLoop((now) => {
   }
 });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-window.__salotto = { goTo, select, camera, controls };
+if (/[#&]k=/.test(location.hash)) { // link con la chiave: si apre direttamente la stanza a foto
+  setLook('real').then((ok) => { if (ok) { openTab('views'); const h = $('hint'); h.textContent = 'La tua stanza, dalle foto · prova "Cammina nella stanza"'; h.classList.remove('off'); } });
+} else {
+  try { if (localStorage.getItem(LOOK_KEY) === 'real') setLook('real'); } catch { /* ok */ }
+}
+window.__salotto = { goTo, select, camera, controls, setLook, get look() { return look; }, get real() { return realApi; }, get walk() { return walkApi; } };

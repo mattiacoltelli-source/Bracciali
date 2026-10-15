@@ -19,6 +19,15 @@
   <p id="hint" class="hint">Trascina per girare · due dita per zoom · tocca un quadro per selezionarlo</p>
   <p id="err" class="err" hidden></p>
 
+  <div id="walk-hud" class="walk" hidden>
+    <button id="walk-exit" type="button" class="walk-btn">‹ Esci</button>
+    <div class="walk-eye" role="group" aria-label="Altezza degli occhi">
+      <button data-eye="1.6" type="button" aria-pressed="true">In piedi</button>
+      <button data-eye="1.1" type="button">Seduto</button>
+    </div>
+    <div id="joy" class="joy" role="application" aria-label="Joystick per muoverti"><div id="joy-knob" class="joy-knob"></div></div>
+  </div>
+
   <nav class="bar" aria-label="Strumenti">
     <button data-tab="views" type="button">Viste</button>
     <button data-tab="paintings" type="button">Quadri</button>
@@ -40,6 +49,17 @@
         <button data-view="window" type="button">Dalla finestra</button>
         <button data-view="split" type="button">Dallo split</button>
       </div>
+      <h3>Aspetto della stanza</h3>
+      <div class="steps" role="group" aria-label="Aspetto">
+        <button data-look="blocks" type="button" aria-pressed="true">Blocchi</button>
+        <button data-look="real" type="button">Foto</button>
+      </div>
+      <p id="real-status" class="muted" role="status"></p>
+      <div id="real-key" hidden>
+        <label>Chiave della stanza<input id="real-key-in" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Incolla qui la chiave"></label>
+        <button id="real-key-go" type="button" class="primary">Usa la chiave</button>
+      </div>
+      <button id="walk-go" type="button" class="primary" hidden>Cammina nella stanza</button>
       <a class="cardlink" href="foto.html"><span><b>Prova sulla foto</b><small>Metti un quadro su una foto vera della parete</small></span><span aria-hidden="true">›</span></a>
     </div>
 
