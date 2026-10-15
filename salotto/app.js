@@ -449,7 +449,12 @@ renderer.setAnimationLoop((now) => {
     renderer.render(scene, camera);
   }
 });
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator) {
+  const had = !!navigator.serviceWorker.controller; // già c'era una versione installata: questa è un aggiornamento
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+  // al primo avvio dopo un aggiornamento si vedrebbe ancora la versione vecchia (dalla cache): si ricarica una volta sola, subito
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (had && performance.now() < 20000) location.reload(); });
+}
 if (/[#&]k=/.test(location.hash)) { // link con la chiave: si apre direttamente la stanza a foto
   setLook('real').then((ok) => { if (ok) { openTab('views'); const h = $('hint'); h.textContent = 'La tua stanza, dalle foto · prova "Cammina nella stanza"'; h.classList.remove('off'); } });
 } else {
