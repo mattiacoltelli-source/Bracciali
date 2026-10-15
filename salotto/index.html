@@ -104,6 +104,19 @@
         <h3>3 · Quadri</h3>
         <label>Luminosità dei quadri<input id="s-bright" type="range" min="40" max="140" value="85"></label>
         <p class="muted">Per appendere: scegli un quadro in "Quadri" e premi "Appendi nella scansione".</p>
+        <h3>4 · Pulizia (facoltativa)</h3>
+        <p class="muted">Per togliere nebbia, riflessi sotto il pavimento lucido e punti sospesi per aria.</p>
+        <label>Nebbia<input id="s-fog" type="range" min="0" max="100" value="0"></label>
+        <p class="muted">Alza finché la nebbia sparisce; se compaiono buchi nei muri, abbassa.</p>
+        <label>Taglia sotto il pavimento<input id="s-cut" type="range" min="0" max="40" value="0"></label>
+        <p id="s-cut-v" class="muted">Spento. Serve il passo 1 (pavimento).</p>
+        <div class="row"><button id="s-erase" type="button" class="primary">Cancella punti per aria</button></div>
+        <label>Grandezza della gomma<input id="s-eraser" type="range" min="5" max="60" value="20"></label>
+        <div class="row">
+          <button id="s-undo" type="button">Annulla l'ultimo</button>
+          <button id="s-undoall" type="button">Ripristina tutti</button>
+        </div>
+        <p id="s-erased" class="muted"></p>
       </div>
       <button id="s-remove" type="button" class="link" hidden>Rimuovi la scansione dal telefono</button>
       <details class="guide" id="s-video-help">

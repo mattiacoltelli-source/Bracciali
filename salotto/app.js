@@ -344,4 +344,4 @@ renderer.setAnimationLoop((now) => {
   }
 });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-window.__salotto = { goTo, select };
+window.__salotto = { goTo, select, camera, controls };
