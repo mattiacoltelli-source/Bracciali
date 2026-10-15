@@ -5,7 +5,7 @@ sys.path.insert(0, '/tmp/claude-0/s/reg')
 import numpy as np, cv2
 from fill import diffuse_fill, scene_complete, wall_fill
 from scene_def import BOXES, PRIMS, ITEMS
-import shelf_unit, shelf_tex
+import shelf_unit, shelf_tex, console_obj
 
 R = '/tmp/claude-0/s/reg/out'
 KEYFILE = '/tmp/claude-0/s/pack.key'
@@ -256,15 +256,29 @@ def main():
         images['sofa_t'] = open(f'{SD}/sofa_t.jpg', 'rb').read(); bins['sofa_h'] = open(f'{SD}/sofa_h.bin', 'rb').read()
         sofa['h'] = 'sofa_h'; sofa['t'] = 'sofa_t'
     voxs = []
+    USE_CONSOLE = bool(os.environ.get('CONSOLE_ASSETS')) and os.path.isdir(os.environ.get('CONSOLE_ASSETS', ''))     # oggetti sulla console in 3D vero (ritagli dalle foto)
     for vn in sorted(os.listdir(SD)) if os.path.isdir(SD) else []:
-        if vn.startswith('vox_') and vn.endswith('.bin') and not os.environ.get('NO_VOX'):
+        if vn.startswith('vox_') and vn.endswith('.bin') and not os.environ.get('NO_VOX') and not (USE_CONSOLE and vn == 'vox_console.bin'):
             tag_ = vn[4:-4]; vm = json.load(open(f'{SD}/vox_{tag_}.json'))
             bins[f'vox_{tag_}'] = open(f'{SD}/{vn}', 'rb').read(); vm['bin'] = f'vox_{tag_}'; voxs.append(vm)
     # mobile a mensole: mesh a colori per vertice (mensole, pianta, vasi, fumetti)
-    prims = list(PRIMS)
+    prims = [p for p in PRIMS if not (USE_CONSOLE and p.get('grp') == 'lampada')]
     um = shelf_unit.build(); meta, blob_u = um.pack(); bins['shelf_unit'] = blob_u
     prims.append(dict(t='vmesh', bin='shelf_unit', nv=meta['nv'], ni=meta['ni']))
     print('mesh mensole: vertici', meta['nv'], 'indici', meta['ni'], round(len(blob_u) / 1e3), 'KB', flush=True)
+    if USE_CONSOLE:
+        console_obj.ASSETS = os.environ['CONSOLE_ASSETS']
+        cparts, cimgs = console_obj.build(case_yaw=float(os.environ.get('CASE_YAW', '0')))
+        images.update(cimgs); nvt = 0
+        for cp in cparts:
+            meta, blob_c = cp['mesh'].pack(); bins[f"cm_{cp['name']}"] = blob_c; nvt += meta['nv']      # i blocchi si chiamano cm_*: le texture cobj_* hanno nomi diversi (stesso nome = si sovrascrivono)
+            d = dict(t='vmesh', bin=f"cm_{cp['name']}", nv=meta['nv'], ni=meta['ni'])
+            if meta.get('uv'): d['uv'] = 1
+            if cp.get('map'): d['map'] = cp['map']
+            if cp.get('amap'): d['amap'] = cp['amap']; d['atest'] = cp.get('atest', 0.5)
+            if cp.get('alpha'): d['alpha'] = cp['alpha']
+            prims.append(d)
+        print('oggetti console: parti', len(cparts), 'vertici', nvt, flush=True)
     boxes = []
     for b in BOXES:
         d = dict(name=b['name'], min=b['min'], max=b['max'], grp=b['grp'], solid=b['solid'])
