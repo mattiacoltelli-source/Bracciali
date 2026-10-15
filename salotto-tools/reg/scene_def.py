@@ -103,22 +103,22 @@ PRIMS += [
     dict(t='cyl', p=[7.00, 1.05, 4.405], r0=0.062, r1=0.046, h=0.095, color='#141416', grp='lampada'),
 ]
 # vaso sulla credenza (tornio: [raggio, quota relativa, colore] dalla scansione e dalle foto)
-PRIMS += [dict(t='lathe', p=[0.143, 0.80, 1.937], prof=[[0.062, 0.0, "#312d24"], [0.085, 0.01, "#27241a"], [0.112, 0.028, "#4e483a"], [0.126, 0.05, "#807c69"], [0.128, 0.07, "#78694f"], [0.123, 0.09, "#766244"], [0.118, 0.11, "#978f75"], [0.108, 0.13, "#a49f8a"], [0.09, 0.15, "#a39c88"], [0.075, 0.17, "#948868"], [0.06, 0.19, "#7a694f"], [0.051, 0.21, "#8e8363"], [0.048, 0.235, "#7f6c49"], [0.049, 0.26, "#735e41"], [0.054, 0.285, "#594328"], [0.068, 0.305, "#86744c"], [0.068, 0.305, "#86744c"], [0.087, 0.325, "#8a7a55"], [0.104, 0.345, "#928360"], [0.113, 0.365, "#9a8c69"], [0.113, 0.375, "#9a8c69"]], seg=28)]
+PRIMS += [dict(t='lathe', p=[0.143, 0.80, 1.937], prof=[[0.062, 0.0, "#312d24"], [0.085, 0.01, "#27241a"], [0.112, 0.028, "#4e483a"], [0.126, 0.05, "#807c69"], [0.128, 0.07, "#78694f"], [0.123, 0.09, "#766244"], [0.118, 0.11, "#978f75"], [0.108, 0.13, "#a49f8a"], [0.09, 0.15, "#a39c88"], [0.075, 0.17, "#948868"], [0.06, 0.19, "#7a694f"], [0.051, 0.21, "#8e8363"], [0.048, 0.235, "#7f6c49"], [0.049, 0.26, "#735e41"], [0.054, 0.285, "#594328"], [0.068, 0.305, "#86744c"], [0.068, 0.305, "#86744c"], [0.087, 0.325, "#8a7a55"], [0.104, 0.345, "#928360"], [0.113, 0.365, "#9a8c69"], [0.113, 0.375, "#9a8c69"]], seg=28, grp='credenza')]
 # vaso rosso nel vano del mobile TV: cilindro (raggio 5,3 cm, alto 21,5 cm) in piedi sul fondo del vano; la texture 'vase_t' e' la foto intorno al cilindro (vase_tex.py)
 PRIMS += [dict(t='cylt', p=[6.682, 0.341, 0.30], r=0.053, h=0.215, map='vase_t', inner='#2a0509', rim='#d9aba6')]
 # portabottiglie nero con tre bottiglie sulla credenza
 _rk = dict(x0=0.05, x1=0.23, z0=0.41, z1=0.69, y0=0.80, y1=1.09, w=0.006)
 for _x in (_rk['x0'] + 0.006, _rk['x1'] - 0.006):
     for _z in (_rk['z0'] + 0.006, _rk['z1'] - 0.006):
-        PRIMS.append(dict(t='box', min=[_x - 0.006, _rk['y0'], _z - 0.006], max=[_x + 0.006, _rk['y1'], _z + 0.006], color='#121214'))
+        PRIMS.append(dict(t='box', min=[_x - 0.006, _rk['y0'], _z - 0.006], max=[_x + 0.006, _rk['y1'], _z + 0.006], color='#121214', grp='credenza'))
 for _y in (_rk['y0'], _rk['y1'] - 0.012):
     for _x in (_rk['x0'] + 0.006, _rk['x1'] - 0.006):
-        PRIMS.append(dict(t='box', min=[_x - 0.006, _y, _rk['z0']], max=[_x + 0.006, _y + 0.012, _rk['z1']], color='#121214'))
+        PRIMS.append(dict(t='box', min=[_x - 0.006, _y, _rk['z0']], max=[_x + 0.006, _y + 0.012, _rk['z1']], color='#121214', grp='credenza'))
     for _z in (_rk['z0'] + 0.006, _rk['z1'] - 0.006):
-        PRIMS.append(dict(t='box', min=[_rk['x0'], _y, _z - 0.006], max=[_rk['x1'], _y + 0.012, _z + 0.006], color='#121214'))
+        PRIMS.append(dict(t='box', min=[_rk['x0'], _y, _z - 0.006], max=[_rk['x1'], _y + 0.012, _z + 0.006], color='#121214', grp='credenza'))
 for _y, _lz in ((0.848, 0.575), (0.945, 0.59), (1.042, 0.565)):
-    PRIMS.append(dict(t='hcyl', p=[0.14, _y, 0.55], r=0.036, len=0.27, axis='z', color='#16211b'))
-    PRIMS.append(dict(t='hcyl', p=[0.14, _y, _lz], r=0.0368, len=0.075, axis='z', color='#d9cfb4'))
+    PRIMS.append(dict(t='hcyl', p=[0.14, _y, 0.55], r=0.036, len=0.27, axis='z', color='#16211b', grp='credenza'))
+    PRIMS.append(dict(t='hcyl', p=[0.14, _y, _lz], r=0.0368, len=0.075, axis='z', color='#d9cfb4', grp='credenza'))
 
 # cuscini del divano: scatole smussate orientate, ricavate dalla scansione 3D (nel sistema stanza). q = quaternione (x, y, z, w); size = spessore, lunghezza, larghezza
 import json as _json, os as _os

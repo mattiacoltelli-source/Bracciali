@@ -40,6 +40,15 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
    - mensole portaquadri nere e i sei quadretti (`reg/ledges.py`): le posizioni (u lungo la parete TV, altezza del piano) vengono dalla parete cotta e dal confronto con una foto registrata frontale; i quadretti sono
      rettificati dalla foto (`console/prep_posters.py`: angoli del passepartout trovati in automatico dalla cornice nera, due a mano; atlante 3x2), inclinati di 8 gradi all'indietro contro il muro.
      In `build_pack.py` le fasce della parete TV dove c'erano le vecchie foto dei quadretti vengono ricostruite per diffusione (`WALL_EXCL`).
+   - oggetti sulla credenza (`reg/credenza_obj.py`): il vaso smaltato e' un solido di rotazione col profilo letto dalle silhouette nelle foto registrate (la scala e' verificata sulle silhouette in quattro foto,
+     raggio x 0,93), l'asse (x 0,155, z 1,945) viene da due foto e dal confronto delle silhouette; la texture e' cotta dalle foto con `reg/phototex.py` (si proietta ogni punto con la posa della foto, peso = coseno
+     dell'angolo di vista, maschere GrabCut `console/seg_vase.py` per scartare lo sfondo, riflessi puntiformi scartati, buchi riempiti per diffusione). Il portabottiglie nero ha telaio (cx 0,158, cz 0,557, ruotato di
+     27,6 gradi, 21,5 x 19,3 x 30,5 cm) e sei bottiglie adattati ai punti letti a mano in tre foto registrate (`console/rackfit.py`, `console/bottlefit.py`, controllo con `console/rackov.py`); le etichette delle tre
+     bottiglie davanti sono ritagli rettificati dalla foto frontale, incollati come strisce curve; capsule e anelli del collo a colori per vertice. La ciotola di rame (a x 0,33 z 1,31, da tre raggi) ha un oggetto
+     blu-argento dentro. Attenzione: la foto registrata 8ebbe415 ha una posa sbagliata di 10-20 cm in questa zona (il vaso torna perche' e' stato triangolato anche con lei): per misurare sulla credenza si usano
+     3039c671, 6d89137e e 4bd3d963 (`console/vaseov.py` e `console/pairs.py` sovrappongono modello e foto).
+   - interruttore e presa sulla parete A (`reg/wall_obj.py`): placche a tre moduli (11,7 x 8,2 cm) con gli angoli intersecati col piano della parete in due foto (concordano entro 4 mm). Nella texture della
+     parete A le loro fasce sono ricostruite (`WALL_EXCL['A']`): le foto, con pose un po' diverse, le avevano cotte doppie.
 6. `reg/build_pack.py TAG_MURI TAG_PAV TAG_FACCE salotto.bin` — toglie i quadri dai muri, riempie i buchi, mette l'ombra sotto i mobili sospesi,
    impacchetta atlante, divano, voxel e primitive e cifra tutto con AES-256-GCM.
 
