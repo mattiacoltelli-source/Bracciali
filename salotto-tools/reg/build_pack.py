@@ -5,7 +5,7 @@ sys.path.insert(0, '/tmp/claude-0/s/reg')
 import numpy as np, cv2
 from fill import diffuse_fill, scene_complete, wall_fill
 from scene_def import BOXES, PRIMS, ITEMS
-import shelf_unit, shelf_tex, console_obj, ledges, credenza_obj, wall_obj
+import shelf_unit, shelf_tex, console_obj, ledges, credenza_obj, wall_obj, corridor_obj
 
 R = '/tmp/claude-0/s/reg/out'
 KEYFILE = '/tmp/claude-0/s/pack.key'
@@ -25,7 +25,7 @@ def erode_valid(valid, k=7):
 
 # (u0, u1, y0, y1, morbido) in metri, sistema nuovo: fasce della parete TV da rifare per diffusione. A sinistra e sopra il mobile a mensole (x 3,54-4,25) la pianta e i tralci si proiettavano sul muro
 # (morbido = tiene anche l'intonaco piu' scuro, per non schiarire il gradiente della luce); dietro alle mensole portaquadri e ai sei quadretti, ora in 3D, la parete va ripulita (fill nitido).
-WALL_EXCL = {'T': [(3.18, 3.58, 0.55, 2.68, True), (3.18, 4.50, 2.20, 2.68, True), (4.70, 5.84, 1.94, 2.34, False), (5.98, 7.10, 1.94, 2.34, False)],
+WALL_EXCL = {'T': [(3.18, 3.58, 0.55, 2.68, True), (3.18, 4.50, 2.20, 2.68, True), (4.70, 5.84, 1.94, 2.34, False), (5.98, 7.10, 1.94, 2.34, False), (0.0, 0.47, 0.05, 1.55, True)],
              'A': wall_obj.wall_rects(L_A_O)}       # parete A: interruttore e presa (ora in 3D, nella texture avevano la doppia immagine)
 
 def walls(tag):
@@ -293,6 +293,18 @@ def main():
             if meta.get('uv'): d['uv'] = 1
             if lp.get('map'): d['map'] = lp['map']
             prims.append(d)
+    CORR = os.path.join(os.environ.get('CONSOLE_ASSETS', ''), 'corr') if USE_CONSOLE else ''
+    corridor = bool(CORR) and os.path.isdir(CORR)
+    if corridor:      # corridoio dietro l'arco in 3D (porta, stampe, pavimento di marmo): parti 'deep', visibili solo da dentro la stanza
+        corridor_obj.ASSETS = CORR
+        cparts2, cimgs2 = corridor_obj.build(); images.update(cimgs2)
+        for cp in cparts2:
+            meta, blob_c2 = cp['mesh'].pack(); bins[f"cm_{cp['name']}"] = blob_c2
+            d = dict(t='vmesh', bin=f"cm_{cp['name']}", nv=meta['nv'], ni=meta['ni'], deep=1)
+            if meta.get('uv'): d['uv'] = 1
+            if cp.get('map'): d['map'] = cp['map']
+            prims.append(d)
+        print('corridoio: parti', len(cparts2), flush=True)
     wparts, wimgs = wall_obj.build(); images.update(wimgs)      # interruttore e presa sulla parete A
     for wp in wparts:
         meta, blob_w = wp['mesh'].pack(); bins[f"cm_{wp['name']}"] = blob_w
@@ -328,6 +340,7 @@ def main():
         imap[name] = dict(o=len(blob), n=len(data), t='application/octet-stream'); blob += data
     man = dict(v=1, images=imap, walls={w: f'wall_{w}' for w in 'TWFA'}, floor='floor', atlas='atlas', atlasSize=[at.shape[1], at.shape[0]],
                boxes=boxes, prims=prims, items=ITEMS, art=art, spawn=spawn)
+    if corridor: man['corridor'] = 1
     if sofa: man['sofa'] = sofa
     if voxs: man['vox'] = voxs
     mj = json.dumps(man, separators=(',', ':')).encode()

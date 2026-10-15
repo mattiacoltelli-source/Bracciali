@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { ROOM, WALLS, OPENINGS } from './room.js';
 
-const PACK_URL = 'pack/salotto.bin?v=10'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
+const PACK_URL = 'pack/salotto.bin?v=11'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
 const KEY_STORE = 'salotto.key';
 const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 
@@ -209,11 +209,15 @@ function wallWithHoles(w, ops) {
 }
 // profondita' dell'arco: stipiti e architrave in intonaco, corridoio che si scurisce e, in fondo, la foto sfocata del corridoio (a ~1 m dal muro).
 // `flat` e' la versione piatta (la foto dell'apertura sul piano del muro) per quando si guarda da fuori la stanza
-function archParts(w, o, wallTex) {
+function archParts(w, o, wallTex, real = false) {
   const deep = [], d = 0.25, run = 0.8, W = o.u1 - o.u0, h = o.y1;
   const win = (geo, u0, uw, hh) => { const uv = geo.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, (u0 + uv.getX(i) * uw) / w.len, (uv.getY(i) * hh) / ROOM.H); };
   const mk = (geo, mat, x, y, z, rx = 0, ry = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx, ry, 0); deep.push(m); return m; };
   const plaster = (k) => new THREE.MeshBasicMaterial({ color: new THREE.Color('#e6e3dc').multiplyScalar(k), toneMapped: false });
+  const fg = new THREE.PlaneGeometry(W, h); win(fg, o.u0, W, h);
+  const flat = new THREE.Mesh(fg, new THREE.MeshBasicMaterial({ map: wallTex, toneMapped: false }));
+  flat.position.set((o.u0 + o.u1) / 2, h / 2, 0);
+  if (real) return { deep, flat };      // il corridoio vero (imbotte compreso) sta nel pacchetto, nelle parti 'deep' dei prim: qui resta solo la foto piatta per le viste da fuori
   mk(new THREE.PlaneGeometry(d, h), plaster(0.93), o.u0, h / 2, -d / 2, 0, Math.PI / 2);           // stipite sinistro (normale verso +u: dentro l'apertura)
   mk(new THREE.PlaneGeometry(d, h), plaster(0.86), o.u1, h / 2, -d / 2, 0, -Math.PI / 2);          // stipite destro
   mk(new THREE.PlaneGeometry(W, d), plaster(0.80), (o.u0 + o.u1) / 2, h, -d / 2, Math.PI / 2, 0);  // architrave (normale in basso)
@@ -232,9 +236,6 @@ function archParts(w, o, wallTex) {
   // fondo: la porzione di parete con l'apertura (foto sfocata dalle viste in cui si intravede il corridoio), scurita
   const bg = new THREE.PlaneGeometry(W, h); win(bg, o.u0, W, h);
   mk(bg, new THREE.MeshBasicMaterial({ map: wallTex, color: '#b9b4ab', toneMapped: false }), (o.u0 + o.u1) / 2, h / 2, -d - run);
-  const fg = new THREE.PlaneGeometry(W, h); win(fg, o.u0, W, h);
-  const flat = new THREE.Mesh(fg, new THREE.MeshBasicMaterial({ map: wallTex, toneMapped: false }));
-  flat.position.set((o.u0 + o.u1) / 2, h / 2, 0);
   return { deep, flat };
 }
 
@@ -478,7 +479,7 @@ export function createReal(ctx) {
       let m;
       if (ops.length) {
         m = new THREE.Mesh(wallWithHoles(w, ops), basic(T[man.walls[id]], { side: THREE.DoubleSide }));
-        for (const o of ops) { const a = archParts(w, o, T[man.walls[id]]); a.wall = id; a.deep.forEach((e) => { e.visible = false; }); a.flat.visible = false; extras.push(a); }
+        for (const o of ops) { const a = archParts(w, o, T[man.walls[id]], !!man.corridor); a.wall = id; a.deep.forEach((e) => { e.visible = false; }); a.flat.visible = false; extras.push(a); }
       } else {
         m = new THREE.Mesh(new THREE.PlaneGeometry(w.len, ROOM.H), basic(T[man.walls[id]]));
         m.position.set(w.len / 2, ROOM.H / 2, 0);
@@ -540,11 +541,13 @@ export function createReal(ctx) {
     if (man.vox && man.vox.length) stage.add(buildVox(man.vox, plain, base, man));
     for (const it of man.items || []) stage.add(softItem(it));
     const blob = (name) => { const im = man.images[name]; return plain.slice(base + im.o, base + im.o + im.n); };
-    for (const p of man.prims || []) stage.add(primMesh(p, T, blob)); // piccoli oggetti: lampada, vasi, portabottiglie, mensole con pianta e fumetti
+    const deepPrims = [];
+    for (const p of man.prims || []) { const m = primMesh(p, T, blob); if (p.deep) { m.visible = false; deepPrims.push(m); } else stage.add(m); } // piccoli oggetti: lampada, vasi, portabottiglie, mensole con pianta e fumetti; i 'deep' (corridoio) seguono l'arco
     for (const id of Object.keys(man.art || {})) arts[id] = T[man.art[id]];
     group.add(stage);
     for (const m of walls) { groups[m.userData.wall].add(m); pieces.push(m); wallMeshes.push(m); }
     for (const a of extras) { a.deep.forEach((e) => groups[a.wall].add(e)); groups[a.wall].add(a.flat); archSets.push(a); }
+    if (deepPrims.length && extras.length) for (const m of deepPrims) { extras[0].deep.push(m); groups[extras[0].wall].add(m); }
     pack = { solid, spawn: man.spawn || { pos: [1.6, 1.6, 3.9], yaw: 0 }, floorTex: T[man.floor] };
   }
 

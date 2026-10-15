@@ -49,6 +49,14 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
      3039c671, 6d89137e e 4bd3d963 (`console/vaseov.py` e `console/pairs.py` sovrappongono modello e foto).
    - interruttore e presa sulla parete A (`reg/wall_obj.py`): placche a tre moduli (11,7 x 8,2 cm) con gli angoli intersecati col piano della parete in due foto (concordano entro 4 mm). Nella texture della
      parete A le loro fasce sono ricostruite (`WALL_EXCL['A']`): le foto, con pose un po' diverse, le avevano cotte doppie.
+   - corridoio dietro l'arco (`reg/corridor_obj.py`): un disimpegno di 2,8 x 1,4 m con la porta di mogano chiusa, il secondo vano buio, le due stampe manga in bianco e nero e il pavimento di marmo.
+     Le foto del corridoio dell'utente (verticali, non registrate nel modello) si mettono nel riferimento della stanza con una PnP (`console/corr_pose.py`): angoli dell'arco e tre punti della parete TV letti in una foto
+     registrata (b4bfa2ec). Il muro di fondo sta a z = -1,40: il pavimento letto in due foto indipendenti (la PnP e la registrata) lo da' a -1,40 e stampe da 48 x 68 cm; il confronto fotometrico fra foto
+     registrate dava -2,15 ma dipende troppo dalle pose relative. L'imbotte dell'arco e' profondo 40 cm (lo dice il bordo posteriore dell'architrave nella foto), non 25.
+     `console/corr_prep.py` ricava le texture: stampe rettificate con l'omografia dei quattro angoli (`console/corners_view.py` e `gcrop2.py` per leggerli a mano), foglia della porta, pavimento e colori dell'imbotte
+     campionati con la posa; il pavimento che l'arco non lascia vedere si completa a specchio. L'intonaco e' a colori per vertice col gradiente di luce visto nella foto (luce calda dall'alto).
+     Nel pacchetto sono prim `vmesh` con `deep: 1`: `real.js` li mostra solo da dentro la stanza, insieme all'imbotte (con `corridor` nel manifesto i piani procedurali di stipiti, architrave e tunnel non si usano piu').
+     I ritagli (foglia, stampe, pavimento, imbotte) stanno in `CONSOLE_ASSETS/corr` (foto di casa, fuori dal repository). La fascia sinistra della parete TV (x 0-0,47, a sinistra dell'arco) e' ricostruita per diffusione (`WALL_EXCL`): le foto la cuocevano a chiazze.
 6. `reg/build_pack.py TAG_MURI TAG_PAV TAG_FACCE salotto.bin` — toglie i quadri dai muri, riempie i buchi, mette l'ombra sotto i mobili sospesi,
    impacchetta atlante, divano, voxel e primitive e cifra tutto con AES-256-GCM.
 
