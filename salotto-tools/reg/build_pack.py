@@ -53,6 +53,10 @@ def walls(tag):
                 sh[:, x0b:x1b] = np.minimum(sh[:, x0b:x1b], prof[:, None])
             sh = cv2.GaussianBlur(sh, (0, 0), 0.03 * PPM_W)
             out[wid] = (out[wid].astype(np.float32) * sh[..., None]).clip(0, 255).astype(np.uint8)
+        if wid == 'T':   # fondo del vano di destra del mobile TV: la parete li' dentro e' in ombra (le foto la vedono solo di striscio, il resto sarebbe intonaco bianco)
+            r0, r1, c0, c1 = int((H - 0.70) * PPM_W), int((H - 0.341) * PPM_W), int(6.49 * PPM_W), int(6.76 * PPM_W)
+            dark = np.array([48, 55, 66], np.float32)     # BGR di (66,55,48): (48,40,35) misurato nella foto x il guadagno di normalizzazione delle texture
+            out[wid][r0:r1, c0:c1] = np.minimum(out[wid][r0:r1, c0:c1].astype(np.float32), dark[None, None, :]).astype(np.uint8)
         print('muro', wid, out[wid].shape, 'validi', round(float(v.mean()), 3), flush=True)
     return out
 
@@ -215,6 +219,11 @@ def main():
     for wid, im in wl.items(): cv2.imwrite(f'{R}/final_wall_{wid}.jpg', im, [cv2.IMWRITE_JPEG_QUALITY, 90])
     at, rects, means = atlas(ta)
     images['atlas'] = jpg(at, 90)
+    VT = os.environ.get('VASE_TEX', '/tmp/claude-0/s/vaso/vase_t.jpg')     # texture del vaso rosso (vase_tex.py)
+    for pr in PRIMS:
+        if pr.get('t') == 'cylt':
+            if os.path.exists(VT): images[pr['map']] = open(VT, 'rb').read()
+            else: print('ATTENZIONE: manca la texture del vaso', VT, flush=True)
     cv2.imwrite(f'{R}/final_atlas.jpg', at, [cv2.IMWRITE_JPEG_QUALITY, 90])
     P = json.load(open(f'{R}/paintings_final.json'))
     art = {}

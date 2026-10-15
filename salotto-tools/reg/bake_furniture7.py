@@ -2,7 +2,7 @@
 import sys, time, json
 sys.path.insert(0, '/tmp/claude-0/s/reg')
 from bake4 import *
-from scene_def import BOXES
+from scene_def import BOXES, EXTRA_OCC
 
 # facce: (normale, origine (callable sul box), right, up, larghezza, altezza)
 def face_def(b, f):
@@ -39,6 +39,7 @@ if __name__ == '__main__':
     tag = sys.argv[2] if len(sys.argv) > 2 else 'v1'
     fr = FR(); from cams_sel import select; names = select(fr)
     occ_all = [dict(min=(np.array(b['min']) - 0.012).tolist(), max=(np.array(b['max']) + 0.012).tolist(), name=b['name']) for b in BOXES]
+    occ_all += [dict(min=e['min'], max=e['max'], name=e['name']) for e in EXTRA_OCC]   # volumi invisibili (vasi, oggetti sulla console): non vanno nelle texture
     faces = []
     t0 = time.time()
     for b in BOXES:

@@ -24,6 +24,9 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
      `reg/sofa_bake.py` ne ricava la texture a 5 mm dalle foto (occlusione del campo stesso), `reg/sofa_export.py` riempie i buchi e prepara quote e texture
      `scan/sofa_cut.py` toglie dal campo di quote il bracciolo e il piano del tavolino con le rotelle che la scansione aveva incluso (parte sempre dall'originale)
    - oggetti sulla console: `scan/cons_vox.py` li trasforma in voxel da 6 mm; `reg/vox_photo.py` li ricolora con le foto
+   - vaso rosso nel vano del mobile TV: la scansione (splat + mesh) conferma un cilindro semplice; le misure (raggio 5,3 cm, alto 21,5 cm, in piedi a x 6,68 e z 0,30) vengono
+     dal contorno nella foto registrata (`reg/vase_profile.py`: diametro a ogni quota, nel piano dell'asse), perche' la scala delle scansioni non e' affidabile; `reg/vase_tex.py` ricava
+     la texture intorno al cilindro (colonne = angolo, righe = quota). Il vano e' vero (fondo e divisorio in `scene_def.py`), il vaso e' una `cylt` nel pacchetto.
 6. `reg/build_pack.py TAG_MURI TAG_PAV TAG_FACCE salotto.bin` — toglie i quadri dai muri, riempie i buchi, mette l'ombra sotto i mobili sospesi,
    impacchetta atlante, divano, voxel e primitive e cifra tutto con AES-256-GCM.
 
