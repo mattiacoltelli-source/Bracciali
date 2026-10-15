@@ -17,12 +17,18 @@ BOXES = [
     # --- parete TV (z = 0) ---
     B('colonna', 3.73, 4.14, 0.99, 2.19, 0.0, 0.18, '#b9b2a4', ['+z', '-x'], ['+y'], **TV),
     B('pensile', 4.14, 4.755, 1.00, 2.27, 0.0, 0.25, '#3c3b3a', ['+z', '+x'], ['+y'], **TV),
-    B('cassettone', 4.24, 6.79, 0.34, 0.71, 0.0, 0.40, '#bcb4a6', ['+z', '-x'], ['+y'], **TV),
+    B('cassettone', 4.24, 6.79, 0.34, 0.71, 0.0, 0.40, '#bcb4a6', ['+z', '-x'], ['+y', '+x'], **TV),
     B('ripiano', 5.00, 7.25, 0.71, 0.76, 0.0, 0.35, '#4a2f20', [], ['+z', '+y', '+x', '-x'], **TV),
-    B('vano_dx', 6.79, 7.25, 0.28, 0.71, 0.0, 0.40, '#4a2f20', ['+z'], ['+x'], **TV),
+    # vano a destra del mobile TV: a sinistra il vano aperto con il vaso rosso (fondo in noce a 34 cm; in fondo la parete, scura), poi un divisorio e un secondo vano buio, fianco destro in noce.
+    # Facce a tinta unita con i colori misurati sulla foto 50f7be75 (le foto del vano da piu' angoli sbavano: il vano e' una rientranza, non un piano)
+    B('vano_pav', 6.79, 7.25, 0.274, 0.341, 0.0, 0.40, '#33190d', [], ['+y', '+z', '+x'], **TV),
+    B('vano_div', 7.06, 7.08, 0.341, 0.71, 0.0, 0.40, '#44291e', [], ['+z'], solid=False, **TV),          # il bordo davanti del divisorio, in noce
+    B('vano_sx', 7.055, 7.06, 0.341, 0.71, 0.0, 0.40, '#403630', [], ['-x'], ppm=100, margin=0.0, grp='tv', solid=False),   # la sua faccia verso il vaso: scura come il fondo
+    B('vano_dx', 7.08, 7.25, 0.341, 0.71, 0.0, 0.40, '#44291e', [], ['+z', '+x'], **TV),
+    B('vano_buio', 7.10, 7.23, 0.345, 0.66, 0.40, 0.402, '#251410', [], ['+z'], ppm=100, margin=0.0, grp='tv', solid=False),
     B('tv', 5.07, 6.60, 0.79, 1.68, 0.06, 0.12, '#0b0b0d', ['+z'], ['+y', '+x', '-x'], **TV),
     B('soundbar', 5.43, 6.18, 0.76, 0.83, 0.18, 0.30, '#17181a', ['+z'], ['+y', '+x', '-x'], **TV),
-    B('speaker', 6.65, 6.94, 0.76, 1.07, 0.05, 0.30, '#141416', ['+z', '-x'], ['+y', '+x'], **TV),
+    B('speaker', 6.59, 6.845, 0.76, 1.07, 0.115, 0.27, '#141416', ['+z', '-x'], ['+y', '+x'], **TV),   # misure rifinite sui bordi delle foto (fitbox): largo 25,5 cm, profondo 15,5 cm
     # --- parete split (x = 0) ---
     B('credenza', 0.30, 0.72, 0.216, 0.772, 0.375, 2.245, '#2f3134', ['+x', '+z'], ['+y', '-z'], ppm=260, margin=0.03, grp='cred'),
     B('cred_piano', 0.30, 0.745, 0.772, 0.801, 0.345, 2.275, '#2a2c2f', [], ['+y', '+x', '+z', '-z'], ppm=100, margin=0.0, grp='cred'),
@@ -61,6 +67,7 @@ EXTRA_OCC = [
     dict(name='oggetti_console', min=[7.14, 0.78, 2.70], max=[7.40, 1.34, 4.50]),   # nel vecchio sistema (DX viene tolto sotto)
     dict(name='dietro_divano_W', min=[6.9, 0.0, 1.88], max=[7.4, 0.78, 4.5]),
     dict(name='vaso', min=[0.34, 0.78, 1.78], max=[0.68, 1.27, 2.14]),
+    dict(name='vaso_rosso', min=[6.92, 0.34, 0.235], max=[7.06, 0.57, 0.365]),
     dict(name='portabottiglie', min=[0.34, 0.78, 0.40], max=[0.62, 1.15, 0.80]),
     dict(name='ciotola', min=[0.40, 0.78, 1.17], max=[0.66, 0.90, 1.40]),
 ]
@@ -78,6 +85,8 @@ PRIMS += [
 ]
 # vaso sulla credenza (tornio: [raggio, quota relativa, colore] dalla scansione e dalle foto)
 PRIMS += [dict(t='lathe', p=[0.143, 0.80, 1.937], prof=[[0.062, 0.0, "#312d24"], [0.085, 0.01, "#27241a"], [0.112, 0.028, "#4e483a"], [0.126, 0.05, "#807c69"], [0.128, 0.07, "#78694f"], [0.123, 0.09, "#766244"], [0.118, 0.11, "#978f75"], [0.108, 0.13, "#a49f8a"], [0.09, 0.15, "#a39c88"], [0.075, 0.17, "#948868"], [0.06, 0.19, "#7a694f"], [0.051, 0.21, "#8e8363"], [0.048, 0.235, "#7f6c49"], [0.049, 0.26, "#735e41"], [0.054, 0.285, "#594328"], [0.068, 0.305, "#86744c"], [0.068, 0.305, "#86744c"], [0.087, 0.325, "#8a7a55"], [0.104, 0.345, "#928360"], [0.113, 0.365, "#9a8c69"], [0.113, 0.375, "#9a8c69"]], seg=28)]
+# vaso rosso nel vano del mobile TV: cilindro (raggio 5,3 cm, alto 21,5 cm) in piedi sul fondo del vano; la texture 'vase_t' e' la foto intorno al cilindro (vase_tex.py)
+PRIMS += [dict(t='cylt', p=[6.682, 0.341, 0.30], r=0.053, h=0.215, map='vase_t', inner='#2a0509', rim='#d9aba6')]
 # portabottiglie nero con tre bottiglie sulla credenza
 _rk = dict(x0=0.05, x1=0.23, z0=0.41, z1=0.69, y0=0.80, y1=1.09, w=0.006)
 for _x in (_rk['x0'] + 0.006, _rk['x1'] - 0.006):

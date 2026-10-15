@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { ROOM, WALLS, OPENINGS } from './room.js';
 
-const PACK_URL = 'pack/salotto.bin?v=5'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
+const PACK_URL = 'pack/salotto.bin?v=6'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
 const KEY_STORE = 'salotto.key';
 const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 
@@ -131,8 +131,9 @@ function roundedTexMesh(b, map, aw, ah) {
   return m;
 }
 
-// piccoli oggetti fatti a mano: cilindro verticale, scatola, cilindro orizzontale (bottiglia), solido di rotazione con un colore per anello (vaso)
-function primMesh(p) {
+// piccoli oggetti fatti a mano: cilindro verticale, scatola, cilindro orizzontale (bottiglia), solido di rotazione con un colore per anello (vaso),
+// cilindro cavo con la foto intorno (vaso rosso del vano)
+function primMesh(p, T = {}) {
   const basic = (o = {}) => new THREE.MeshBasicMaterial({ color: p.color, toneMapped: false, ...o });
   let m;
   if (p.t === 'cyl') {
@@ -154,6 +155,17 @@ function primMesh(p) {
     g.setAttribute('color', new THREE.BufferAttribute(col, 3));
     m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false, side: THREE.DoubleSide }));
     m.position.set(...p.p);
+  } else if (p.t === 'cylt') {
+    // parete fuori con la texture (la foto del vaso, u = angolo da +z verso +x), parete dentro scura, bordo chiaro e fondo; l'origine e' la base
+    const seg = 40, r = p.r, h = p.h, wall = 0.004;
+    const outer = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg, 1, true), new THREE.MeshBasicMaterial(T[p.map] ? { map: T[p.map], toneMapped: false } : { color: '#7a0a10', toneMapped: false }));
+    const inner = new THREE.Mesh(new THREE.CylinderGeometry(r - wall, r - wall, h, seg, 1, true), new THREE.MeshBasicMaterial({ color: p.inner, side: THREE.BackSide, toneMapped: false }));
+    const rim = new THREE.Mesh(new THREE.RingGeometry(r - wall, r, seg), new THREE.MeshBasicMaterial({ color: p.rim, side: THREE.DoubleSide, toneMapped: false }));
+    rim.rotation.x = -Math.PI / 2; rim.position.y = h / 2 + 0.0005;
+    const bottom = new THREE.Mesh(new THREE.CircleGeometry(r - wall, seg), new THREE.MeshBasicMaterial({ color: p.inner, toneMapped: false }));
+    bottom.rotation.x = -Math.PI / 2; bottom.position.y = -h / 2 + 0.01;
+    m = new THREE.Group(); m.add(outer, inner, rim, bottom);
+    m.position.set(p.p[0], p.p[1] + h / 2, p.p[2]);
   } else m = new THREE.Group();
   return m;
 }
@@ -508,7 +520,7 @@ export function createReal(ctx) {
     if (man.sofa) stage.add(buildSofa(man, plain, base, T));
     if (man.vox && man.vox.length) stage.add(buildVox(man.vox, plain, base, man));
     for (const it of man.items || []) stage.add(softItem(it));
-    for (const p of man.prims || []) stage.add(primMesh(p)); // piccoli oggetti: lampada, vaso, portabottiglie
+    for (const p of man.prims || []) stage.add(primMesh(p, T)); // piccoli oggetti: lampada, vasi, portabottiglie
     for (const id of Object.keys(man.art || {})) arts[id] = T[man.art[id]];
     group.add(stage);
     for (const m of walls) { groups[m.userData.wall].add(m); pieces.push(m); wallMeshes.push(m); }
