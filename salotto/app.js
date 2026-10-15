@@ -150,7 +150,9 @@ function shadowTexture() { // ombra morbida sotto e a destra del quadro (luce da
   for (let i = 0; i < 14; i++) {
     const m = 6 + i * 1.8;
     g.fillStyle = 'rgba(0,0,0,0.045)';
-    g.beginPath(); g.roundRect(m, m, 64 - 2 * m, 64 - 2 * m, 4); g.fill();
+    g.beginPath();
+    if (g.roundRect) g.roundRect(m, m, 64 - 2 * m, 64 - 2 * m, 4); else g.rect(m, m, 64 - 2 * m, 64 - 2 * m); // roundRect manca nei Safari più vecchi
+    g.fill();
   }
   shadowTex = new THREE.CanvasTexture(c);
   shadowTex.colorSpace = THREE.SRGBColorSpace;

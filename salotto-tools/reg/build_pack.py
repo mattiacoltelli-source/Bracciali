@@ -4,11 +4,12 @@ import sys, os, json, struct, base64, secrets, time
 sys.path.insert(0, '/tmp/claude-0/s/reg')
 import numpy as np, cv2
 from fill import diffuse_fill, scene_complete, wall_fill
-from scene_def import BOXES, PRIMS
+from scene_def import BOXES, PRIMS, ITEMS
 
 R = '/tmp/claude-0/s/reg/out'
 KEYFILE = '/tmp/claude-0/s/pack.key'
-PPM = 300
+PPM_W = int(os.environ.get('PPM_W', 300))   # px/m dei muri
+PPM_F = int(os.environ.get('PPM_F', 300))   # px/m del pavimento
 H = 3.0
 L, W = 7.4, 4.5
 
@@ -28,11 +29,24 @@ def walls(tag):
         v = erode_valid(valid, 7)
         for pid, p in P.items():
             if p['wall'] != wid: continue
-            x0 = int((p['u'] - p['w'] / 2 - 0.07) * PPM); x1 = int((p['u'] + p['w'] / 2 + 0.07) * PPM)
-            y0 = int((H - (p['y'] + p['h'] / 2) - 0.07) * PPM); y1 = int((H - (p['y'] - p['h'] / 2) + 0.10) * PPM)
+            x0 = int((p['u'] - p['w'] / 2 - 0.07) * PPM_W); x1 = int((p['u'] + p['w'] / 2 + 0.07) * PPM_W)
+            y0 = int((H - (p['y'] + p['h'] / 2) - 0.07) * PPM_W); y1 = int((H - (p['y'] - p['h'] / 2) + 0.10) * PPM_W)
             v[max(y0, 0):y1, max(x0, 0):x1] = False
         img = img.copy(); img[~v] = 0
-        out[wid] = wall_fill(img, v, PPM)
+        out[wid] = wall_fill(img, v, PPM_W)
+        if wid == 'T':   # ombra morbida sulla parete sotto i mobili sospesi (li' le foto non vedono: si sarebbe riempito di bianco)
+            Hh, Ww = out[wid].shape[:2]
+            sh = np.ones((Hh, Ww), np.float32)
+            for bx in BOXES:
+                if bx['grp'] != 'tv' or bx['min'][1] < 0.2 or bx['min'][1] > 0.4: continue
+                x0b, x1b = int((bx['min'][0] - 0.03) * PPM_W), int((bx['max'][0] + 0.03) * PPM_W)
+                y0b = bx['min'][1]
+                rows = np.arange(Hh); yy = (H - (rows + 0.5) / PPM_W)
+                prof = np.clip(0.46 + 0.36 * (1 - yy / y0b), 0.46, 0.92)          # scuro sotto il mobile, piu' chiaro verso terra
+                prof = np.where(yy < y0b, prof, 1.0).astype(np.float32)
+                sh[:, x0b:x1b] = np.minimum(sh[:, x0b:x1b], prof[:, None])
+            sh = cv2.GaussianBlur(sh, (0, 0), 0.03 * PPM_W)
+            out[wid] = (out[wid].astype(np.float32) * sh[..., None]).clip(0, 255).astype(np.uint8)
         print('muro', wid, out[wid].shape, 'validi', round(float(v.mean()), 3), flush=True)
     return out
 
@@ -47,13 +61,13 @@ def floor(tag):
         m = lab == i
         if m.sum() < 20000: continue
         ys, xs = np.nonzero(m)
-        cx, cz = xs.mean() / PPM, ys.mean() / PPM
+        cx, cz = xs.mean() / PPM_F, ys.mean() / PPM_F
         if 2.3 < cx < 4.7 and 0.7 < cz < 2.5 and (best is None or m.sum() > best[1]): best = (i, m.sum())
     work = img.copy()
     work[~v] = cv2.inpaint(img, (~v).astype(np.uint8) * 255, 6, cv2.INPAINT_TELEA)[~v]
     if best:
         central = cv2.dilate((lab == best[0]).astype(np.uint8), np.ones((25, 25), np.uint8)).astype(bool) & ~v
-        allowed = np.zeros_like(v); allowed[0:int(3.1 * PPM), int(0.2 * PPM):int(2.9 * PPM)] = True
+        allowed = np.zeros_like(v); allowed[0:int(3.1 * PPM_F), int(0.2 * PPM_F):int(2.9 * PPM_F)] = True
         ys, xs = np.nonzero(central)
         src_ok = (v & allowed).astype(np.uint8)
         integ = cv2.integral(src_ok)
@@ -88,7 +102,7 @@ def floor(tag):
     for b in BOXES:
         gap = b['min'][1]
         if gap < 0.05 or b['name'].startswith(('tv', 'soundbar', 'speaker', 'ripiano', 'colonna', 'pensile', 'tav_ripiano')): continue
-        x0b, x1b = int(b['min'][0] * PPM), int(b['max'][0] * PPM); z0b, z1b = int(b['min'][2] * PPM), int(b['max'][2] * PPM)
+        x0b, x1b = int(b['min'][0] * PPM_F), int(b['max'][0] * PPM_F); z0b, z1b = int(b['min'][2] * PPM_F), int(b['max'][2] * PPM_F)
         f = 0.28 if gap < 0.2 else 0.42
         shade[z0b:z1b, x0b:x1b] = np.minimum(shade[z0b:z1b, x0b:x1b], f)
     shade = cv2.GaussianBlur(shade, (0, 0), 6)
@@ -115,7 +129,11 @@ def atlas(tag):
     used = {(bx['name'], f) for bx in BOXES for f in bx['faces']}
     keep = {}
     for key, (img, cov) in faces.items():
-        if cov >= 0.25 and key in used: keep[key] = img
+        if cov >= 0.25 and key in used:
+            if key != ('tv', '+z'):   # niente alone di parete/sfondo sul bordo (le scatole sono precise a ~1-2 cm): si tolgono 1,5 cm per lato e si riallarga
+                h, w = img.shape[:2]; n = max(2, int(0.015 * 300))
+                if h > 4 * n and w > 4 * n: img = cv2.resize(img[n:h - n, n:w - n], (w, h), interpolation=cv2.INTER_CUBIC)
+            keep[key] = img
     # impacchetta (shelf packing) in un atlante di larghezza 4096
     PAD = 2
     items = sorted(keep.items(), key=lambda kv: -kv[1].shape[0])
@@ -180,7 +198,7 @@ def main():
     for name, data in images.items():
         imap[name] = dict(o=len(blob), n=len(data), t='image/jpeg'); blob += data
     man = dict(v=1, images=imap, walls={w: f'wall_{w}' for w in 'TWFA'}, floor='floor', atlas='atlas', atlasSize=[at.shape[1], at.shape[0]],
-               boxes=boxes, prims=PRIMS, art=art, spawn=spawn)
+               boxes=boxes, prims=PRIMS, items=ITEMS, art=art, spawn=spawn)
     mj = json.dumps(man, separators=(',', ':')).encode()
     plain = struct.pack('<I', len(mj)) + mj + blob
     if os.path.exists(KEYFILE): key = base64.urlsafe_b64decode(open(KEYFILE).read().strip() + '==')

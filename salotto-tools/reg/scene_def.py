@@ -24,13 +24,13 @@ BOXES = [
     # --- parete split (x = 0) ---
     B('credenza', 0.0, 0.45, 0.14, 0.78, 0.30, 2.34, '#2f3134', ['+x'], ['+y', '+z', '-z'], ppm=260, margin=0.05, grp='cred'),
     # --- divano e dintorni (a tinta unita con spigoli smussati: dalle foto non si ricavano texture pulite) ---
-    B('s_schienale', 4.55, 7.10, 0.46, 0.93, 4.28, 4.50, FAB, [], ['-z', '+y', '+x', '-x'], round=0.06, **SOFA),
-    B('s_bracciolo', 4.15, 4.55, 0.08, 0.58, 3.55, 4.50, FAB, [], ['-z', '-x', '+y', '+x'], round=0.06, **SOFA),
-    B('s_seduta', 4.55, 7.10, 0.08, 0.46, 3.55, 4.28, FAB, [], ['+y', '-z'], round=0.05, **SOFA),
-    B('s_letto', 4.55, 6.20, 0.30, 0.46, 2.75, 3.55, FAB, [], ['-z', '-x', '+y'], round=0.04, **SOFA),
-    B('s_chaise', 6.20, 7.10, 0.08, 0.46, 1.88, 3.55, FAB, [], ['-z', '-x', '+y'], round=0.05, **{**SOFA, 'margin': 0.05}),
-    B('s_chaise_dorso', 7.00, 7.25, 0.46, 0.80, 1.88, 3.55, FAB, [], ['-x', '-z', '+y'], round=0.05, **{**SOFA, 'margin': 0.02}),
-    B('totem', 4.22, 4.52, 0.0, 0.72, 3.25, 3.55, '#6a2a22', [], ['-z', '-x', '+y', '+x'], ppm=200, margin=0.05, grp='sofa', round=0.012),
+    B('s_schienale', 4.55, 7.10, 0.38, 0.93, 4.28, 4.50, FAB, [], ['-z', '+y', '+x', '-x'], round=0.06, **SOFA),
+    B('s_bracciolo', 4.15, 4.65, 0.08, 0.58, 3.55, 4.50, FAB, [], ['-z', '-x', '+y', '+x'], round=0.06, **SOFA),
+    B('s_seduta', 4.45, 7.10, 0.08, 0.46, 3.55, 4.40, FAB, [], ['+y', '-z'], round=0.05, **SOFA),
+    B('s_letto', 4.45, 6.30, 0.30, 0.46, 2.75, 3.65, FAB, [], ['-z', '-x', '+y'], round=0.04, **SOFA),
+    B('s_chaise', 6.10, 7.10, 0.08, 0.46, 1.88, 3.65, FAB, [], ['-z', '-x', '+y'], round=0.05, **{**SOFA, 'margin': 0.05}),
+    B('s_chaise_dorso', 7.00, 7.25, 0.38, 0.80, 1.88, 3.65, FAB, [], ['-x', '-z', '+y'], round=0.05, **{**SOFA, 'margin': 0.02}),
+    B('totem', 4.25, 4.50, 0.0, 0.68, 3.30, 3.55, '#6a2a22', [], ['-z', '-x', '+y', '+x'], ppm=200, margin=0.05, grp='sofa', round=0.012),
     # --- consolle dietro la chaise (finestra) ---
     B('consolle', 7.12, 7.40, 0.74, 0.78, 2.80, 4.50, '#3d2a1f', [], ['+y', '-x', '-z'], ppm=200, margin=0.0, grp='cons'),
 ]
@@ -59,4 +59,12 @@ def as_occluders(boxes=BOXES, extra=True):
 PRIMS = [
     dict(t='cyl', p=[7.27, 0.78, 4.33], r0=0.006, r1=0.006, h=0.40, color='#101012'),
     dict(t='cyl', p=[7.27, 1.18, 4.33], r0=0.060, r1=0.045, h=0.10, color='#141416'),
+]
+
+# oggetti morbidi inclinati (cuscini appoggiati allo schienale basso della chaise, lato finestra): c = centro, size = spessore x, altezza y, larghezza z
+ITEMS = [
+    dict(name='cuscino1', c=[6.86, 0.64, 2.78], size=[0.13, 0.40, 0.40], rz=-0.30, ry=0.10, color='#bdb39f', round=0.05),
+    dict(name='cuscino2', c=[6.88, 0.64, 3.18], size=[0.13, 0.40, 0.40], rz=-0.38, ry=-0.08, color='#c9bfab', round=0.05),
+    dict(name='cuscino3', c=[6.85, 0.63, 3.55], size=[0.13, 0.40, 0.40], rz=-0.26, ry=0.12, color='#b7ad98', round=0.05),
+    dict(name='cuscino_senape', c=[6.90, 0.62, 3.93], size=[0.13, 0.38, 0.40], rz=-0.40, ry=-0.14, color='#7e5a31', round=0.05),
 ]

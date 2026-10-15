@@ -50,7 +50,7 @@ export function createWalk(ctx) {
   function place(pos, at, eye) { // da una "vista": posizione e punto guardato
     st.x = Math.min(Math.max(pos[0], R + 0.05), ROOM.L - R - 0.05);
     st.z = Math.min(Math.max(pos[2], R + 0.05), ROOM.W - R - 0.05);
-    if (eye) st.eye = eye;
+    if (eye) { st.eye = eye; document.querySelectorAll('[data-eye]').forEach((b) => b.setAttribute('aria-pressed', String(Math.abs(Number(b.dataset.eye) - eye) < 0.2))); }
     const dx = at[0] - pos[0], dz = at[2] - pos[2], dy = at[1] - pos[1];
     st.yaw = Math.atan2(-dx, -dz);
     st.pitch = Math.max(-1.2, Math.min(1.2, Math.atan2(dy, Math.hypot(dx, dz))));

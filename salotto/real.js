@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { ROOM, WALLS } from './room.js';
 
-const PACK_URL = 'pack/salotto.bin?v=1'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
+const PACK_URL = 'pack/salotto.bin?v=2'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
 const KEY_STORE = 'salotto.key';
 const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 
@@ -101,6 +101,15 @@ function roundedMesh(b) {
   return m;
 }
 
+// oggetti morbidi inclinati (cuscini): scatola smussata centrata, ruotata
+function softItem(it) {
+  const h = [it.size[0] / 2, it.size[1] / 2, it.size[2] / 2];
+  const m = roundedMesh({ min: [-h[0], -h[1], -h[2]], max: h, color: it.color, round: it.round || 0.05 });
+  m.position.set(...it.c);
+  m.rotation.set(0, it.ry || 0, it.rz || 0, 'YXZ');
+  return m;
+}
+
 function ceilingTexture() {
   const c = document.createElement('canvas');
   c.width = c.height = 128;
@@ -138,7 +147,7 @@ export function createReal(ctx) {
   };
 
   // travi (posizioni e misure dalle foto), binari con i faretti e cornicione: non illuminati, con una sfumatura fissa per faccia
-  function buildCeilingStuff() {
+  function buildCeilingStuff(parent) {
     const base = new THREE.Color('#efede8');
     const mk = (k) => new THREE.MeshBasicMaterial({ color: base.clone().multiplyScalar(k), toneMapped: false });
     const black = new THREE.MeshBasicMaterial({ color: '#0f0f11', toneMapped: false });
@@ -149,7 +158,7 @@ export function createReal(ctx) {
       beam.position.set(cx, ROOM.H - BEAM.drop / 2, ROOM.W / 2);
       const rail = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.028, ROOM.W - 0.9), black);
       rail.position.set(cx, ROOM.H - BEAM.drop - 0.014, ROOM.W / 2);
-      group.add(beam, rail);
+      parent.add(beam, rail);
       for (let i = 0; i < 4; i++) {
         const z = 0.95 + i * 0.85;
         const spot = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.034, 0.13, 14), black);
@@ -158,14 +167,14 @@ export function createReal(ctx) {
         const tip = new THREE.Mesh(new THREE.CircleGeometry(0.03, 14), warm);
         tip.position.set(0, -0.0655, 0); tip.rotation.x = Math.PI / 2;
         spot.add(tip);
-        group.add(spot);
+        parent.add(spot);
       }
     }
     const cm = mk(0.96);
     for (const [w, x, z, ry] of [[ROOM.L, ROOM.L / 2, 0.035, 0], [ROOM.L, ROOM.L / 2, ROOM.W - 0.035, 0], [ROOM.W, 0.035, ROOM.W / 2, Math.PI / 2], [ROOM.W, ROOM.L - 0.035, ROOM.W / 2, Math.PI / 2]]) {
       const c = new THREE.Mesh(new THREE.BoxGeometry(w, 0.1, 0.07), cm);
       c.position.set(x, ROOM.H - 0.05, z); c.rotation.y = ry;
-      group.add(c);
+      parent.add(c);
     }
   }
 
@@ -175,6 +184,7 @@ export function createReal(ctx) {
     const man = JSON.parse(new TextDecoder().decode(new Uint8Array(plain, 4, mlen)));
     const base = 4 + mlen;
     const T = {};
+    const stage = new THREE.Group(), walls = [];
     const names = Object.keys(man.images);
     let k = 0;
     for (const name of names) {
@@ -191,9 +201,7 @@ export function createReal(ctx) {
       m.position.set(w.len / 2, ROOM.H / 2, 0);
       m.userData.wall = id;
       m.visible = false;
-      groups[id].add(m);
-      pieces.push(m);
-      wallMeshes.push(m);
+      walls.push(m);
     }
     // pavimento (l'immagine ha in alto la parete TV) e soffitto
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(ROOM.L, ROOM.W), basic(T[man.floor]));
@@ -202,7 +210,7 @@ export function createReal(ctx) {
     const ceil = new THREE.Mesh(new THREE.PlaneGeometry(ROOM.L, ROOM.W), basic(ceilingTexture()));
     ceil.rotation.x = Math.PI / 2;
     ceil.position.set(ROOM.L / 2, ROOM.H, ROOM.W / 2);
-    group.add(floor, ceil);
+    stage.add(floor, ceil);
     // mobili: tutte le facce con foto in una sola mesh (atlante), le altre a tinta unita in un'altra
     const [aw, ah] = man.atlasSize;
     const P = { t: { pos: [], uv: [], idx: [] }, f: { pos: [], col: [], idx: [] } };
@@ -211,7 +219,7 @@ export function createReal(ctx) {
     for (const b of man.boxes) {
       const a = b.min, c = b.max;
       if (b.solid !== false) solid.push({ min: a, max: c, grp: b.grp || '' });
-      if (b.round) { group.add(roundedMesh(b)); continue; }
+      if (b.round) { stage.add(roundedMesh(b)); continue; }
       col.set(b.color);
       const faces = [...new Set([...Object.keys(b.faces || {}), ...(b.flat || [])])];
       for (const f of faces) {
@@ -240,16 +248,19 @@ export function createReal(ctx) {
       g.setIndex(S.idx);
       return g;
     };
-    if (P.t.idx.length) group.add(new THREE.Mesh(geo(P.t, true), basic(T[man.atlas])));
-    if (P.f.idx.length) group.add(new THREE.Mesh(geo(P.f, false), new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false })));
-    buildCeilingStuff();
+    if (P.t.idx.length) stage.add(new THREE.Mesh(geo(P.t, true), basic(T[man.atlas])));
+    if (P.f.idx.length) stage.add(new THREE.Mesh(geo(P.f, false), new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false })));
+    buildCeilingStuff(stage);
+    for (const it of man.items || []) stage.add(softItem(it));
     for (const p of man.prims || []) { // piccoli oggetti (la lampada nera sulla consolle)
       if (p.t !== 'cyl') continue;
       const m = new THREE.Mesh(new THREE.CylinderGeometry(p.r1, p.r0, p.h, 16), new THREE.MeshBasicMaterial({ color: p.color, toneMapped: false }));
       m.position.set(p.p[0], p.p[1] + p.h / 2, p.p[2]);
-      group.add(m);
+      stage.add(m);
     }
     for (const id of Object.keys(man.art || {})) arts[id] = T[man.art[id]];
+    group.add(stage);
+    for (const m of walls) { groups[m.userData.wall].add(m); pieces.push(m); wallMeshes.push(m); }
     pack = { solid, spawn: man.spawn || { pos: [1.6, 1.6, 3.9], yaw: 0 }, floorTex: T[man.floor] };
   }
 
