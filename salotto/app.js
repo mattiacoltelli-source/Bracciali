@@ -80,7 +80,6 @@ const getScan = () => (scanLoading ??= import('./scan.js').then((m) => (scanApi 
 
 // ---------- stanza a foto + camminata (pacchetto cifrato, caricato solo quando serve) ----------
 let realApi = null, walkApi = null, realMod = null, realLoading = null, look = 'blocks';
-const LOOK_KEY = 'salotto.look';
 const getReal = () => (realLoading ??= Promise.all([import('./real.js'), import('./walk.js')]).then(([r, w]) => {
   realMod = r;
   realApi = r.createReal({ renderer, roomRoot, groups, pieces, render });
@@ -422,7 +421,6 @@ async function setLook(next) {
   }
   look = next;
   realApi?.setLook(next === 'real');
-  try { localStorage.setItem(LOOK_KEY, next); } catch { /* ok */ }
   paintings.forEach(rebuild); // i quadri cambiano materiale: illuminati nel modello a blocchi, "stampati" nella stanza a foto
   if (next !== 'real') walkApi?.exit();
   syncLookUi(); render();
@@ -468,9 +466,21 @@ if ('serviceWorker' in navigator) {
   // al primo avvio dopo un aggiornamento si vedrebbe ancora la versione vecchia (dalla cache): si ricarica una volta sola, subito
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (had && performance.now() < 20000) location.reload(); });
 }
-if (/[#&]k=/.test(location.hash)) { // link con la chiave: si apre direttamente la stanza a foto
-  setLook('real').then((ok) => { if (ok) { openTab('views'); const h = $('hint'); h.textContent = 'La tua stanza, dalle foto · prova "Cammina nella stanza"'; h.classList.remove('off'); } });
-} else {
-  try { if (localStorage.getItem(LOOK_KEY) === 'real') setLook('real'); } catch { /* ok */ }
+// La stanza dalle foto e' la versione di partenza: con la chiave (nel link, #k=, oppure gia' salvata nel telefono) si apre subito, senza passare dal modello a blocchi.
+// Senza la chiave resta il modello a blocchi (la stanza a foto si legge solo con la chiave); il toggle Blocchi/Foto resta nel pannello Viste.
+{
+  const hint = $('hint');
+  const say = (t, ms = 0) => { hint.textContent = t; hint.classList.remove('off'); if (ms) setTimeout(() => hint.classList.add('off'), ms); };
+  const fromLink = /[#&]k=/.test(location.hash);
+  let stored = false;
+  try { stored = !!localStorage.getItem('salotto.key'); } catch { /* ok */ }
+  if (fromLink || stored) {
+    roomRoot.visible = false; // niente lampo del modello a blocchi mentre la stanza a foto si prepara
+    say('Apro la tua stanza dalle foto…');
+    setLook('real').then((ok) => {
+      if (ok) { if (fromLink) openTab('views'); say('La tua stanza, dalle foto · prova "Cammina nella stanza"', 6000); }
+      else { openTab('views'); say('La stanza dalle foto non si e\' aperta: intanto vedi il modello a blocchi', 6000); } // il motivo e' nel pannello Viste
+    }).catch(() => { openTab('views'); }).finally(() => { roomRoot.visible = true; render(); });
+  }
 }
 window.__salotto = { goTo, select, camera, controls, setLook, get look() { return look; }, get real() { return realApi; }, get walk() { return walkApi; } };
