@@ -50,3 +50,6 @@ input[type=range] { padding: 0; min-height: 36px; }
 .row button.primary { font-size: 14px; }
 .snap { position: fixed; right: 12px; top: calc(env(safe-area-inset-top) + 64px); z-index: 4; width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 24px; background: rgba(22,22,24,.85); color: var(--text); }
 .tooling .bar { display: none; }
+.cardlink { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 60px; margin-top: 12px; padding: 8px 16px; border: 1px solid var(--accent); border-radius: 12px; background: #1f1f23; color: var(--text); text-decoration: none; }
+.cardlink small { display: block; color: var(--muted); font-size: 12px; font-weight: 600; }
+.cardlink > span:last-child { color: var(--accent); font-size: 24px; }

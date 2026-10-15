@@ -40,6 +40,7 @@
         <button data-view="window" type="button">Dalla finestra</button>
         <button data-view="split" type="button">Dallo split</button>
       </div>
+      <a class="cardlink" href="foto.html"><span><b>Prova sulla foto</b><small>Metti un quadro su una foto vera della parete</small></span><span aria-hidden="true">›</span></a>
     </div>
 
     <div data-panel="paintings" hidden>
@@ -108,11 +109,10 @@
       <details class="guide" id="s-video-help">
         <summary>Ho già un video: come lo trasformo in scansione?</summary>
         <ul>
-          <li>Un video non basta: va trasformato in una scansione 3D (file .ply o .spz). Lo fa un'app o un sito con un server potente, non il telefono.</li>
-          <li><b>KIRI Engine</b> (app o sito): + → 3DGS → carica il video → attendi (da 10 minuti a un'ora) → Esporta .PLY.</li>
-          <li><b>Luma AI</b> (app o sito): carica il video → esporta .PLY. Controlla che il piano gratuito lo permetta.</li>
-          <li><b>Scaniverse</b> (app): non parte da un video già girato; riprendi la stanza dentro l'app, crea la scansione sul telefono e la esporta in .SPZ o .PLY. Niente caricamento su server altrui.</li>
-          <li>Con KIRI e Luma il video va sui loro server: se non vuoi, usa Scaniverse.</li>
+          <li>Un video non basta: serve un'app che lo trasformi in una scansione 3D (file .ply o .spz).</li>
+          <li><b>Scaniverse</b> (app Android, gratis per uso personale): non usa un video già girato, ma riprende la stanza dentro l'app e fa tutto sul telefono. Nuova scansione → Splat → registra 1-3 minuti → attendi l'elaborazione → Condividi → Esporta → SPZ (più leggero) o PLY → salva nel telefono. Serve Android 7 o più recente, 4 GB di RAM e ARCore con profondità: sui telefoni vecchi può non funzionare. I nomi delle voci possono cambiare.</li>
+          <li><b>Luma AI</b> (sito o app): permette di caricare il video già girato ed esportare .PLY. Il servizio è gratuito ma "così com'è", senza nuovi sviluppi: può non funzionare. Il video va sui loro server.</li>
+          <li><b>KIRI Engine</b>: lo splat (3DGS) è a pagamento. <b>Polycam</b>: nel piano gratuito esporta solo mesh, non splat (da quanto ho trovato).</li>
           <li>Se il file supera 100 MB, riducilo da PC con SuperSplat (superspl.at/editor): importa, cancella i punti vaganti, esporta in .spz.</li>
         </ul>
       </details>
@@ -123,7 +123,7 @@
           <li>Cammina piano, 2-3 minuti: un giro lungo i muri a circa 1,5 m, poi uno in diagonale e uno a due altezze diverse.</li>
           <li>Inquadra sempre qualcosa di "ricco" (mobili, quadri): i muri bianchi lisci confondono l'app. Puoi attaccare qualche pezzetto di nastro di carta.</li>
           <li>Niente persone in movimento. Per il marmo lucido: evita i riflessi forti delle luci.</li>
-          <li>Esporta in formato .spz (più leggero) o .ply e caricalo qui. Meglio sotto i 50 MB.</li>
+          <li>Esporta in .spz (più leggero) o .ply e caricalo qui. Meglio sotto i 50 MB. Con Scaniverse vale lo stesso: 1-3 minuti di ripresa.</li>
         </ul>
       </details>
     </div>

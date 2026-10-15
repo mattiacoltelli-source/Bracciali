@@ -1,0 +1,32 @@
+body.foto { overflow: hidden; }
+.fhead { position: fixed; top: 0; left: 0; right: 0; z-index: 5; display: flex; align-items: center; gap: 8px; height: calc(52px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 8px 0; background: rgba(11,11,12,.94); border-bottom: 1px solid var(--line); }
+.fhead .back { min-width: 48px; min-height: 48px; display: grid; place-items: center; padding: 0 8px; color: var(--text); text-decoration: none; font-weight: 700; }
+.fhead h1 { font-size: 18px; letter-spacing: -.01em; }
+.fhead h1::before { display: none; }
+.stage { position: fixed; top: calc(52px + env(safe-area-inset-top)); left: 0; right: 0; bottom: var(--sheet-h, 0px); overflow: hidden; background: #000; touch-action: none; }
+.zoom { position: absolute; inset: 0; display: grid; place-items: center; transform-origin: 0 0; will-change: transform; }
+#fc { display: block; touch-action: none; }
+.zreset { margin-left: auto; min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: 12px; background: #1f1f23; color: var(--text); font: inherit; font-size: 13px; }
+#t-hold { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; }
+.overlay { position: absolute; pointer-events: none; }
+.overlay .h { pointer-events: auto; cursor: grab; touch-action: none; }
+.loupe { position: absolute; z-index: 6; width: 112px; height: 112px; border: 2px solid var(--accent); border-radius: 56px; background-color: #000; background-repeat: no-repeat; box-shadow: 0 4px 18px rgba(0,0,0,.6); pointer-events: none; }
+.loupe::before, .loupe::after { content: ""; position: absolute; background: var(--accent); }
+.loupe::before { left: 50%; top: 14px; bottom: 14px; width: 1px; }
+.loupe::after { top: 50%; left: 14px; right: 14px; height: 1px; }
+.fhint { position: fixed; left: 12px; right: 12px; top: calc(60px + env(safe-area-inset-top)); z-index: 4; text-align: center; font-size: 14px; text-shadow: 0 1px 8px #000, 0 0 3px #000; pointer-events: none; }
+.fsheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; max-height: 46dvh; overflow-y: auto; padding: 0 16px calc(env(safe-area-inset-bottom) + 16px); background: var(--card); border-top: 1px solid var(--line); border-radius: 18px 18px 0 0; }
+.fsheet.collapsed > :not(.grab) { display: none; }
+.fsheet .grab { justify-content: center; }
+.fsheet .grab .tgl { width: auto; height: 44px; padding: 0 16px; border: 0; border-radius: 12px; background: none; color: var(--muted); font: inherit; font-size: 13px; text-decoration: underline; }
+.chips button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.fsheet .chips { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 6px; }
+.fsheet .chips button { flex: none; padding: 0 16px; }
+.check { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+.check input { min-height: 0; width: 22px; height: 22px; }
+.fsheet .row { margin-bottom: 10px; }
+.fsheet label { margin-bottom: 10px; }
+.fsheet form { margin-top: 6px; }
+#t-del { width: 100%; min-height: 48px; border: 1px solid var(--line); border-radius: 12px; background: #1f1f23; font: inherit; }
+.fsheet .row > *, .fsheet label { min-width: 0; }
+.fsheet input:not([type=checkbox]):not([type=range]) { width: 100%; min-width: 0; }

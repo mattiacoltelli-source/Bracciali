@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b0c">
+  <title>Prova sulla foto</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="foto.css">
+  <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+</head>
+<body class="foto">
+  <header class="fhead">
+    <a class="back" href="./" aria-label="Torna al salotto 3D">‹ Salotto</a>
+    <h1>Prova sulla foto</h1>
+    <button id="zreset" type="button" class="zreset" hidden>Zoom 1×</button>
+  </header>
+
+  <div id="stage" class="stage">
+    <div id="zoom" class="zoom">
+      <canvas id="fc" aria-label="Foto della parete con il quadro"></canvas>
+      <svg id="overlay" class="overlay" aria-hidden="true"></svg>
+    </div>
+    <div id="loupe" class="loupe" hidden></div>
+  </div>
+  <p id="fhint" class="fhint"></p>
+  <p id="err" class="err" hidden></p>
+
+  <section id="fsheet" class="fsheet">
+    <div class="grab"><button id="f-toggle" type="button" class="tgl">Nascondi pannello</button></div>
+
+    <div id="p-start">
+      <p class="muted">Scegli la foto di una parete, scattata di fronte. Serve qualcosa di piatto sulla parete di cui conosci le misure: un quadro già appeso (per esempio uno dei 75×50) oppure, se la parete è vuota, un foglio A4 attaccato al muro.</p>
+      <label class="file">Foto della parete<input id="f-photo" type="file" accept="image/*"></label>
+      <p class="muted">La foto resta nel telefono: non viene caricata da nessuna parte.</p>
+      <details class="guide">
+        <summary>Come scattare la foto</summary>
+        <ul>
+          <li>Mettiti di fronte alla parete, a qualche metro, senza zoom e senza grandangolo spinto.</li>
+          <li>Il riferimento (quadro o foglio) deve essere intero e ben visibile: più è grande in foto, più la prova è precisa.</li>
+          <li>La prova vale solo per la parete del riferimento: per un'altra parete serve un'altra foto.</li>
+          <li>Le misure del nuovo quadro derivano da quelle del riferimento: se sono sbagliate, lo sono anche le sue.</li>
+          <li>Parete bianca vuota: un foglio A4 bianco si vede poco, meglio un foglio colorato o un cartoncino scuro. In alternativa 4 pezzetti di nastro ai vertici di un rettangolo misurato col metro (per esempio 100 × 60 cm): scrivi le misure vere.</li>
+          <li>Per leggere anche le altezze da terra, inquadra il pavimento e scrivi a che altezza sta il bordo basso del riferimento.</li>
+        </ul>
+      </details>
+    </div>
+
+    <div id="p-calib" hidden>
+      <p id="c-help" class="muted"></p>
+      <div id="c-presets" class="chips" role="group" aria-label="Riferimento">
+        <button type="button" data-ref="75,50">Quadro 75×50</button>
+        <button type="button" data-ref="50,75">Quadro 50×75</button>
+        <button type="button" data-ref="21,29.7">Foglio A4 in piedi</button>
+        <button type="button" data-ref="29.7,21">Foglio A4 per lungo</button>
+      </div>
+      <div class="row">
+        <label>Larghezza vera (cm)<input id="c-w" type="number" step="any" inputmode="decimal" min="5" max="500" value="75"></label>
+        <label>Altezza vera (cm)<input id="c-h" type="number" step="any" inputmode="decimal" min="5" max="500" value="50"></label>
+      </div>
+      <p class="muted">Misure vere del riferimento, come lo vedi in foto: se è in verticale, larghezza minore dell'altezza (per esempio 50 × 75).</p>
+      <div class="row">
+        <button id="c-swap" type="button">Scambia misure</button>
+        <button id="c-reset" type="button">Rifai i punti</button>
+      </div>
+      <button id="c-go" type="button" class="primary" disabled>Prova il quadro</button>
+    </div>
+
+    <div id="p-try" hidden>
+      <div id="t-list" class="chips" role="group" aria-label="Quadro da provare"></div>
+      <p class="muted">Trascina il quadro nella foto, oppure usa le frecce.</p>
+      <div class="steps" role="group" aria-label="Passo">
+        <button data-fstep="1" type="button">1 cm</button>
+        <button data-fstep="5" type="button" aria-pressed="true">5 cm</button>
+        <button data-fstep="20" type="button">20 cm</button>
+      </div>
+      <div class="pad">
+        <button data-fnudge="up" type="button" aria-label="Su">▲</button>
+        <button data-fnudge="left" type="button" aria-label="Sinistra">◀</button>
+        <button data-fnudge="down" type="button" aria-label="Giù">▼</button>
+        <button data-fnudge="right" type="button" aria-label="Destra">▶</button>
+      </div>
+      <p id="t-info" class="muted"></p>
+      <div class="row">
+        <button id="t-hold" type="button">Tieni premuto: originale</button>
+        <button id="t-save" type="button" class="primary">Salva immagine</button>
+      </div>
+      <details class="guide">
+        <summary>Misure e regolazioni</summary>
+        <div class="row">
+          <label>Larghezza (cm)<input id="t-w" type="number" step="any" inputmode="decimal" min="5" max="500"></label>
+          <label>Altezza (cm)<input id="t-h" type="number" step="any" inputmode="decimal" min="5" max="500"></label>
+        </div>
+        <label>Luminosità del quadro<input id="t-bright" type="range" min="40" max="140" value="90"></label>
+        <label>Ombra<input id="t-shadow" type="range" min="0" max="100" value="60"></label>
+        <label class="check"><input id="t-hide" type="checkbox"> Nascondi il riferimento (lo copro col colore del muro)</label>
+        <label>Altezza da terra del bordo basso del riferimento (cm, facoltativo)<input id="t-floor" type="number" step="any" inputmode="decimal" min="0" max="400"></label>
+        <button id="t-del" type="button" class="danger" hidden>Elimina questo quadro dall'elenco</button>
+      </details>
+      <details class="guide" id="t-add">
+        <summary>Aggiungi un quadro</summary>
+        <form id="add-form">
+          <label class="file">Foto del quadro<input id="a-file" type="file" accept="image/*" required></label>
+          <label>Nome<input id="a-name" type="text" placeholder="Nuovo quadro" maxlength="40"></label>
+          <div class="row">
+            <label>Larghezza (cm)<input id="a-w" type="number" step="any" inputmode="decimal" min="5" max="500" value="75" required></label>
+            <label>Altezza (cm)<input id="a-h" type="number" step="any" inputmode="decimal" min="5" max="500" value="50" required></label>
+          </div>
+          <label class="check"><input id="a-ratio" type="checkbox" checked> Altezza dalle proporzioni della foto</label>
+          <button type="submit" class="primary">Aggiungi</button>
+        </form>
+      </details>
+      <div class="row">
+        <button id="t-recal" type="button">Rifai la calibrazione</button>
+        <button id="t-newphoto" type="button">Altra foto</button>
+      </div>
+    </div>
+  </section>
+
+  <script type="module" src="foto.js"></script>
+</body>
+</html>
