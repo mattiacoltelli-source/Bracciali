@@ -18,12 +18,14 @@ export const OPENINGS = {
   A: [{ s0: 0.96, s1: 1.86, y0: 0, y1: 2.1, kind: 'door-open' }], // porta interna (posizione: stima)
 };
 
-// Quadri già appesi (tutti 75x50). s = centro, y = centro dal pavimento. Posizioni: stime dalle foto.
-// `art` sono tre colori per un'immagine segnaposto: le foto vere non stanno nel repo.
+// Quadri già appesi (tutti 75x50). s = centro, y = centro dal pavimento. Posizioni misurate sulle foto registrate (±1 cm).
+// `art` sono tre colori per un'immagine segnaposto: le foto vere stanno nel pacchetto cifrato della stanza a foto.
 export const PAINTINGS = [
-  { id: 'taj', name: 'Taj Mahal', w: 0.5, h: 0.75, wall: 'T', s: 2.8, y: 1.815, art: ['#8ec1e6', '#e6edf1', '#2b7fa5'] },
-  { id: 'petra', name: 'Petra', w: 0.5, h: 0.75, wall: 'W', s: 2.99, y: 1.805, art: ['#6d8bb0', '#c9926a', '#a9c9d6'] },
-  { id: 'barca', name: 'Barca al tramonto', w: 0.75, h: 0.5, wall: 'W', s: 3.755, y: 1.68, art: ['#2a1a1c', '#d8542a', '#7a2a1a'] },
-  { id: 'islanda', name: 'Islanda', w: 0.75, h: 0.5, wall: 'F', s: 3.595, y: 1.75, art: ['#b7bcc2', '#5c6168', '#23272c'] },
-  { id: 'sneaker', name: 'Sneaker (sulla credenza)', w: 0.75, h: 0.5, wall: 'A', s: 3.3, y: 1.05, art: ['#f1ece4', '#cc2b2b', '#2a2a2a'] },
+  { id: 'taj', name: 'Taj Mahal', w: 0.5, h: 0.75, wall: 'T', s: 2.848, y: 1.8, art: ['#8ec1e6', '#e6edf1', '#2b7fa5'] },
+  { id: 'petra', name: 'Petra', w: 0.5, h: 0.75, wall: 'W', s: 3.019, y: 1.783, art: ['#6d8bb0', '#c9926a', '#a9c9d6'] },
+  { id: 'barca', name: 'Barca al tramonto', w: 0.75, h: 0.5, wall: 'W', s: 3.788, y: 1.653, art: ['#2a1a1c', '#d8542a', '#7a2a1a'] },
+  { id: 'islanda', name: 'Islanda', w: 0.75, h: 0.5, wall: 'F', s: 3.384, y: 1.856, art: ['#b7bcc2', '#5c6168', '#23272c'] },
+  { id: 'sneaker', name: 'Sneaker (sulla credenza)', w: 0.75, h: 0.5, wall: 'A', s: 3.395, y: 1.015, art: ['#f1ece4', '#cc2b2b', '#2a2a2a'] },
 ];
+// Posizioni delle versioni precedenti (stime): chi non ha mai spostato un quadro passa alle misure nuove.
+export const OLD_POS = { taj: [2.8, 1.815], petra: [2.99, 1.805], barca: [3.755, 1.68], islanda: [3.805, 1.75], sneaker: [3.3, 1.05] };

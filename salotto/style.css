@@ -53,3 +53,16 @@ input[type=range] { padding: 0; min-height: 36px; }
 .cardlink { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 60px; margin-top: 12px; padding: 8px 16px; border: 1px solid var(--accent); border-radius: 12px; background: #1f1f23; color: var(--text); text-decoration: none; }
 .cardlink small { display: block; color: var(--muted); font-size: 12px; font-weight: 600; }
 .cardlink > span:last-child { color: var(--accent); font-size: 24px; }
+.walk { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+.walk > * { pointer-events: auto; }
+.walk-btn { position: absolute; left: 12px; top: calc(env(safe-area-inset-top) + 12px); min-height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 14px; background: rgba(22,22,24,.85); color: var(--text); font: inherit; }
+.walk-eye { position: absolute; right: 12px; top: calc(env(safe-area-inset-top) + 12px); display: flex; gap: 6px; }
+.walk-eye button { min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(22,22,24,.85); color: var(--text); font: inherit; font-size: 13px; }
+.walk-eye button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.joy { position: absolute; left: 22px; bottom: calc(env(safe-area-inset-bottom) + 98px); width: 132px; height: 132px; border-radius: 50%; border: 2px solid rgba(255,255,255,.32); background: rgba(22,22,24,.32); touch-action: none; }
+.joy-knob { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: rgba(255,138,61,.85); pointer-events: none; }
+.snap { top: calc(env(safe-area-inset-top) + 66px); }
+.walking .hint { top: calc(env(safe-area-inset-top) + 66px); }
+#walk-go, #real-key-go { width: 100%; margin: 6px 0 4px; }
+#real-key { margin-bottom: 8px; }
+.walk, .walk * { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }

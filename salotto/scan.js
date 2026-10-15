@@ -114,6 +114,7 @@ export function createScan(ctx) {
     status(`Scansione pronta${n ? ` · ${(n / 1e6).toFixed(2)} milioni di punti` : ''}. Segui i passi 1 e 2 per raddrizzarla e metterla in scala.`);
     for (const p of ctx.paintings()) if (p.scan) makeS(p);
     saveXf();
+    syncClean();
     cams.scan = null;
     if (mode === 'scan') { viewInside(); ctx.refreshPanels(); ctx.render(); } else setMode('scan', true);
   }
@@ -318,7 +319,7 @@ export function createScan(ctx) {
     mesh.updateMatrixWorld(true);
     camMap((x) => { x.sub(pos0).applyQuaternion(q0).add(pos0); x.y -= dy; return x; });
     xf.floorSet = true;
-    saveXf(); updateAll(); ctx.save();
+    saveXf(); updateAll(); ctx.save(); cleanText(); applyClean();
     status('Pavimento impostato: la scansione è dritta e il pavimento è a quota zero.');
     endTool();
   }
@@ -378,8 +379,61 @@ export function createScan(ctx) {
     if (tool === 'floor') tapFloor(e);
     else if (tool === 'measure') tapMeasure(e);
     else if (tool === 'hang') tapHang(e);
+    else if (tool === 'erase') tapErase(e);
     else tapSelect(e);
   });
+
+  // ---------- pulizia: nebbia, taglio sotto il pavimento, gomma per i punti per aria ----------
+  const FOG_MIN = 0.5 / 255, MAX_ERASE = 40;
+  let cutEdit = null, cutSdf = null, eraseEdit = null;
+  function applyClean() {
+    if (!spark || !sparkMod) return;
+    spark.minAlpha = FOG_MIN + 0.3 * (xf.fog || 0) ** 2;
+    if (!cutEdit) {
+      cutEdit = new sparkMod.SplatEdit({ rgbaBlendMode: sparkMod.SplatEditRgbaBlendMode.MULTIPLY });
+      cutSdf = new sparkMod.SplatEditSdf({ type: sparkMod.SplatEditSdfType.PLANE, opacity: 0 });
+      cutSdf.rotation.x = -Math.PI / 2; // normale verso l'alto
+      cutEdit.add(cutSdf);
+      scene.add(cutEdit);
+    }
+    cutEdit.visible = !!xf.floorSet && (xf.cut || 0) > 0;
+    cutSdf.position.y = -(xf.cut || 0) / 100;
+    ctx.render();
+  }
+  function buildErase() {
+    if (eraseEdit) { eraseEdit.parent?.remove(eraseEdit); eraseEdit = null; }
+    const list = xf.erase || [];
+    if (mesh && sparkMod && list.length) {
+      eraseEdit = new sparkMod.SplatEdit({ rgbaBlendMode: sparkMod.SplatEditRgbaBlendMode.MULTIPLY });
+      for (const [x, y, z, r] of list) {
+        const d = new sparkMod.SplatEditSdf({ type: sparkMod.SplatEditSdfType.SPHERE, radius: r, opacity: 0 });
+        d.position.set(x, y, z);
+        eraseEdit.add(d);
+      }
+      mesh.add(eraseEdit);
+    }
+    ctx.render();
+  }
+  function cleanText() {
+    $('s-cut-v').textContent = !xf.floorSet ? 'Spento. Serve il passo 1 (pavimento).' : (xf.cut || 0) > 0 ? `Tolgo ciò che sta più di ${xf.cut} cm sotto il pavimento.` : 'Spento. Alza piano piano finché spariscono i riflessi; se il pavimento si buca, abbassa.';
+    const n = (xf.erase || []).length;
+    $('s-erased').textContent = n ? `Zone cancellate: ${n}.` : '';
+  }
+  function syncClean() { // dopo aver caricato o riaperto una scansione
+    $('s-fog').value = Math.round((xf.fog || 0) * 100);
+    $('s-cut').value = xf.cut || 0;
+    cleanText(); applyClean(); buildErase();
+  }
+  function tapErase(e) {
+    const q = hit(e.clientX, e.clientY);
+    if (!q) { ctx.showErr('Non trovo punti lì: tocca un punto sospeso.'); return; }
+    if ((xf.erase || []).length >= MAX_ERASE) { ctx.showErr('Troppe zone cancellate: annullane qualcuna.'); return; }
+    mesh.updateMatrixWorld(true);
+    const l = mesh.worldToLocal(q.clone());
+    (xf.erase ||= []).push([l.x, l.y, l.z, Number($('s-eraser').value) / 100 / mesh.scale.x]);
+    saveXf(); buildErase(); cleanText();
+    pill(`Cancellate ${xf.erase.length} zone · tocca un altro punto o premi Fine`);
+  }
 
   // ---------- pannello ----------
   $('s-file').onchange = (e) => { const f = e.target.files[0]; if (f) loadFile(f); e.target.value = ''; };
@@ -396,6 +450,7 @@ export function createScan(ctx) {
     await idbDel('file').catch(() => {});
     try { localStorage.removeItem(XF_KEY); } catch { /* ok */ }
     stored = null; xf = { floorSet: false, bright: 0.85 };
+    eraseEdit = null; applyClean();
     $('s-tools').hidden = true; $('s-remove').hidden = true; status('Scansione rimossa.');
     ctx.save(); ctx.refreshPanels(); ctx.render();
   };
@@ -408,6 +463,13 @@ export function createScan(ctx) {
   $('s-apply').onclick = applyScale;
   document.querySelectorAll('[data-real]').forEach((b) => { b.onclick = () => { $('s-real').value = b.dataset.real; }; });
   $('s-bright').oninput = (e) => setBright(Number(e.target.value) / 100);
+  $('s-fog').oninput = (e) => { xf.fog = Number(e.target.value) / 100; applyClean(); };
+  $('s-fog').onchange = () => saveXf();
+  $('s-cut').oninput = (e) => { xf.cut = Number(e.target.value); cleanText(); applyClean(); };
+  $('s-cut').onchange = () => saveXf();
+  $('s-erase').onclick = () => mesh && startTool('erase', 'Tocca i punti sospesi da cancellare');
+  $('s-undo').onclick = () => { if (xf.erase?.length) { xf.erase.pop(); saveXf(); buildErase(); cleanText(); } };
+  $('s-undoall').onclick = () => { if (xf.erase?.length && confirm('Ripristinare tutti i punti cancellati?')) { xf.erase = []; saveXf(); buildErase(); cleanText(); } };
   $('tool-done').onclick = () => endTool();
 
   return {
