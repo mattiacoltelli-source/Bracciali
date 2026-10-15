@@ -8,11 +8,14 @@ class Frame:
     """Sistema della stanza (x lungo la parete TV dall'angolo split, y su, z verso l'ingresso) ricavato dallo SfM.
     La mappa SfM -> stanza è: allineamento con la gravità e la parete TV, poi scala per asse in modo che i 6 piani
     coincidano col box (L, W, H)."""
-    def __init__(self, planes, M, r, cam, dims=(7.4, 4.5, 3.0), img_dir='/tmp/claude-0/s/sfm/img_full'):
+    def __init__(self, planes, M, r, cam, dims=(7.4, 4.5, 3.0), img_dir='/tmp/claude-0/s/sfm/img_full', xshift=0.0):
+        # xshift: la parete split (A) sta davvero a `xshift` metri dal vecchio piano xA (misurato con le foto di dettaglio e la scansione):
+        # l'origine di x si sposta sulla parete vera e la lunghezza della stanza diventa dims[0] - xshift; la scala per asse non cambia.
         self.L, self.W, self.H = dims
         self.M = M; self.r = r; self.cam = cam
         self.xA, self.xW, self.zT, self.zF, self.yF, self.yC = [planes[k] for k in ('xA', 'xW', 'zT', 'zF', 'yFloor', 'yCeil')]
         self.sx = self.L / (self.xW - self.xA); self.sz = self.W / (self.zF - self.zT); self.sy = self.H / (self.yC - self.yF)
+        self.xA = self.xA + xshift / self.sx; self.L = self.L - xshift
         self.f, self.cx, self.cy, self.k = cam.params
         self.img_dir = img_dir
         self.cams = {}
@@ -40,10 +43,18 @@ class Frame:
         im = cv2.imread(f'{self.img_dir}/{n}.jpg')
         return cv2.resize(im, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA) if scale != 1 else im
 
-def make_frame(dims=(7.4, 4.5, 3.0)):
+NEW_MODEL = '/tmp/claude-0/s/sfm/work_new/sparse/0'
+XSHIFT = 0.30   # m: parete split vera rispetto al vecchio piano xA (interruttore 0.297, stipite porta 0.300, quadro 0.32, credenza)
+def make_frame(dims=(7.4, 4.5, 3.0), extended=None, xshift=None):
+    """extended=True (o env FRAME_EXT=1): usa il modello esteso con le foto di dettaglio (le vecchie pose sono identiche).
+    xshift (o env FRAME_SHIFT=0 per tornare al vecchio sistema): sposta l'origine sulla vera parete A."""
+    import os, pycolmap
+    if extended is None: extended = os.environ.get('FRAME_EXT') == '1'
+    if xshift is None: xshift = 0.0 if os.environ.get('FRAME_SHIFT') == '0' else XSHIFT
     o = run()
     pl = json.load(open('/tmp/claude-0/s/reg/planes_u.json'))
-    return Frame(pl, o['M'], o['r'], o['cam'], dims)
+    r = pycolmap.Reconstruction(NEW_MODEL) if extended else o['r']
+    return Frame(pl, o['M'], r, o['cam'], dims, xshift=xshift)
 
 if __name__ == '__main__':
     fr = make_frame()
