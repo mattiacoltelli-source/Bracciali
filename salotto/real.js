@@ -34,19 +34,24 @@ async function fetchPack(onStatus) {
   let res;
   try { res = await fetch(PACK_URL); } catch { throw new Error('rete'); }
   if (!res.ok) throw new Error(res.status === 404 ? 'assente' : 'rete');
-  const len = Number(res.headers.get('content-length')) || 0;
-  if (!res.body || !len) return new Uint8Array(await res.arrayBuffer());
-  const out = new Uint8Array(len);
-  const rd = res.body.getReader();
+  if (!res.body) return new Uint8Array(await res.arrayBuffer());
+  // la lunghezza dichiarata serve solo per la percentuale (con la compressione può non coincidere)
+  const len = res.headers.get('content-encoding') ? 0 : Number(res.headers.get('content-length')) || 0;
+  const chunks = [];
   let got = 0;
-  for (;;) {
-    const { done, value } = await rd.read();
-    if (done) break;
-    if (got + value.length > out.length) throw new Error('rete');
-    out.set(value, got); got += value.length;
-    onStatus?.(`Scarico la stanza… ${Math.round((got / len) * 100)}%`);
-  }
-  return got === len ? out : out.subarray(0, got);
+  const rd = res.body.getReader();
+  try {
+    for (;;) {
+      const { done, value } = await rd.read();
+      if (done) break;
+      chunks.push(value); got += value.length;
+      if (len && got <= len) onStatus?.(`Scarico la stanza… ${Math.round((got / len) * 100)}%`);
+    }
+  } catch { throw new Error('rete'); }
+  const out = new Uint8Array(got);
+  let o = 0;
+  for (const c of chunks) { out.set(c, o); o += c.length; }
+  return out;
 }
 
 async function decryptPack(u8, keyB64) {
@@ -113,7 +118,7 @@ export function createReal(ctx) {
   const group = new THREE.Group();
   group.visible = false;
   roomRoot.add(group);
-  // quello che c'è già (modello a blocchi) si nasconde quando si guarda la stanza a foto; travi, binari e cornicione restano
+  // il modello a blocchi si nasconde quando si guarda la stanza a foto (i quadri restano); travi, binari e cornicione si rifanno qui
   const gset = new Set(Object.values(groups));
   const blockTop = roomRoot.children.filter((o) => o !== group && !gset.has(o) && !o.userData.keep);
   const blockWall = Object.values(groups).flatMap((g) => g.children.filter((o) => !o.userData.keep));

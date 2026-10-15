@@ -16,23 +16,28 @@ export function createWalk(ctx) {
   let look = null;
 
   const colliders = () => real.colliders;
-  function blocked(x, z) {
-    if (x < R + 0.04 || x > ROOM.L - R - 0.04 || z < R + 0.04 || z > ROOM.W - R - 0.04) return true;
+  const inRoom = (x, z) => x >= R + 0.04 && x <= ROOM.L - R - 0.04 && z >= R + 0.04 && z <= ROOM.W - R - 0.04;
+  // quanto il corpo (cerchio) entra nei mobili: >0 = dentro; serve a uscire da un mobile se ci si trova dentro (teletrasporto) senza attraversarlo
+  function pen(x, z) {
+    let worst = -1;
     const seated = st.eye < 1.3;
     for (const c of colliders()) {
       if (seated && c.grp === 'sofa') continue;
       if (c.max[1] < 0.25 || c.min[1] > st.eye) continue;
       const dx = Math.max(c.min[0] - x, 0, x - c.max[0]), dz = Math.max(c.min[2] - z, 0, z - c.max[2]);
-      if (dx * dx + dz * dz < R * R) return true;
+      const out = Math.hypot(dx, dz);
+      const d = out > 0 ? out : -Math.min(x - c.min[0], c.max[0] - x, z - c.min[2], c.max[2] - z);
+      worst = Math.max(worst, R - d);
     }
-    return false;
+    return worst;
   }
   function move(dx, dz) {
-    const free = blocked(st.x, st.z); // se si parte da dentro un mobile (teletrasporto) si può uscire liberamente
+    const p0 = pen(st.x, st.z);
+    const ok = (x, z) => inRoom(x, z) && (() => { const p = pen(x, z); return p <= 0 || p <= p0 + 1e-6; })();
     const nx = st.x + dx, nz = st.z + dz;
-    if (free || !blocked(nx, nz)) { st.x = nx; st.z = nz; return; }
-    if (!blocked(nx, st.z)) st.x = nx;
-    else if (!blocked(st.x, nz)) st.z = nz;
+    if (ok(nx, nz)) { st.x = nx; st.z = nz; }
+    else if (ok(nx, st.z)) st.x = nx;
+    else if (ok(st.x, nz)) st.z = nz;
   }
   function apply() {
     camera.rotation.order = 'YXZ';
@@ -61,12 +66,14 @@ export function createWalk(ctx) {
     st.x = s.pos[0]; st.z = s.pos[2]; st.yaw = s.yaw || 0;
     document.querySelectorAll('[data-eye]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.eye) === st.eye)));
     hud.hidden = false;
+    document.body.classList.add('walking');
     apply(); render();
   }
   function exit() {
     if (!on) return;
     on = false;
     hud.hidden = true;
+    document.body.classList.remove('walking');
     j.x = j.z = 0; j.id = null; kb.keys.clear(); kb.x = kb.z = 0; look = null;
     knob.style.transform = '';
     camera.fov = 60; camera.updateProjectionMatrix();
