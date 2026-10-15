@@ -37,6 +37,9 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
      pilastro da 3,855 a 4,25 con il pannello grafite davanti (x 3,80-4,415, z 0,24-0,26; in realta' e' inclinato di ~4,6 gradi), quattro mensole in noce trapezoidali (il lato sinistro e' in diagonale; spessore 2,2 cm).
      Mensole, pianta (tradescantia), brocca, vasetti, fumetti e vasi rossi sono una mesh a colori per vertice (`meshlib.py` + `shelf_unit.py`, tipo `vmesh` nel pacchetto); il fondo e il fianco del pilastro
      sono texture sintetiche con le ombre portate di una luce dall'alto a sinistra (`shelf_tex.py`, direzione ricavata dalle ombre nelle foto): le foto dell'interno sbavavano.
+   - mensole portaquadri nere e i sei quadretti (`reg/ledges.py`): le posizioni (u lungo la parete TV, altezza del piano) vengono dalla parete cotta e dal confronto con una foto registrata frontale; i quadretti sono
+     rettificati dalla foto (`console/prep_posters.py`: angoli del passepartout trovati in automatico dalla cornice nera, due a mano; atlante 3x2), inclinati di 8 gradi all'indietro contro il muro.
+     In `build_pack.py` le fasce della parete TV dove c'erano le vecchie foto dei quadretti vengono ricostruite per diffusione (`WALL_EXCL`).
 6. `reg/build_pack.py TAG_MURI TAG_PAV TAG_FACCE salotto.bin` — toglie i quadri dai muri, riempie i buchi, mette l'ombra sotto i mobili sospesi,
    impacchetta atlante, divano, voxel e primitive e cifra tutto con AES-256-GCM.
 
