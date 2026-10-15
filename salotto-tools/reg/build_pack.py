@@ -5,6 +5,7 @@ sys.path.insert(0, '/tmp/claude-0/s/reg')
 import numpy as np, cv2
 from fill import diffuse_fill, scene_complete, wall_fill
 from scene_def import BOXES, PRIMS, ITEMS
+import shelf_unit, shelf_tex
 
 R = '/tmp/claude-0/s/reg/out'
 KEYFILE = '/tmp/claude-0/s/pack.key'
@@ -22,6 +23,9 @@ def jpg(img, q=88):
 def erode_valid(valid, k=7):
     return cv2.erode(valid.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
 
+# (u0, u1, y0, y1) in metri, sistema nuovo: a sinistra e sopra il mobile a mensole (x 3,54-4,25), dove la pianta e i tralci si proiettavano sul muro
+WALL_EXCL = {'T': [(3.18, 3.58, 0.55, 2.68), (3.18, 4.50, 2.20, 2.68)]}
+
 def walls(tag):
     P = json.load(open(f'{R}/paintings_final.json'))
     out = {}
@@ -35,6 +39,15 @@ def walls(tag):
             v[max(y0, 0):y1, max(x0, 0):x1] = False
         img = img.copy(); img[~v] = 0
         out[wid] = wall_fill(img, v, PPM_W)
+        if WALL_EXCL.get(wid):      # fasce da rifare per diffusione: ai bordi del mobile a mensole le foto portano sbavature di pianta e mensole; sfumate sui bordi
+            v2 = v.copy(); M = np.zeros(v.shape, np.float32)
+            for (ua, ub, ya, yb) in WALL_EXCL[wid]:
+                sl = (slice(max(int((H - yb) * PPM_W), 0), int((H - ya) * PPM_W)), slice(max(int(ua * PPM_W), 0), int(ub * PPM_W)))
+                v2[sl] = False; M[sl] = 1.0
+            img2 = img.copy(); img2[~v2] = 0
+            fill2 = wall_fill(img2, v2, PPM_W, soft=True).astype(np.float32)
+            al = np.clip(cv2.GaussianBlur(M, (0, 0), 0.035 * PPM_W) * 1.6, 0, 1)[..., None]
+            out[wid] = (out[wid].astype(np.float32) * (1 - al) + fill2 * al).clip(0, 255).astype(np.uint8)
         # ombra morbida sulla parete sotto i mobili sospesi (li' le foto non vedono: si sarebbe riempito di bianco)
         Hh, Ww = out[wid].shape[:2]
         floaters = []
@@ -155,6 +168,12 @@ def atlas(tag):
     for name, face, img, cov in arr:
         faces[(name, face)] = (img, cov)
     faces = tidy_faces(faces)
+    # dentro le mensole il fondo e il fianco del pilastro sono texture sintetiche (colore del laccato + ombre calcolate), non foto
+    SYN = {('dorso', '+z'): 'dorso', ('pilastro', '-x'): 'pilastro_x', ('pilastro', '+z'): 'pilastro_z', ('pannello', '+z'): 'plate'}
+    for (nm, fc), kind in SYN.items():
+        bx = next((b for b in BOXES if b['name'] == nm), None)
+        if bx and (nm, fc) in faces:
+            faces[(nm, fc)] = (shelf_tex.make_face(kind, faces[(nm, fc)][0].shape[:2], bounds=(bx['min'], bx['max'])), 1.0)
     # schermo della TV: spento (nelle foto c'e' un video diverso a ogni scatto)
     k = ('tv', '+z')
     if k in faces:
@@ -171,7 +190,7 @@ def atlas(tag):
     keep = {}
     for key, (img, cov) in faces.items():
         if cov >= 0.25 and key in used:
-            if key != ('tv', '+z'):   # niente alone di parete/sfondo sul bordo (le scatole sono precise a ~1-2 cm): si tolgono 1,5 cm per lato e si riallarga
+            if key != ('tv', '+z') and key not in SYN:   # niente alone di parete/sfondo sul bordo (le scatole sono precise a ~1-2 cm): si tolgono 1,5 cm per lato e si riallarga
                 h, w = img.shape[:2]; n = max(2, int(0.015 * 300))
                 if h > 4 * n and w > 4 * n: img = cv2.resize(img[n:h - n, n:w - n], (w, h), interpolation=cv2.INTER_CUBIC)
             keep[key] = img
@@ -241,6 +260,11 @@ def main():
         if vn.startswith('vox_') and vn.endswith('.bin') and not os.environ.get('NO_VOX'):
             tag_ = vn[4:-4]; vm = json.load(open(f'{SD}/vox_{tag_}.json'))
             bins[f'vox_{tag_}'] = open(f'{SD}/{vn}', 'rb').read(); vm['bin'] = f'vox_{tag_}'; voxs.append(vm)
+    # mobile a mensole: mesh a colori per vertice (mensole, pianta, vasi, fumetti)
+    prims = list(PRIMS)
+    um = shelf_unit.build(); meta, blob_u = um.pack(); bins['shelf_unit'] = blob_u
+    prims.append(dict(t='vmesh', bin='shelf_unit', nv=meta['nv'], ni=meta['ni']))
+    print('mesh mensole: vertici', meta['nv'], 'indici', meta['ni'], round(len(blob_u) / 1e3), 'KB', flush=True)
     boxes = []
     for b in BOXES:
         d = dict(name=b['name'], min=b['min'], max=b['max'], grp=b['grp'], solid=b['solid'])
@@ -248,6 +272,8 @@ def main():
         if b.get('round'): d['round'] = b['round']
         d['faces'] = {f: rects[(b['name'], f)] for f in b['faces'] if (b['name'], f) in rects}
         d['flat'] = [f for f in b['flat']] + [f for f in b['faces'] if (b['name'], f) not in rects]
+        if b.get('hidden'):   # solo ostacolo per la camminata (es. il vano delle mensole): non si disegna
+            d['hidden'] = True; d['faces'] = {}; d['flat'] = []
         if sofa and b['name'].startswith('s_') and not b.get('vis'):   # il divano vero e' il campo di quote: le scatole restano solo come ostacoli (il bracciolo e' una scatola vera)
             d['hidden'] = True; d['faces'] = {}; d['flat'] = []
         boxes.append(d)
@@ -259,7 +285,7 @@ def main():
     for name, data in bins.items():
         imap[name] = dict(o=len(blob), n=len(data), t='application/octet-stream'); blob += data
     man = dict(v=1, images=imap, walls={w: f'wall_{w}' for w in 'TWFA'}, floor='floor', atlas='atlas', atlasSize=[at.shape[1], at.shape[0]],
-               boxes=boxes, prims=PRIMS, items=ITEMS, art=art, spawn=spawn)
+               boxes=boxes, prims=prims, items=ITEMS, art=art, spawn=spawn)
     if sofa: man['sofa'] = sofa
     if voxs: man['vox'] = voxs
     mj = json.dumps(man, separators=(',', ':')).encode()

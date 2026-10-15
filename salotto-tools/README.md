@@ -27,6 +27,10 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
    - vaso rosso nel vano del mobile TV: la scansione (splat + mesh) conferma un cilindro semplice; le misure (raggio 5,3 cm, alto 21,5 cm, in piedi a x 6,68 e z 0,30) vengono
      dal contorno nella foto registrata (`reg/vase_profile.py`: diametro a ogni quota, nel piano dell'asse), perche' la scala delle scansioni non e' affidabile; `reg/vase_tex.py` ricava
      la texture intorno al cilindro (colonne = angolo, righe = quota). Il vano e' vero (fondo e divisorio in `scene_def.py`), il vaso e' una `cylt` nel pacchetto.
+   - mobile a mensole accanto alla TV (il 'mobile quadrato'): la struttura e' misurata da foto registrate (triangolazioni `tri.py`/`vline.py`/`rayplane.py` e sovrapposizioni): fondo beige sottile (3,4 cm) a x 3,54-3,855,
+     pilastro da 3,855 a 4,25 con il pannello grafite davanti (x 3,80-4,415, z 0,24-0,26; in realta' e' inclinato di ~4,6 gradi), quattro mensole in noce trapezoidali (il lato sinistro e' in diagonale; spessore 2,2 cm).
+     Mensole, pianta (tradescantia), brocca, vasetti, fumetti e vasi rossi sono una mesh a colori per vertice (`meshlib.py` + `shelf_unit.py`, tipo `vmesh` nel pacchetto); il fondo e il fianco del pilastro
+     sono texture sintetiche con le ombre portate di una luce dall'alto a sinistra (`shelf_tex.py`, direzione ricavata dalle ombre nelle foto): le foto dell'interno sbavavano.
 6. `reg/build_pack.py TAG_MURI TAG_PAV TAG_FACCE salotto.bin` — toglie i quadri dai muri, riempie i buchi, mette l'ombra sotto i mobili sospesi,
    impacchetta atlante, divano, voxel e primitive e cifra tutto con AES-256-GCM.
 
