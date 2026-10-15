@@ -11,7 +11,8 @@ KEYFILE = '/tmp/claude-0/s/pack.key'
 PPM_W = int(os.environ.get('PPM_W', 300))   # px/m dei muri
 PPM_F = int(os.environ.get('PPM_F', 300))   # px/m del pavimento
 H = 3.0
-L, W = 7.4, 4.5
+L, W = 7.1, 4.5
+L_A_O = W   # parete A: u = W - z
 
 def jpg(img, q=88):
     ok, b = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, q, cv2.IMWRITE_JPEG_OPTIMIZE, 1])
@@ -34,14 +35,19 @@ def walls(tag):
             v[max(y0, 0):y1, max(x0, 0):x1] = False
         img = img.copy(); img[~v] = 0
         out[wid] = wall_fill(img, v, PPM_W)
-        if wid == 'T':   # ombra morbida sulla parete sotto i mobili sospesi (li' le foto non vedono: si sarebbe riempito di bianco)
-            Hh, Ww = out[wid].shape[:2]
+        # ombra morbida sulla parete sotto i mobili sospesi (li' le foto non vedono: si sarebbe riempito di bianco)
+        Hh, Ww = out[wid].shape[:2]
+        floaters = []
+        for bx in BOXES:
+            if wid == 'T' and bx['grp'] == 'tv' and 0.2 <= bx['min'][1] <= 0.4:
+                floaters.append((bx['min'][0] - 0.03, bx['max'][0] + 0.03, bx['min'][1]))
+            if wid == 'A' and bx['grp'] == 'cred' and bx['name'] == 'credenza':
+                floaters.append((L_A_O - bx['max'][2] - 0.03, L_A_O - bx['min'][2] + 0.03, bx['min'][1]))   # parete A: u = W - z
+        if floaters:
             sh = np.ones((Hh, Ww), np.float32)
-            for bx in BOXES:
-                if bx['grp'] != 'tv' or bx['min'][1] < 0.2 or bx['min'][1] > 0.4: continue
-                x0b, x1b = int((bx['min'][0] - 0.03) * PPM_W), int((bx['max'][0] + 0.03) * PPM_W)
-                y0b = bx['min'][1]
-                rows = np.arange(Hh); yy = (H - (rows + 0.5) / PPM_W)
+            rows = np.arange(Hh); yy = (H - (rows + 0.5) / PPM_W)
+            for (ua, ub, y0b) in floaters:
+                x0b, x1b = max(0, int(ua * PPM_W)), min(Ww, int(ub * PPM_W))
                 prof = np.clip(0.46 + 0.36 * (1 - yy / y0b), 0.46, 0.92)          # scuro sotto il mobile, piu' chiaro verso terra
                 prof = np.where(yy < y0b, prof, 1.0).astype(np.float32)
                 sh[:, x0b:x1b] = np.minimum(sh[:, x0b:x1b], prof[:, None])
@@ -62,12 +68,12 @@ def floor(tag):
         if m.sum() < 20000: continue
         ys, xs = np.nonzero(m)
         cx, cz = xs.mean() / PPM_F, ys.mean() / PPM_F
-        if 2.3 < cx < 4.7 and 0.7 < cz < 2.5 and (best is None or m.sum() > best[1]): best = (i, m.sum())
+        if 2.0 < cx < 4.4 and 0.7 < cz < 2.5 and (best is None or m.sum() > best[1]): best = (i, m.sum())
     work = img.copy()
     work[~v] = cv2.inpaint(img, (~v).astype(np.uint8) * 255, 6, cv2.INPAINT_TELEA)[~v]
     if best:
         central = cv2.dilate((lab == best[0]).astype(np.uint8), np.ones((25, 25), np.uint8)).astype(bool) & ~v
-        allowed = np.zeros_like(v); allowed[0:int(3.1 * PPM_F), int(0.2 * PPM_F):int(2.9 * PPM_F)] = True
+        allowed = np.zeros_like(v); allowed[0:int(3.1 * PPM_F), int(0.0 * PPM_F):int(2.6 * PPM_F)] = True
         ys, xs = np.nonzero(central)
         src_ok = (v & allowed).astype(np.uint8)
         integ = cv2.integral(src_ok)
@@ -109,11 +115,42 @@ def floor(tag):
     out = (out.astype(np.float32) * shade[..., None]).clip(0, 255).astype(np.uint8)
     return out
 
+def clean_fabric(img, region=None, fallback=(64, 61, 59)):
+    """Solo tessuto grigio scuro: scarta cio' che e' chiaro o colorato (parete, tavolino rosso, tavolino con le rotelle, camicia) e lo riempie col tessuto vicino."""
+    from fill import push_pull
+    bgr = img.astype(np.int32); lum = bgr.mean(2); sat = bgr.max(2) - bgr.min(2)
+    ok = (lum < 105) & (lum > 14) & (sat < 26)
+    if region is not None: ok &= region
+    w = cv2.erode(ok.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(np.float32)
+    if w.mean() < 0.04:
+        out = np.empty_like(img); out[:] = fallback; return out
+    filled = push_pull(img.astype(np.float32), w, levels=8)
+    a = cv2.GaussianBlur(w, (0, 0), 1.0)[..., None]
+    return np.clip(img.astype(np.float32) * a + filled * (1 - a), 0, 255).astype(np.uint8)
+
+def tidy_faces(faces):
+    """Bracciolo: le foto dei suoi lati vedono anche cio' che ci sta davanti (il tavolino rosso a 3 cm, il tavolino con le rotelle) e il piano di sopra e' quasi
+    sempre coperto dal piano rosso o visto di striscio: della foto si tiene il fronte (solo tessuto) e il pezzo davanti al montante; piano e retro sono tinta unita
+    (colori misurati sulle foto: tessuto grigio scuro, un po' piu' chiaro sopra)."""
+    fr = faces.get(('s_bracciolo', '-z'))
+    if fr is None: return faces
+    h, w = fr[0].shape[:2]
+    reg = np.ones((h, w), bool); reg[:, int(0.80 * w):] = False; reg[:, :int(0.06 * w)] = False; reg[:int(0.10 * h), :] = False   # le fasce degli spigoli smussati vedono anche parete, tavolino e piano rosso
+    front = clean_fabric(fr[0], reg); faces[('s_bracciolo', '-z')] = (front, fr[1])
+    flat = lambda rgb, shape: np.full(shape + (3,), rgb[::-1], np.uint8)
+    for f, rgb in (('+y', (62, 62, 59)), ('+x', (46, 46, 44))):
+        k = ('s_bracciolo', f)
+        if k in faces: faces[k] = (flat(rgb, faces[k][0].shape[:2]), 1.0)
+    k = ('s_bracciolo', '-x')
+    if k in faces: faces[k] = (flat((52, 52, 51), faces[k][0].shape[:2]), 1.0)     # il lato si vede solo per 16 cm davanti al montante: le foto li' sono sporche, tinta unita misurata
+    return faces
+
 def atlas(tag):
     arr = np.load(f'{R}/faces_{tag}.npy', allow_pickle=True)
     faces = {}
     for name, face, img, cov in arr:
         faces[(name, face)] = (img, cov)
+    faces = tidy_faces(faces)
     # schermo della TV: spento (nelle foto c'e' un video diverso a ogni scatto)
     k = ('tv', '+z')
     if k in faces:
@@ -184,6 +221,17 @@ def main():
     for pid in P:
         a = cv2.imread(f'{R}/art_{pid}.png')
         images[f'art_{pid}'] = jpg(a, 90); art[pid] = f'art_{pid}'
+    SD = os.environ.get('SOFA_DIR', '/tmp/claude-0/s/sofa'); bins = {}
+    sofa = None
+    if os.path.exists(f'{SD}/sofa_h.bin') and os.path.exists(f'{SD}/sofa_t.jpg') and not os.environ.get('NO_SOFA'):
+        sofa = json.load(open(f'{SD}/sofa_meta.json'))
+        images['sofa_t'] = open(f'{SD}/sofa_t.jpg', 'rb').read(); bins['sofa_h'] = open(f'{SD}/sofa_h.bin', 'rb').read()
+        sofa['h'] = 'sofa_h'; sofa['t'] = 'sofa_t'
+    voxs = []
+    for vn in sorted(os.listdir(SD)) if os.path.isdir(SD) else []:
+        if vn.startswith('vox_') and vn.endswith('.bin') and not os.environ.get('NO_VOX'):
+            tag_ = vn[4:-4]; vm = json.load(open(f'{SD}/vox_{tag_}.json'))
+            bins[f'vox_{tag_}'] = open(f'{SD}/{vn}', 'rb').read(); vm['bin'] = f'vox_{tag_}'; voxs.append(vm)
     boxes = []
     for b in BOXES:
         d = dict(name=b['name'], min=b['min'], max=b['max'], grp=b['grp'], solid=b['solid'])
@@ -191,14 +239,20 @@ def main():
         if b.get('round'): d['round'] = b['round']
         d['faces'] = {f: rects[(b['name'], f)] for f in b['faces'] if (b['name'], f) in rects}
         d['flat'] = [f for f in b['flat']] + [f for f in b['faces'] if (b['name'], f) not in rects]
+        if sofa and b['name'].startswith('s_') and not b.get('vis'):   # il divano vero e' il campo di quote: le scatole restano solo come ostacoli (il bracciolo e' una scatola vera)
+            d['hidden'] = True; d['faces'] = {}; d['flat'] = []
         boxes.append(d)
-    spawn = dict(pos=[1.7, 1.6, 3.9], yaw=float(np.arctan2(-(4.2 - 1.7), -(0 - 3.9))))
+    spawn = dict(pos=[1.4, 1.6, 3.9], yaw=float(np.arctan2(-(3.9 - 1.4), -(0 - 3.9))))
     # immagini in un'unica area binaria
     blob = b''; imap = {}
     for name, data in images.items():
         imap[name] = dict(o=len(blob), n=len(data), t='image/jpeg'); blob += data
+    for name, data in bins.items():
+        imap[name] = dict(o=len(blob), n=len(data), t='application/octet-stream'); blob += data
     man = dict(v=1, images=imap, walls={w: f'wall_{w}' for w in 'TWFA'}, floor='floor', atlas='atlas', atlasSize=[at.shape[1], at.shape[0]],
                boxes=boxes, prims=PRIMS, items=ITEMS, art=art, spawn=spawn)
+    if sofa: man['sofa'] = sofa
+    if voxs: man['vox'] = voxs
     mj = json.dumps(man, separators=(',', ':')).encode()
     plain = struct.pack('<I', len(mj)) + mj + blob
     if os.path.exists(KEYFILE): key = base64.urlsafe_b64decode(open(KEYFILE).read().strip() + '==')

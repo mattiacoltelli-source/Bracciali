@@ -452,6 +452,7 @@ const tmp = new THREE.Vector3();
 renderer.setAnimationLoop((now) => {
   stepTween(now);
   if (walkApi?.step(now)) needs = true;
+  if (realApi?.update(camera)) needs = true;
   if (needs) {
     needs = false;
     for (const id in groups) { // da fuori la parete (con quello che ha attaccato) sparisce: si vede dentro la stanza

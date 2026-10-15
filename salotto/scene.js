@@ -225,15 +225,15 @@ function buildFurniture(scene) {
   box(sofa, 0.95, 0.45, 1.25, M.fabric, x1 - 0.475, 0.1, zF - 0.625); // chaise
   box(sofa, 0.2, 0.3, 1.25, M.fabric, x1 - 0.1, 0.55, zF - 0.625); // schienale basso
   box(sofa, 0.25, 0.65, 0.95, M.fabric, xA + 0.125, 0.1, W - 0.475); // bracciolo
-  // --- consolle dietro la chaise (parete finestra) ---
-  box(scene, 0.28, 0.03, 1.7, M.walnut, L - 0.14, 0.75, W - 0.85);
-  for (const [dx, dz] of [[0.03, 0.03], [0.25, 0.03], [0.03, 1.67], [0.25, 1.67]]) box(scene, 0.03, 0.75, 0.03, M.black, L - 0.28 + dx, 0, W - 1.7 + dz);
-  box(scene, 0.1, 0.3, 0.2, mat('#7a1f1f'), L - 0.14, 0.78, W - 0.8);
-  const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.35, 8), M.black);
-  lamp.position.set(L - 0.14, 0.78 + 0.175, W - 0.25);
+  // --- consolle dietro la chaise (parete finestra): piano a 77 cm, profondo 21 cm, da z 2,76 al muro (misure dalla scansione 3D) ---
+  box(scene, 0.21, 0.03, 1.74, M.walnut, L - 0.105, 0.745, 3.63);
+  for (const [dx, dz] of [[0.03, 0.03], [0.18, 0.03], [0.03, 1.71], [0.18, 1.71]]) box(scene, 0.03, 0.745, 0.03, M.black, L - 0.21 + dx, 0, 2.76 + dz - 0.015);
+  box(scene, 0.03, 0.46, 0.15, mat('#7a1f1f'), L - 0.11, 0.775, 3.33); // fumetto con il supporto trasparente
+  const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.275, 8), M.black);
+  lamp.position.set(L - 0.1, 0.775 + 0.1375, 4.405);
   scene.add(lamp);
-  const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.07, 0.09, 14), M.black);
-  shade.position.set(L - 0.14, 0.78 + 0.4, W - 0.25);
+  const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.046, 0.095, 14), M.black);
+  shade.position.set(L - 0.1, 1.0975, 4.405);
   scene.add(shade);
   box(scene, 0.1, 0.7, 0.9, M.white, L - 0.05, 0.08, 1.17); // radiatore finestra
 }
