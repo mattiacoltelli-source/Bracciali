@@ -118,13 +118,15 @@ def push_pull(img, w, levels=8):
         out = fine * a + up * (1 - a)
     return out
 
-def wall_fill(img, valid, ppm=300, floor_cut=0.14, top=3.0):
+def wall_fill(img, valid, ppm=300, floor_cut=0.14, top=3.0, soft=False):
     """Riempie i buchi di una parete usando solo pixel di intonaco chiaro e poco saturo (niente ombre, oggetti, battiscopa)."""
     H, W = valid.shape
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV).astype(np.float32)
     lum = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).astype(np.float32)
     ref = float(np.median(lum[valid & (lum > 140)]))
     wl = np.clip((lum - 0.80 * ref) / (0.10 * ref), 0, 1) * np.clip((55.0 - hsv[..., 1]) / 25.0, 0, 1)
+    if soft:      # tiene anche le zone di intonaco piu' scure (gradiente della luce): serve a ricostruire fasce vicine ai mobili senza schiarirle
+        wl = np.clip((lum - 0.45 * ref) / (0.08 * ref), 0, 1) * np.clip((60.0 - hsv[..., 1]) / 25.0, 0, 1)
     rows = (top - (np.arange(H) + 0.5) / ppm)[:, None]           # quota y di ogni riga
     wl = wl * (rows > floor_cut)
     # solo pixel "interni" (lontani dai bordi dei buchi: li' c'e' contaminazione)

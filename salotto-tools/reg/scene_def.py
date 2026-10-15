@@ -9,14 +9,22 @@ def B(name, x0, x1, y0, y1, z0, z1, color='#444444', faces=(), flat=(), ppm=200,
     x0, x1 = x0 - DX, x1 - DX
     return dict(name=name, min=[x0, y0, z0], max=[x1, y1, z1], color=color, faces=list(faces), flat=list(flat), ppm=ppm, margin=margin, grp=grp, solid=solid, round=round, vis=vis, hidden=hidden)
 
+def N(name, x0, x1, *a, **k):
+    """come B() ma con la x nel sistema nuovo (senza lo spostamento DX)"""
+    return B(name, x0 + DX, x1 + DX, *a, **k)
+
 TV = dict(ppm=300, margin=0.035, grp='tv')
 SOFA = dict(ppm=170, margin=0.07, grp='sofa')
 FAB = '#3b3d40'
 
 BOXES = [
     # --- parete TV (z = 0) ---
-    B('colonna', 3.73, 4.14, 0.99, 2.19, 0.0, 0.18, '#b9b2a4', ['+z', '-x'], ['+y'], **TV),
-    B('pensile', 4.14, 4.755, 1.00, 2.27, 0.0, 0.25, '#3c3b3a', ['+z', '+x'], ['+y'], **TV),
+    # mobile a mensole accanto alla TV (coordinate del sistema NUOVO, tramite N()): fondo beige sottile, pilastro (il 'mobile quadrato'), pannello scuro davanti al pilastro.
+    # Le mensole in noce, la pianta, i vasi e i fumetti sono una mesh a colori per vertice (shelf_unit.py). Il pannello e' un po' inclinato (a sinistra z 0,236, a destra 0,285): qui sta a 0,26 in media.
+    N('dorso', 3.54, 3.855, 0.945, 2.213, 0.0, 0.034, '#b9b3a5', ['+z'], ['-x', '+y'], solid=False, **TV),
+    N('pilastro', 3.855, 4.25, 0.71, 2.245, 0.0, 0.236, '#b3ad9f', ['-x', '+z'], ['+x', '+y'], **TV),
+    N('pannello', 3.802, 4.415, 0.945, 2.245, 0.237, 0.26, '#8a8d92', ['+z'], ['-x', '+x', '+y'], **TV),
+    N('ostacolo_mensole', 3.54, 3.855, 0.945, 2.213, 0.0, 0.24, '#000000', [], [], hidden=True, **TV),
     B('cassettone', 4.24, 6.79, 0.34, 0.71, 0.0, 0.40, '#bcb4a6', ['+z', '-x'], ['+y', '+x'], **TV),
     B('ripiano', 5.00, 7.25, 0.71, 0.76, 0.0, 0.35, '#4a2f20', [], ['+z', '+y', '+x', '-x'], **TV),
     # vano a destra del mobile TV: a sinistra il vano aperto con il vaso rosso (fondo in noce a 34 cm; in fondo la parete, scura), poi un divisorio e un secondo vano buio, fianco destro in noce.
@@ -71,9 +79,20 @@ EXTRA_OCC = [
     dict(name='portabottiglie', min=[0.34, 0.78, 0.40], max=[0.62, 1.15, 0.80]),
     dict(name='ciotola', min=[0.40, 0.78, 1.17], max=[0.66, 0.90, 1.40]),
 ]
+
+# mobile a mensole: ostacoli per le texture delle facce (le mensole a scalini al posto del trapezio, gli oggetti con volumi scatola); coordinate nuove, +DX perche' sotto si toglie
+def _N(name, x0, x1, y0, y1, z0, z1): return dict(name=name, min=[x0 + DX, y0, z0], max=[x1 + DX, y1, z1])
+for _n, _y in zip('ABCD', (2.027, 1.815, 1.598, 1.16)):
+    EXTRA_OCC += [_N('mensola_' + _n + '1', 3.545, 3.855, _y - 0.022, _y, 0.034, 0.106), _N('mensola_' + _n + '2', 3.58, 3.855, _y - 0.022, _y, 0.106, 0.173), _N('mensola_' + _n + '3', 3.613, 3.855, _y - 0.022, _y, 0.173, 0.24)]
+EXTRA_OCC += [
+    _N('pianta_chioma', 3.60, 3.90, 2.12, 2.34, 0.02, 0.21), _N('pianta_vaso', 3.69, 3.80, 2.027, 2.125, 0.065, 0.165), _N('pianta_tralci', 3.43, 3.60, 1.84, 2.12, 0.10, 0.30), _N('pianta_ripiano', 3.52, 3.72, 2.03, 2.12, 0.12, 0.30),
+    _N('brocca', 3.60, 3.75, 1.815, 1.95, 0.06, 0.19), _N('vasetto_B', 3.768, 3.842, 1.815, 1.89, 0.085, 0.165),
+    _N('fumetti', 3.684, 3.855, 1.598, 1.78, 0.036, 0.17), _N('vasetto_C1', 3.598, 3.672, 1.598, 1.70, 0.11, 0.19), _N('vasetto_C2', 3.738, 3.812, 1.598, 1.70, 0.11, 0.19),
+    _N('pianta_foglie_pannello', 3.78, 3.93, 2.10, 2.34, 0.20, 0.32), _N('vaso_tulipano', 3.60, 3.77, 1.16, 1.39, 0.03, 0.19), _N('vaso_tondo', 3.69, 3.84, 1.16, 1.36, 0.08, 0.22),
+]
 for _e in EXTRA_OCC: _e['min'][0] -= DX; _e['max'][0] -= DX
 def as_occluders(boxes=BOXES, extra=True):
-    out = [dict(min=(np.array(b['min']) - b['margin']).tolist(), max=(np.array(b['max']) + b['margin']).tolist(), name=b['name']) for b in boxes]
+    out = [dict(min=(np.array(b['min']) - b['margin']).tolist(), max=(np.array(b['max']) + b['margin']).tolist(), name=b['name']) for b in boxes if not b.get('hidden')]
     return out + (EXTRA_OCC if extra else [])
 
 # piccoli oggetti (cilindri/coni): lampada nera sulla consolle, nell'angolo

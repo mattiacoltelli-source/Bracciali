@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { ROOM, WALLS, OPENINGS } from './room.js';
 
-const PACK_URL = 'pack/salotto.bin?v=6'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
+const PACK_URL = 'pack/salotto.bin?v=7'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
 const KEY_STORE = 'salotto.key';
 const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 
@@ -132,8 +132,8 @@ function roundedTexMesh(b, map, aw, ah) {
 }
 
 // piccoli oggetti fatti a mano: cilindro verticale, scatola, cilindro orizzontale (bottiglia), solido di rotazione con un colore per anello (vaso),
-// cilindro cavo con la foto intorno (vaso rosso del vano)
-function primMesh(p, T = {}) {
+// cilindro cavo con la foto intorno (vaso rosso del vano), mesh a colori per vertice (mensole, pianta, vasi, fumetti: B(nome) legge il blocco binario)
+function primMesh(p, T = {}, B = null) {
   const basic = (o = {}) => new THREE.MeshBasicMaterial({ color: p.color, toneMapped: false, ...o });
   let m;
   if (p.t === 'cyl') {
@@ -166,6 +166,17 @@ function primMesh(p, T = {}) {
     bottom.rotation.x = -Math.PI / 2; bottom.position.y = -h / 2 + 0.01;
     m = new THREE.Group(); m.add(outer, inner, rim, bottom);
     m.position.set(p.p[0], p.p[1] + h / 2, p.p[2]);
+  } else if (p.t === 'vmesh' && B) {
+    // posizioni float32 (nv*3), colori uint8 sRGB (nv*3, riempiti a 4 byte), indici uint16 (ni): le ombre sono gia' nei colori
+    const buf = B(p.bin), nv = p.nv, ni = p.ni;
+    const pos = new Float32Array(buf, 0, nv * 3), cb = new Uint8Array(buf, nv * 12, nv * 3), idx = new Uint16Array(buf, nv * 12 + ((nv * 3 + 3) & ~3), ni);
+    const col = new Float32Array(nv * 3), c = new THREE.Color();
+    for (let i = 0; i < nv; i++) { c.setRGB(cb[i * 3] / 255, cb[i * 3 + 1] / 255, cb[i * 3 + 2] / 255, THREE.SRGBColorSpace); col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b; }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos.slice(), 3));
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    g.setIndex(new THREE.BufferAttribute(idx.slice(), 1));
+    m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false, side: THREE.DoubleSide }));
   } else m = new THREE.Group();
   return m;
 }
@@ -520,7 +531,8 @@ export function createReal(ctx) {
     if (man.sofa) stage.add(buildSofa(man, plain, base, T));
     if (man.vox && man.vox.length) stage.add(buildVox(man.vox, plain, base, man));
     for (const it of man.items || []) stage.add(softItem(it));
-    for (const p of man.prims || []) stage.add(primMesh(p, T)); // piccoli oggetti: lampada, vasi, portabottiglie
+    const blob = (name) => { const im = man.images[name]; return plain.slice(base + im.o, base + im.o + im.n); };
+    for (const p of man.prims || []) stage.add(primMesh(p, T, blob)); // piccoli oggetti: lampada, vasi, portabottiglie, mensole con pianta e fumetti
     for (const id of Object.keys(man.art || {})) arts[id] = T[man.art[id]];
     group.add(stage);
     for (const m of walls) { groups[m.userData.wall].add(m); pieces.push(m); wallMeshes.push(m); }

@@ -38,7 +38,7 @@ if __name__ == '__main__':
     scale = float(sys.argv[1]) if len(sys.argv) > 1 else 0.5
     tag = sys.argv[2] if len(sys.argv) > 2 else 'v1'
     fr = FR(); from cams_sel import select; names = select(fr)
-    occ_all = [dict(min=(np.array(b['min']) - 0.012).tolist(), max=(np.array(b['max']) + 0.012).tolist(), name=b['name']) for b in BOXES]
+    occ_all = [dict(min=(np.array(b['min']) - 0.012).tolist(), max=(np.array(b['max']) + 0.012).tolist(), name=b['name']) for b in BOXES if not b.get('hidden')]
     occ_all += [dict(min=e['min'], max=e['max'], name=e['name']) for e in EXTRA_OCC]   # volumi invisibili (vasi, oggetti sulla console): non vanno nelle texture
     faces = []
     t0 = time.time()
