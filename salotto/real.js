@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { ROOM, WALLS, OPENINGS } from './room.js';
 
-const PACK_URL = 'pack/salotto.bin?v=19'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
+const PACK_URL = 'pack/salotto.bin?v=20'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
 const KEY_STORE = 'salotto.key';
 const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 
@@ -319,7 +319,7 @@ export function createReal(ctx) {
   const archSets = []; // archi: parti con profondita' (da dentro la stanza) e versione piatta (da fuori)
   let archDeep = false;
   const applyArch = () => { for (const a of archSets) { a.deep.forEach((m) => { m.visible = on && archDeep; }); a.flat.visible = on && !archDeep; } };
-  const arts = {}, assets = {}; // assets: parti del pacchetto che non sono la stanza (la statua a rilievo): l'app le chiede per nome
+  const arts = {};
   let pack = null, loading = null, on = false;
   const loader = new THREE.TextureLoader();
   const aniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
@@ -543,7 +543,7 @@ export function createReal(ctx) {
     for (const it of man.items || []) stage.add(softItem(it));
     const blob = (name) => { const im = man.images[name]; return plain.slice(base + im.o, base + im.o + im.n); };
     const deepPrims = [], wallPrims = [];
-    for (const p of man.prims || []) { const m = primMesh(p, T, blob); if (p.asset) { const g = (assets[p.asset] ||= new THREE.Group()); g.userData.h = p.h; g.add(m); continue; } if (p.deep) { m.visible = false; deepPrims.push(m); } else if (p.wall) wallPrims.push([p.wall, m]); else stage.add(m); } // piccoli oggetti: lampada, vasi, portabottiglie, mensole con pianta e fumetti; i 'deep' (corridoio) seguono l'arco; i 'wall' (le porte) restano attaccati alla loro parete
+    for (const p of man.prims || []) { const m = primMesh(p, T, blob); if (p.deep) { m.visible = false; deepPrims.push(m); } else if (p.wall) wallPrims.push([p.wall, m]); else stage.add(m); } // piccoli oggetti: lampada, vasi, portabottiglie, mensole con pianta e fumetti; i 'deep' (corridoio) seguono l'arco; i 'wall' (le porte) restano attaccati alla loro parete
     for (const id of Object.keys(man.art || {})) arts[id] = T[man.art[id]];
     group.add(stage);
     for (const m of walls) { groups[m.userData.wall].add(m); pieces.push(m); wallMeshes.push(m); }
@@ -562,7 +562,6 @@ export function createReal(ctx) {
     get colliders() { return pack ? pack.solid : []; },
     get spawn() { return pack?.spawn; },
     art: (id) => arts[id] || null,
-    asset: (name) => (assets[name] ? assets[name].clone() : null), // copia che condivide forma e materiale
     // 'ok' | 'nokey' | 'badkey' | 'assente' | 'rete' | 'pacchetto' | 'errore'
     load(onStatus) {
       if (pack) return Promise.resolve('ok');

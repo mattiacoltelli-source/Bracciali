@@ -212,7 +212,7 @@ function viewRay() { // dove guarda la camera (con la scheda aperta e' il centro
   camera.getWorldDirection(ray.ray.direction); ray.ray.origin.copy(camera.position);
   return ray;
 }
-const objApi = createObjects({ scene, camera, render, showErr, select: (id) => select(id), frame: (id) => { const o = objApi.get(id); if (o) { fitView(); frameAt(pv.set(o.x, o.h / 2, o.z)); } }, selected: () => selected, refresh: () => refreshPanels(), openTab: (n) => openTab(n), toDataUrl: (f, max) => toDataUrl(f, max), viewRay, asset: (n) => realApi?.asset?.(n) || null });
+const objApi = createObjects({ scene, camera, render, showErr, select: (id) => select(id), frame: (id) => { const o = objApi.get(id); if (o) { fitView(); frameAt(pv.set(o.x, o.h / 2, o.z)); } }, selected: () => selected, refresh: () => refreshPanels(), openTab: (n) => openTab(n), toDataUrl: (f, max) => toDataUrl(f, max), viewRay });
 
 // ---------- selezione e pannelli ----------
 let selected = null, step = 0.05;
@@ -430,6 +430,7 @@ const setStatus = (t) => { $('real-status').textContent = t || ''; };
 function syncLookUi() {
   document.querySelectorAll('[data-look]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.look === look)));
   $('walk-go').hidden = look !== 'real';
+  $('copy-link').hidden = !realApi?.ready; // c'e' solo con la chiave giusta (la stanza e' stata aperta)
 }
 async function setLook(next) {
   if (next === look) { syncLookUi(); return true; }
@@ -440,7 +441,6 @@ async function setLook(next) {
     $('real-key').hidden = !(r === 'nokey' || r === 'badkey');
     if (r !== 'ok') { setStatus(MSG[r] || MSG.errore); syncLookUi(); return false; }
     setStatus('');
-    objApi.assetsReady(); // con la stanza aperta arrivano le parti cifrate (la statua di lei)
   }
   look = next;
   realApi?.setLook(next === 'real');
@@ -455,6 +455,24 @@ $('real-key-go').onclick = async () => {
   if (!realMod.saveKey($('real-key-in').value)) { setStatus('Quella non sembra una chiave: sono 43 caratteri, senza spazi.'); return; }
   $('real-key-in').value = '';
   setLook('real');
+};
+// Il link con la chiave: chi lo apre vede subito la stanza a foto. L'app toglie la chiave dall'indirizzo dopo la prima apertura, quindi l'indirizzo della barra non basta: il link si ricompone qui.
+$('copy-link').onclick = async () => {
+  const k = realMod?.readKey?.();
+  if (!k) return;
+  const link = `${location.origin}${location.pathname}#k=${k}`;
+  let done = false;
+  try { await navigator.clipboard.writeText(link); done = true; } catch { /* provo il metodo vecchio */ }
+  if (!done) {
+    const t = document.createElement('textarea'); t.value = link; t.setAttribute('readonly', ''); t.style.cssText = 'position:fixed;top:0;opacity:0';
+    document.body.append(t); t.select();
+    try { done = document.execCommand('copy'); } catch { /* ok */ }
+    t.remove();
+  }
+  if (!done) { prompt('Copia il link della stanza:', link); return; } // ultima strada: si copia a mano
+  setStatus('Link copiato: chi lo apre vede la stanza a foto.');
+  const b = $('copy-link'); b.textContent = 'Link copiato';
+  setTimeout(() => { b.textContent = 'Copia il link della stanza'; }, 2500);
 };
 $('walk-go').onclick = () => {
   if (!realApi?.ready || look !== 'real') return;
