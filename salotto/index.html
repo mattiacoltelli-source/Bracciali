@@ -31,11 +31,8 @@
   <nav class="bar" aria-label="Strumenti">
     <button data-tab="views" type="button">Viste</button>
     <button data-tab="paintings" type="button">Quadri</button>
-    <button data-tab="scan" type="button">Scansione</button>
     <button data-tab="add" type="button" class="accent">+ Nuovo</button>
   </nav>
-
-  <div id="tool-pill" class="pill" hidden><span id="tool-text"></span><button id="tool-done" type="button">Fine</button></div>
 
   <section id="sheet" class="sheet" hidden>
     <div class="grab"><button id="sheet-close" type="button" aria-label="Chiudi">✕</button></div>
@@ -80,85 +77,12 @@
           <button data-nudge="down" type="button" aria-label="Giù">▼</button>
           <button data-nudge="right" type="button" aria-label="Destra">▶</button>
         </div>
-        <button id="e-hang" type="button" class="primary" hidden>Appendi nella scansione: tocca la parete</button>
         <div class="row">
           <button id="e-rot" type="button">Ruota 90°</button>
           <button id="e-del" type="button" class="danger">Elimina</button>
         </div>
       </div>
       <button id="reset" type="button" class="link">Ripristina quadri iniziali</button>
-    </div>
-
-    <div data-panel="scan" hidden>
-      <p class="muted">Carica la scansione 3D della stanza (file .ply, .spz o .splat). Resta nel telefono: non viene caricata da nessuna parte.</p>
-      <label class="file">Scansione<input id="s-file" type="file"></label>
-      <button id="s-reopen" type="button" hidden></button>
-      <p id="s-status" class="muted" role="status"></p>
-      <div id="s-tools" hidden>
-        <div class="steps" role="group" aria-label="Vista">
-          <button data-smode="scan" type="button" aria-pressed="true">Scansione</button>
-          <button data-smode="model" type="button">Modello a blocchi</button>
-        </div>
-        <h3>1 · Pavimento e verticale</h3>
-        <p class="muted">Inclina la vista verso il basso finché vedi il pavimento, poi tocca 3 punti ben distanti. L'app raddrizza la scansione e mette il pavimento a quota zero.</p>
-        <div class="row">
-          <button id="s-flip" type="button">Capovolgi</button>
-          <button id="s-roll" type="button">Gira 90°</button>
-          <button id="s-floor" type="button" class="primary">Tocca il pavimento</button>
-        </div>
-        <h3>2 · Scala</h3>
-        <p class="muted">Tocca due punti di cui conosci la distanza (es. i lati dell'arco), poi scrivi la misura vera.</p>
-        <div class="row">
-          <button id="s-measure" type="button" class="primary">Misura due punti</button>
-        </div>
-        <p id="s-measured" class="muted"></p>
-        <div class="row">
-          <label>Misura vera (cm)<input id="s-real" type="number" inputmode="decimal" min="1" max="2000"></label>
-          <button id="s-apply" type="button">Imposta scala</button>
-        </div>
-        <div class="steps" role="group" aria-label="Misure note">
-          <button data-real="107" type="button">Arco 107</button>
-          <button data-real="210" type="button">Porta 210</button>
-          <button data-real="300" type="button">Divano 300</button>
-        </div>
-        <h3>3 · Quadri</h3>
-        <label>Luminosità dei quadri<input id="s-bright" type="range" min="40" max="140" value="85"></label>
-        <p class="muted">Per appendere: scegli un quadro in "Quadri" e premi "Appendi nella scansione".</p>
-        <h3>4 · Pulizia (facoltativa)</h3>
-        <p class="muted">Per togliere nebbia, riflessi sotto il pavimento lucido e punti sospesi per aria.</p>
-        <label>Nebbia<input id="s-fog" type="range" min="0" max="100" value="0"></label>
-        <p class="muted">Alza finché la nebbia sparisce; se compaiono buchi nei muri, abbassa.</p>
-        <label>Taglia sotto il pavimento<input id="s-cut" type="range" min="0" max="40" value="0"></label>
-        <p id="s-cut-v" class="muted">Spento. Serve il passo 1 (pavimento).</p>
-        <div class="row"><button id="s-erase" type="button" class="primary">Cancella punti per aria</button></div>
-        <label>Grandezza della gomma<input id="s-eraser" type="range" min="5" max="60" value="20"></label>
-        <div class="row">
-          <button id="s-undo" type="button">Annulla l'ultimo</button>
-          <button id="s-undoall" type="button">Ripristina tutti</button>
-        </div>
-        <p id="s-erased" class="muted"></p>
-      </div>
-      <button id="s-remove" type="button" class="link" hidden>Rimuovi la scansione dal telefono</button>
-      <details class="guide" id="s-video-help">
-        <summary>Ho già un video: come lo trasformo in scansione?</summary>
-        <ul>
-          <li>Un video non basta: serve un'app che lo trasformi in una scansione 3D (file .ply o .spz).</li>
-          <li><b>Scaniverse</b> (app Android, gratis per uso personale): non usa un video già girato, ma riprende la stanza dentro l'app e fa tutto sul telefono. Nuova scansione → Splat → registra 1-3 minuti → attendi l'elaborazione → Condividi → Esporta → SPZ (più leggero) o PLY → salva nel telefono. Serve Android 7 o più recente, 4 GB di RAM e ARCore con profondità: sui telefoni vecchi può non funzionare. I nomi delle voci possono cambiare.</li>
-          <li><b>Luma AI</b> (sito o app): permette di caricare il video già girato ed esportare .PLY. Il servizio è gratuito ma "così com'è", senza nuovi sviluppi: può non funzionare. Il video va sui loro server.</li>
-          <li><b>KIRI Engine</b>: lo splat (3DGS) è a pagamento. <b>Polycam</b>: nel piano gratuito esporta solo mesh, non splat (da quanto ho trovato).</li>
-          <li>Se il file supera 100 MB, riducilo da PC con SuperSplat (superspl.at/editor): importa, cancella i punti vaganti, esporta in .spz.</li>
-        </ul>
-      </details>
-      <details class="guide">
-        <summary>Come girare il video della stanza</summary>
-        <ul>
-          <li>Luce uniforme (di giorno e luci accese), niente zoom, tieni fissi esposizione e fuoco se puoi.</li>
-          <li>Cammina piano, 2-3 minuti: un giro lungo i muri a circa 1,5 m, poi uno in diagonale e uno a due altezze diverse.</li>
-          <li>Inquadra sempre qualcosa di "ricco" (mobili, quadri): i muri bianchi lisci confondono l'app. Puoi attaccare qualche pezzetto di nastro di carta.</li>
-          <li>Niente persone in movimento. Per il marmo lucido: evita i riflessi forti delle luci.</li>
-          <li>Esporta in .spz (più leggero) o .ply e caricalo qui. Meglio sotto i 50 MB. Con Scaniverse vale lo stesso: 1-3 minuti di ripresa.</li>
-        </ul>
-      </details>
     </div>
 
     <form data-panel="add" id="add-form" hidden>
