@@ -474,6 +474,24 @@ $('copy-link').onclick = async () => {
   const b = $('copy-link'); b.textContent = 'Link copiato';
   setTimeout(() => { b.textContent = 'Copia il link della stanza'; }, 2500);
 };
+// ---------- installare l'app (PWA) ----------
+// Chrome, Edge e Samsung Internet mandano beforeinstallprompt: con un tocco si apre la finestra di installazione. Su iPhone e iPad non c'e': la voce spiega il menu Condividi.
+// Se l'app e' gia' installata (o si sta usando da installata) la voce non compare.
+let installEvt = null;
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || navigator.standalone === true;
+const isApple = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const installSub = $('install').querySelector('small'), installSub0 = installSub.textContent;
+const syncInstall = () => { $('install').hidden = isStandalone() || !(installEvt || isApple); };
+addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvt = e; installSub.textContent = installSub0; syncInstall(); });
+addEventListener('appinstalled', () => { installEvt = null; syncInstall(); });
+$('install').onclick = async () => {
+  if (!installEvt) { installSub.textContent = 'Tocca Condividi (il quadrato con la freccia in su), poi «Aggiungi alla schermata Home»'; return; }
+  const e = installEvt; installEvt = null; // l'evento vale una volta sola
+  e.prompt();
+  await e.userChoice.catch(() => {});
+  syncInstall();
+};
+syncInstall();
 $('walk-go').onclick = () => {
   if (!realApi?.ready || look !== 'real') return;
   $('sheet').hidden = true;

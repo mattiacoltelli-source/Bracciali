@@ -2,15 +2,25 @@
   "id": "salotto-3d",
   "name": "Salotto 3D",
   "short_name": "Salotto 3D",
-  "description": "Il salotto in 3D per provare i quadri",
+  "description": "Il salotto in 3D: prova quadri, tavoli e mobili, cammina nella stanza. Funziona anche senza rete.",
+  "lang": "it",
+  "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0b0b0c",
   "theme_color": "#0b0b0c",
+  "categories": ["lifestyle", "utilities"],
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "screenshots/quadri.jpg", "sizes": "540x960", "type": "image/jpeg", "form_factor": "narrow", "label": "Prova i quadri sulle pareti" },
+    { "src": "screenshots/oggetti.jpg", "sizes": "540x960", "type": "image/jpeg", "form_factor": "narrow", "label": "Aggiungi tavoli, sedie e mobili su misura" },
+    { "src": "screenshots/panoramica.jpg", "sizes": "540x960", "type": "image/jpeg", "form_factor": "narrow", "label": "La stanza vista dall'alto" },
+    { "src": "screenshots/quadri-wide.jpg", "sizes": "1280x720", "type": "image/jpeg", "form_factor": "wide", "label": "Prova i quadri sulle pareti" },
+    { "src": "screenshots/panoramica-wide.jpg", "sizes": "1280x720", "type": "image/jpeg", "form_factor": "wide", "label": "La stanza vista dall'alto" }
   ]
 }
