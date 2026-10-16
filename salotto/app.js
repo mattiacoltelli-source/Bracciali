@@ -212,7 +212,7 @@ function viewRay() { // dove guarda la camera (con la scheda aperta e' il centro
   camera.getWorldDirection(ray.ray.direction); ray.ray.origin.copy(camera.position);
   return ray;
 }
-const objApi = createObjects({ scene, camera, render, showErr, select: (id) => select(id), frame: (id) => { const o = objApi.get(id); if (o) { fitView(); frameAt(pv.set(o.x, o.h / 2, o.z)); } }, selected: () => selected, refresh: () => refreshPanels(), openTab: (n) => openTab(n), toDataUrl: (f, max) => toDataUrl(f, max), viewRay });
+const objApi = createObjects({ scene, camera, render, showErr, select: (id) => select(id), frame: (id) => { const o = objApi.get(id); if (o) { fitView(); frameAt(pv.set(o.x, o.h / 2, o.z)); } }, selected: () => selected, refresh: () => refreshPanels(), openTab: (n) => openTab(n), toDataUrl: (f, max) => toDataUrl(f, max), viewRay, asset: (n) => realApi?.asset?.(n) || null });
 
 // ---------- selezione e pannelli ----------
 let selected = null, step = 0.05;
@@ -440,6 +440,7 @@ async function setLook(next) {
     $('real-key').hidden = !(r === 'nokey' || r === 'badkey');
     if (r !== 'ok') { setStatus(MSG[r] || MSG.errore); syncLookUi(); return false; }
     setStatus('');
+    objApi.assetsReady(); // con la stanza aperta arrivano le parti cifrate (la statua di lei)
   }
   look = next;
   realApi?.setLook(next === 'real');

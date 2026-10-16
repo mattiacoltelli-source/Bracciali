@@ -87,6 +87,13 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
      (bianco pieno nella foto) si sostituiscono con il colore della striscia (`deglare`), e oltre il bordo vero l'ultimo colore d'ottone si prolunga (`strip_plaster`: intonaco = poco saturo e non bruciato).
      Nel manifesto `holes` dice a `real.js` di ritagliare la parete (`wallWithHoles` ora tiene anche il pezzo sotto l'apertura) e i prim con `wall: 'W'` restano legati alla parete. Nella texture del muro W
      la fascia della finestra e il telaio sdoppiato (arriva a z = 1,72) sono ricostruiti per diffusione (`WALL_EXCL['W']`, morbido). La nicchia e il radiatore restano cotti nel muro.
+   - la statua a rilievo da una foto (`reg/sagoma_obj.py`): una persona intera in piedi diventa una scultura a bassorilievo che si vede da tutti i lati, dentro l'app come oggetto "Statua di lei".
+     Maschera della figura con GrabCut e bordi dei capelli tracciati a mano (`console/sagoma_cut.py`); `console/sagoma_prep.py` chiude i buchi piccoli, ritaglia e prepara il dietro (la foto senza pelle e senza telefono,
+     con i colori vicini di capelli e vestito, sfocata: niente volto sul retro). La mesh segue il contorno (anelli di punti a distanza crescente dal bordo + una griglia larga dentro, Delaunay) e lo spessore
+     cresce con la distanza dal bordo (profilo tondeggiante, 17 cm al centro); sul contorno davanti e dietro si toccano (z = 0): solido chiuso, nessuna maschera alfa. Le due parti stanno nel pacchetto cifrato come
+     prim `vmesh` con `asset: 'sagoma'` e `h` (altezza di riferimento): `real.js` non le disegna, le tiene in `assets` e le consegna a `objects.js` (`real.asset('sagoma')`, copia che condivide forma e materiale).
+     Il tipo "Statua di lei" compare solo con la stanza a foto aperta; la prima volta una statua sta al centro (sostituisce quella di marmo di partenza se non e' stata toccata). I ritagli sono foto di casa:
+     restano fuori dal repository (`SAGOMA_ASSETS`), nel sito pubblico c'e' solo il pacchetto cifrato. `NO_SAGOMA=1` costruisce il pacchetto senza.
 6. `reg/build_pack.py TAG_MURI TAG_PAV TAG_FACCE salotto.bin` — toglie i quadri dai muri, riempie i buchi, mette l'ombra sotto i mobili sospesi,
    impacchetta atlante, divano, voxel e primitive e cifra tutto con AES-256-GCM. Nella parete W il muro dietro il divano (z 1,85-4,50, sotto 0,88 m: nessuna foto lo vede)
    si ricostruisce con il riempimento morbido (`WALL_EXCL['W']`): quello "solo intonaco chiaro" lasciava un blocco piu' chiaro con il bordo netto. Nella parete F la fascia delle applique arriva fino al portone

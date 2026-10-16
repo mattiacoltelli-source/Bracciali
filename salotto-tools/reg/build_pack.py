@@ -5,7 +5,7 @@ sys.path.insert(0, '/tmp/claude-0/s/reg')
 import numpy as np, cv2
 from fill import diffuse_fill, scene_complete, wall_fill
 from scene_def import BOXES, PRIMS, ITEMS
-import shelf_unit, shelf_tex, console_obj, ledges, credenza_obj, wall_obj, corridor_obj, door_obj, win_obj
+import shelf_unit, shelf_tex, console_obj, ledges, credenza_obj, wall_obj, corridor_obj, door_obj, win_obj, sagoma_obj
 
 R = '/tmp/claude-0/s/reg/out'
 KEYFILE = '/tmp/claude-0/s/pack.key'
@@ -353,6 +353,12 @@ def main():
             if qp.get('map'): d['map'] = qp['map']
             prims.append(d)
         print('oggetti credenza: parti', len(qparts), 'vertici', nvq, flush=True)
+    if os.path.isdir(sagoma_obj.ASSETS) and not os.environ.get('NO_SAGOMA'):      # la statua a rilievo da una foto: parti `asset` (non si disegnano nella stanza, le usa l'oggetto "sagoma" dell'app)
+        gparts, gimgs = sagoma_obj.build(); images.update(gimgs)
+        for gp in gparts:
+            meta, blob_g = gp['mesh'].pack(); bins[f"cm_{gp['name']}"] = blob_g
+            prims.append(dict(t='vmesh', bin=f"cm_{gp['name']}", nv=meta['nv'], ni=meta['ni'], uv=1, map=gp['map'], asset=gp['asset'], h=gp['h']))
+        print('sagoma: parti', len(gparts), flush=True)
     boxes = []
     for b in BOXES:
         d = dict(name=b['name'], min=b['min'], max=b['max'], grp=b['grp'], solid=b['solid'])
