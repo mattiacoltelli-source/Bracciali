@@ -1,4 +1,4 @@
-// Oggetti di prova nella stanza (tavolo, tavolino, sedia, mobile, tappeto, scatola): forme semplici a misura, che si spostano sul pavimento
+// Oggetti di prova nella stanza (tavolo, tavolino, sedia, mobile, tappeto, scatola, statua): forme semplici a misura, che si spostano sul pavimento
 // e si salvano nel telefono. Lo stato sta qui; app.js gestisce selezione, schede e tocchi sulla scena.
 import * as THREE from 'three';
 import { ROOM, WALLS } from './room.js';
@@ -19,8 +19,9 @@ export const KINDS = {
   cabinet: { label: 'Mobile', w: 1.2, d: 0.4, h: 0.85, mat: 'bianco', round: false, faces: ['front', 'top'] },
   rug: { label: 'Tappeto', w: 2.0, d: 1.4, h: 0.015, mat: 'beige', round: true, faces: ['top'] },
   box: { label: 'Scatola', w: 1.0, d: 0.6, h: 1.0, mat: 'grigio', round: false, faces: ['front', 'top'] },
+  statue: { label: 'Statua', w: 0.5, d: 0.5, h: 2.0, mat: 'marmo', round: false, faces: [] }, // misure del basamento e altezza totale
 };
-export const MATS = { rovere: ['Rovere', '#c2a47c'], noce: ['Noce', '#5e3d2a'], bianco: ['Bianco', '#e8e6df'], beige: ['Beige', '#d2c7b2'], grigio: ['Grigio', '#868a90'], nero: ['Nero', '#26262a'], rosso: ['Rosso', '#9e302b'] };
+export const MATS = { rovere: ['Rovere', '#c2a47c'], noce: ['Noce', '#5e3d2a'], bianco: ['Bianco', '#e8e6df'], beige: ['Beige', '#d2c7b2'], grigio: ['Grigio', '#868a90'], nero: ['Nero', '#26262a'], rosso: ['Rosso', '#9e302b'], marmo: ['Marmo', '#f1efea'] };
 const LIGHT = 0.8; // le luci della scena sommano piu' di 1: senza questo i colori chiari escono bruciati (il rovere diventava giallo acceso)
 const PHOTO_HINT = { table: 'La foto va sul piano: per esempio un marmo o un legno.', coffee: 'La foto va sul piano: per esempio un marmo o un legno.', rug: 'La foto va sopra il tappeto.', cabinet: 'Scegli se metterla davanti o sopra.', box: 'Scegli se metterla davanti o sopra.' };
 
@@ -56,6 +57,25 @@ function shadowTex(round) {
   return (shadows[k] = t);
 }
 
+// ---- marmo bianco con venature grigie: disegnato una volta sola, sempre uguale ----
+let marble = null;
+function marbleTex() {
+  if (marble) return marble;
+  const S = 256, c = document.createElement('canvas'); c.width = c.height = S;
+  const g = c.getContext('2d'); g.fillStyle = '#f3f1ec'; g.fillRect(0, 0, S, S);
+  let r = 20241; const rnd = () => ((r = (r * 1664525 + 1013904223) >>> 0) / 4294967296); // generatore con seme
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  for (let i = 0; i < 11; i++) {
+    let x = rnd() * S, y = rnd() * S, a = rnd() * Math.PI * 2; const pts = [[x, y]];
+    for (let k = 0; k < 26; k++) { a += (rnd() - 0.5) * 0.8; x += Math.cos(a) * 11; y += Math.sin(a) * 11; pts.push([x, y]); }
+    for (const [lw, al] of i < 4 ? [[9, 0.05], [3, 0.1]] : [[1.4, 0.2]]) { // le venature grosse sono sfumate, le sottili nette
+      g.strokeStyle = `rgba(118,120,132,${al})`; g.lineWidth = lw; g.beginPath(); pts.forEach(([px, py], j) => (j ? g.lineTo(px, py) : g.moveTo(px, py))); g.stroke();
+    }
+  }
+  marble = new THREE.CanvasTexture(c); marble.colorSpace = THREE.SRGBColorSpace; marble.anisotropy = 4;
+  return marble;
+}
+
 // ---- foto del prodotto: ritaglio al centro per non deformarla ----
 function fitTex(tex, ar) {
   const ia = tex.image.width / tex.image.height;
@@ -66,7 +86,8 @@ function fitTex(tex, ar) {
 function build(o, tex) {
   const { w, d, h } = eff(o), g = new THREE.Group();
   const base = new THREE.Color(MATS[o.mat][1]).multiplyScalar(LIGHT);
-  const main = new THREE.MeshLambertMaterial({ color: base }), dark = new THREE.MeshLambertMaterial({ color: base.clone().multiplyScalar(0.62) });
+  const map = o.mat === 'marmo' ? marbleTex() : null;
+  const main = new THREE.MeshLambertMaterial({ color: base, map }), dark = new THREE.MeshLambertMaterial({ color: base.clone().multiplyScalar(0.62), map });
   const photo = tex ? new THREE.MeshLambertMaterial({ map: tex, color: new THREE.Color(LIGHT, LIGHT, LIGHT) }) : null;
   const top = photo && o.face === 'top' ? photo : main, front = photo && o.face === 'front' ? photo : main;
   const put = (geo, m, x, y, z) => { const e = new THREE.Mesh(geo, m); e.position.set(x, y, z); e.userData.oid = o.id; g.add(e); return e; };
@@ -105,6 +126,34 @@ function build(o, tex) {
       }
       break;
     }
+    case 'statue': { // figura classica in veste lunga su un basamento a tre fasce; il davanti (+z) e' dove guarda
+      const ph = Math.min(0.4, h * 0.2), s = (h - ph) / 1.7; // la figura e' disegnata alta 1,7 e scalata
+      box(w, ph * 0.3, d, 0, ph * 0.15, 0, main); box(w * 0.84, ph * 0.52, d * 0.84, 0, ph * 0.56, 0, main); box(w * 0.94, ph * 0.18, d * 0.94, 0, ph * 0.91, 0, main);
+      // veste: solido di rotazione (orlo svasato, vita, spalle) con pieghe verticali sulla gonna; la giunzione sta dietro
+      const prof = [[0.215, 0], [0.222, 0.025], [0.2, 0.12], [0.178, 0.3], [0.158, 0.5], [0.142, 0.68], [0.128, 0.84], [0.113, 0.97], [0.106, 1.04], [0.122, 1.12], [0.14, 1.2], [0.165, 1.27], [0.186, 1.31], [0.17, 1.34], [0.11, 1.365], [0.062, 1.385], [0.048, 1.43], [0.047, 1.48]];
+      const lg = new THREE.LatheGeometry(prof.map(([pr, py]) => new THREE.Vector2(pr * s, py * s)), 56), pp = lg.attributes.position;
+      for (let k = 0; k < pp.count; k++) {
+        const x = pp.getX(k), y = pp.getY(k), z = pp.getZ(k), a = Math.atan2(x, z), f = 1 + 0.075 * Math.max(0, 1 - y / (1.0 * s)) * Math.sin(11 * a + 1.3 * Math.sin(7 * y / s));
+        pp.setXYZ(k, x * f, y, z * f);
+      }
+      lg.computeVertexNormals();
+      const robe = put(lg, main, 0, ph, 0); robe.scale.z = 0.74; robe.rotation.y = Math.PI;
+      const ball = (x, y, z, sx, sy, sz) => { const m = put(new THREE.SphereGeometry(1, 24, 16), main, x * s, ph + y * s, z * s); m.scale.set(sx * s, sy * s, sz * s); };
+      const V = THREE.Vector3, up = new V(0, 1, 0), limb = (a, b, r) => { // braccio: capsula fra due punti
+        const pa = new V(...a).multiplyScalar(s), pb = new V(...b).multiplyScalar(s), len = pa.distanceTo(pb);
+        const m = put(new THREE.CapsuleGeometry(r * s, Math.max(0.001, len - 2 * r * s), 6, 12), main, 0, 0, 0);
+        m.position.copy(pa).add(pb).multiplyScalar(0.5); m.position.y += ph; m.quaternion.setFromUnitVectors(up, pb.sub(pa).normalize());
+      };
+      for (const sx of [-1, 1]) { // braccia piegate, mani giunte davanti alla vita
+        limb([sx * 0.19, 1.3, 0], [sx * 0.205, 1.05, 0.02], 0.037); limb([sx * 0.205, 1.05, 0.02], [sx * 0.035, 1.02, 0.125], 0.031);
+        ball(sx * 0.19, 1.29, 0, 0.046, 0.046, 0.046); ball(sx * 0.205, 1.05, 0.02, 0.04, 0.04, 0.04); ball(sx * 0.035, 1.02, 0.125, 0.034, 0.036, 0.034);
+      }
+      ball(0, 1.55, 0.005, 0.088, 0.112, 0.098);                                       // testa
+      ball(0, 1.572, -0.028, 0.092, 0.1, 0.1);                                         // capelli
+      ball(0, 1.645, -0.088, 0.045, 0.045, 0.045);                                     // crocchia
+      ball(0, 1.538, 0.1, 0.009, 0.017, 0.015);                                        // naso: indica il davanti
+      break;
+    }
     case 'rug':
       if (o.round) drum(w / 2, h, 0, h / 2, 0, main, top); else box(w, h, d, 0, h / 2, 0, m6(top, main));
       break;
@@ -138,6 +187,14 @@ export function createObjects(ctx) {
     } catch { return []; }
   }
   let items = load();
+  // una statua di partenza in mezzo alla stanza, una volta sola per telefono: si elimina come ogni altro oggetto e non torna
+  try {
+    if (!localStorage.getItem('salotto.seed.statua')) {
+      localStorage.setItem('salotto.seed.statua', '1');
+      const K = KINDS.statue; items.push({ id: newId(), kind: 'statue', mat: K.mat, round: false, w: K.w, d: K.d, h: K.h, x: ROOM.L / 2, z: ROOM.W / 2, rot: 0, face: null, img: null });
+      save();
+    }
+  } catch { /* senza archivio non c'e' la statua */ }
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(items.map(({ img, ...r }) => ({ ...r, photo: !!img })))); return true; }
     catch { ctx.showErr('Spazio del telefono pieno: gli oggetti non vengono salvati. Togli qualche foto o oggetto.'); return false; }
