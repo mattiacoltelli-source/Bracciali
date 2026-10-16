@@ -16,7 +16,7 @@
   <button id="snap" class="snap" type="button" aria-label="Salva immagine della vista">
     <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13.5" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
   </button>
-  <p id="hint" class="hint">Trascina per girare · due dita per zoom · tocca un quadro per selezionarlo</p>
+  <p id="hint" class="hint">Trascina per girare · due dita per zoom · tocca un quadro o un oggetto per selezionarlo</p>
   <p id="err" class="err" hidden></p>
 
   <div id="walk-hud" class="walk" hidden>
@@ -30,12 +30,12 @@
 
   <nav class="bar" aria-label="Strumenti">
     <button data-tab="views" type="button">Viste</button>
-    <button data-tab="paintings" type="button">Quadri</button>
+    <button data-tab="paintings" type="button">Oggetti</button>
     <button data-tab="add" type="button" class="accent">+ Nuovo</button>
   </nav>
 
   <section id="sheet" class="sheet" hidden>
-    <div class="grab"><button id="sheet-close" type="button" aria-label="Chiudi">✕</button></div>
+    <div class="grab"><button id="back" type="button" class="link back" hidden>‹ Tutti gli oggetti</button><button id="sheet-close" type="button" aria-label="Chiudi">✕</button></div>
 
     <div data-panel="views" hidden>
       <div class="chips">
@@ -61,9 +61,19 @@
     </div>
 
     <div data-panel="paintings" hidden>
-      <ul id="plist" class="plist"></ul>
+      <div id="lists">
+        <h3>Oggetti</h3>
+        <ul id="olist" class="plist"></ul>
+        <div id="o-empty">
+          <p class="muted">Nessun oggetto. Prova un tavolo, una sedia o un tappeto nella stanza.</p>
+          <button id="o-empty-go" type="button" class="wide">Aggiungi un oggetto</button>
+        </div>
+        <button id="o-clear" type="button" class="link" hidden>Togli tutti gli oggetti</button>
+        <h3>Quadri</h3>
+        <ul id="plist" class="plist"></ul>
+        <button id="reset" type="button" class="link">Ripristina quadri iniziali</button>
+      </div>
       <div id="editor" class="editor" hidden>
-        <button id="e-back" type="button" class="link back">‹ Tutti i quadri</button>
         <h2 id="e-name"></h2>
         <p id="e-info" class="muted"></p>
         <div class="steps" role="group" aria-label="Passo">
@@ -82,19 +92,103 @@
           <button id="e-del" type="button" class="danger">Elimina</button>
         </div>
       </div>
-      <button id="reset" type="button" class="link">Ripristina quadri iniziali</button>
+      <div id="oeditor" class="editor" hidden>
+        <div class="oh"><h2 id="o-name"></h2><span id="o-info" class="muted"></span></div>
+        <p id="o-gap" class="muted tight"></p>
+        <div class="steps" role="group" aria-label="Cosa regolare">
+          <button data-otab="move" type="button" aria-pressed="true">Sposta</button>
+          <button data-otab="size" type="button">Misure</button>
+          <button data-otab="look" type="button">Aspetto</button>
+        </div>
+        <div data-opanel="move">
+          <div class="pad five">
+            <button data-onudge="left" type="button" aria-label="Sinistra">◀</button>
+            <button data-onudge="up" type="button" aria-label="Avanti">▲</button>
+            <button data-onudge="down" type="button" aria-label="Indietro">▼</button>
+            <button data-onudge="right" type="button" aria-label="Destra">▶</button>
+            <button id="o-step" type="button" aria-label="Passo di spostamento: tocca per cambiarlo">5 cm</button>
+          </div>
+          <div class="row">
+            <button data-orot="15" type="button" aria-label="Ruota di 15 gradi a sinistra">↺ 15°</button>
+            <button data-orot="-15" type="button" aria-label="Ruota di 15 gradi a destra">↻ 15°</button>
+            <button data-orot="90" type="button">Ruota 90°</button>
+          </div>
+          <button id="o-here" type="button" class="wide">Sposta dove guardo</button>
+        </div>
+        <div data-opanel="size" hidden>
+          <p class="muted">Misure in cm</p>
+          <div class="row dims">
+            <label id="o-w-l">Larghezza<input id="o-w" type="number" inputmode="decimal" min="5" max="500" step="1"></label>
+            <label id="o-d-l">Profondità<input id="o-d" type="number" inputmode="decimal" min="5" max="500" step="1"></label>
+            <label>Altezza<input id="o-h" type="number" inputmode="decimal" min="1" max="300" step="1"></label>
+          </div>
+          <div id="o-shape" class="steps" role="group" aria-label="Forma">
+            <button data-shape="rect" type="button" aria-pressed="true">Rettangolare</button>
+            <button data-shape="round" type="button">Rotonda</button>
+          </div>
+        </div>
+        <div data-opanel="look" hidden>
+          <div class="sws" role="group" aria-label="Materiale">
+            <button class="sw" data-mat="rovere" type="button" aria-label="Rovere" style="--c:#c2a47c"></button>
+            <button class="sw" data-mat="noce" type="button" aria-label="Noce" style="--c:#5e3d2a"></button>
+            <button class="sw" data-mat="bianco" type="button" aria-label="Bianco" style="--c:#e8e6df"></button>
+            <button class="sw" data-mat="beige" type="button" aria-label="Beige" style="--c:#d2c7b2"></button>
+            <button class="sw" data-mat="grigio" type="button" aria-label="Grigio" style="--c:#868a90"></button>
+            <button class="sw" data-mat="nero" type="button" aria-label="Nero" style="--c:#26262a"></button>
+            <button class="sw" data-mat="rosso" type="button" aria-label="Rosso" style="--c:#9e302b"></button>
+          </div>
+          <p id="o-mat-name" class="muted"></p>
+          <div id="o-photo-box">
+            <label class="file">Foto del prodotto<input id="o-photo" type="file" accept="image/*"></label>
+            <p id="o-photo-hint" class="muted"></p>
+            <div id="o-face" class="steps" role="group" aria-label="Dove mettere la foto" hidden>
+              <button data-face="top" type="button">Sopra</button>
+              <button data-face="front" type="button">Davanti</button>
+            </div>
+            <button id="o-photo-del" type="button" class="link" hidden>Togli la foto</button>
+          </div>
+        </div>
+        <div class="row">
+          <button id="o-copy" type="button">Copia</button>
+          <button id="o-del" type="button" class="danger">Elimina</button>
+        </div>
+      </div>
     </div>
 
-    <form data-panel="add" id="add-form" hidden>
-      <label class="file">Foto del quadro<input id="a-file" type="file" accept="image/*" required></label>
-      <label>Nome<input id="a-name" type="text" placeholder="Nuovo quadro" maxlength="40"></label>
-      <div class="row">
-        <label>Larghezza (cm)<input id="a-w" type="number" inputmode="decimal" min="5" max="400" value="75" required></label>
-        <label>Altezza (cm)<input id="a-h" type="number" inputmode="decimal" min="5" max="400" value="50" required></label>
+    <div data-panel="add" hidden>
+      <div class="steps" role="group" aria-label="Cosa aggiungere">
+        <button data-add="painting" type="button" aria-pressed="true">Quadro</button>
+        <button data-add="object" type="button">Oggetto</button>
       </div>
-      <button type="submit" class="primary">Appendi sulla parete che guardi</button>
-      <p class="muted">La foto resta nel tuo telefono: non viene caricata da nessuna parte.</p>
-    </form>
+      <form id="add-form">
+        <label class="file">Foto del quadro<input id="a-file" type="file" accept="image/*" required></label>
+        <label>Nome<input id="a-name" type="text" placeholder="Nuovo quadro" maxlength="40"></label>
+        <div class="row">
+          <label>Larghezza (cm)<input id="a-w" type="number" inputmode="decimal" min="5" max="400" value="75" required></label>
+          <label>Altezza (cm)<input id="a-h" type="number" inputmode="decimal" min="5" max="400" value="50" required></label>
+        </div>
+        <button type="submit" class="primary">Appendi sulla parete che guardi</button>
+        <p class="muted">La foto resta nel tuo telefono: non viene caricata da nessuna parte.</p>
+      </form>
+      <form id="obj-form" hidden>
+        <div class="kinds" role="group" aria-label="Tipo di oggetto">
+          <button data-kind="table" type="button" aria-pressed="true"><svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="8" width="22" height="4" rx="1.5"/><path d="M7 12v11M21 12v11"/></svg>Tavolo</button>
+          <button data-kind="coffee" type="button"><svg viewBox="0 0 28 28" aria-hidden="true"><rect x="4" y="13" width="20" height="4" rx="1.5"/><path d="M8 17v6M20 17v6"/></svg>Tavolino</button>
+          <button data-kind="chair" type="button"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M9 4v10h12v9M9 14v9"/></svg>Sedia</button>
+          <button data-kind="cabinet" type="button"><svg viewBox="0 0 28 28" aria-hidden="true"><rect x="4" y="6" width="20" height="14" rx="2"/><path d="M14 6v14M7 20v3M21 20v3M11.5 13h.01M16.5 13h.01"/></svg>Mobile</button>
+          <button data-kind="rug" type="button"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M8 8h16l3 12H5z"/><path d="M11 12h10l1.5 4.5h-13z"/></svg>Tappeto</button>
+          <button data-kind="box" type="button"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 4l9 4.5v11L14 24l-9-4.5v-11z"/><path d="M5 8.5l9 4.5 9-4.5M14 13v11"/></svg>Scatola</button>
+        </div>
+        <p class="muted tight">Misure in cm</p>
+        <div class="row dims">
+          <label>Larghezza<input id="n-w" type="number" inputmode="decimal" min="5" max="500" step="1" required></label>
+          <label>Profondità<input id="n-d" type="number" inputmode="decimal" min="5" max="500" step="1" required></label>
+          <label>Altezza<input id="n-h" type="number" inputmode="decimal" min="1" max="300" step="1" required></label>
+        </div>
+        <button type="submit" class="primary">Metti nella stanza</button>
+        <p class="muted">Compare a terra davanti a te. Poi lo sposti e lo regoli.</p>
+      </form>
+    </div>
   </section>
 
   <script type="module" src="app.js"></script>
