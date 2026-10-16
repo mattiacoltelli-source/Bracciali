@@ -52,7 +52,7 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
    - applique, citofono e placca sulla parete d'ingresso F (`reg/wall_obj.py`): due applique nere (asta da 1 cm e cilindro da 5,6 cm contro il muro, l'asta davanti al cilindro), pannello e cornetta bianchi del citofono
      (cavo a spirale), placca nera a quattro tasti. Posizioni dai raggi di tre foto registrate (79eb58fc, 6eac1b0f, 8a00d20d) intersecati col piano della parete (z = 4,5: il quadro dell'Islanda torna a 1 cm),
      dimensioni dalle stesse foto. Le fasce della parete F con le loro vecchie immagini doppie (e l'alone caldo delle applique accese) sono ricostruite per diffusione (`WALL_EXCL['F']`).
-   - corridoio dietro l'arco (`reg/corridor_obj.py`): un disimpegno di 2,8 x 1,4 m con la porta di mogano chiusa, il secondo vano buio, le due stampe manga in bianco e nero e il pavimento di marmo.
+   - corridoio dietro l'arco (`reg/corridor_obj.py`): un disimpegno di 2,8 x 1,4 m con le due porte di mogano chiuse (la seconda, nelle foto aperta, usa la stessa foglia riflessa), le due stampe manga in bianco e nero e il pavimento di marmo.
      Le foto del corridoio dell'utente (verticali, non registrate nel modello) si mettono nel riferimento della stanza con una PnP (`console/corr_pose.py`): angoli dell'arco e tre punti della parete TV letti in una foto
      registrata (b4bfa2ec). Il muro di fondo sta a z = -1,40: il pavimento letto in due foto indipendenti (la PnP e la registrata) lo da' a -1,40 e stampe da 48 x 68 cm; il confronto fotometrico fra foto
      registrate dava -2,15 ma dipende troppo dalle pose relative. L'imbotte dell'arco e' profondo 40 cm (lo dice il bordo posteriore dell'architrave nella foto), non 25.

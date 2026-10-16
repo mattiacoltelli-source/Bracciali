@@ -1,5 +1,5 @@
 """Corridoio dietro l'arco della parete TV (z < 0 nel sistema stanza): un piccolo disimpegno lungo 2,8 m (x da 0,02 a 2,80), profondo 1,40 m dal piano della parete TV, con
-a sinistra la porta chiusa di mogano e a destra un secondo vano (buio), in mezzo le due stampe manga in bianco e nero; zoccolo di marmo bruno, pavimento di marmo.
+a sinistra la porta chiusa di mogano e a destra la seconda porta (anch'essa chiusa), in mezzo le due stampe manga in bianco e nero; zoccolo di marmo bruno, pavimento di marmo.
 Misure dalla foto del corridoio (posa ricavata dagli angoli dell'arco e da tre punti della parete TV letti in una foto registrata); il muro di fondo sta a z = -1,40 (pavimento letto in
 due foto indipendenti). Texture: stampe e foglia della porta rettificate dalle foto, pavimento rettificato e completato a specchio; l'intonaco e' a colori per vertice con il gradiente di luce visto nella foto
 (la luce calda arriva dall'alto). Tutte le parti sono 'deep': l'app le mostra solo da dentro la stanza."""
@@ -151,14 +151,11 @@ def build():
     w2 = DOORWAY
     # secondo vano: cornice solo sul lato sinistro e in alto (il resto sta dietro lo stipite destro dell'arco), interno nero
     casing(w2['x0'], w2['x1'], w2['y1'], w2['arch_w'])
-    black = Mesh()
-    black.quad((w2['x0'], 0.0, fz + 0.004), (w2['x1'], 0.0, fz + 0.004), (w2['x1'], w2['y1'], fz + 0.004), (w2['x0'], w2['y1'], fz + 0.004), (10, 10, 12), two=True, k=1.0)
-    for (xa, xb) in ((w2['x0'], w2['x0']), (w2['x1'], w2['x1'])):
-        black.quad((xa, 0.0, fz), (xa, 0.0, fz - 0.9), (xa, w2['y1'], fz - 0.9), (xa, w2['y1'], fz), (12, 12, 14), two=True, k=1.0)
-    black.quad((w2['x0'], w2['y1'], fz), (w2['x1'], w2['y1'], fz), (w2['x1'], w2['y1'], fz - 0.9), (w2['x0'], w2['y1'], fz - 0.9), (12, 12, 14), two=True, k=1.0)
-    black.quad((w2['x0'], 0.0, fz - 0.9), (w2['x1'], 0.0, fz - 0.9), (w2['x1'], w2['y1'], fz - 0.9), (w2['x0'], w2['y1'], fz - 0.9), (8, 8, 10), two=True, k=1.0)
+    # secondo vano: anche questa porta e' chiusa (nelle foto era aperta, con l'interno buio). Foglia uguale a quella di sinistra (stessa texture, riflessa: la maniglia sta sul lato lontano
+    # dall'arco, che da dentro la stanza resta nascosto dallo stipite destro), alla stessa profondita'; la cornice e' quella di prima
+    fz2 = fz + 0.014
     reveal(trim)
-    parts.append(dict(name='corr_trim', mesh=trim, map=None)); parts.append(dict(name='corr_dark', mesh=black, map=None))
+    parts.append(dict(name='corr_trim', mesh=trim, map=None))
     # --- foglia della porta (texture rettificata dalla foto) ---
     door = cv2.imread(f'{ASSETS}/door_raw.png'); ppm = 600
     c0 = int(round((d['x0'] - 0.34) * ppm)); c1 = int(round((d['x1'] - 0.34) * ppm)); r0 = int(round((1.95 - d['y1']) * ppm)); r1 = int(round((1.95 - 0.02) * ppm))
@@ -167,6 +164,9 @@ def build():
     dm = Mesh(); dz = fz + 0.014
     dm._add([(d['x0'], 0.02, dz), (d['x1'], 0.02, dz), (d['x1'], d['y1'], dz), (d['x0'], d['y1'], dz)], [(255, 255, 255)] * 4, [(0, 1, 2), (0, 2, 3)], [(0, 0), (1, 0), (1, 1), (0, 1)])
     parts.append(dict(name='corr_leaf', mesh=dm, map='corr_door'))
+    d2 = Mesh()
+    d2._add([(w2['x0'], 0.02, fz2), (w2['x1'], 0.02, fz2), (w2['x1'], w2['y1'], fz2), (w2['x0'], w2['y1'], fz2)], [(255, 255, 255)] * 4, [(0, 1, 2), (0, 2, 3)], [(1, 0), (0, 0), (0, 1), (1, 1)])
+    parts.append(dict(name='corr_leaf2', mesh=d2, map='corr_door'))
     # --- stampe ---
     p1 = cv2.imread(f'{ASSETS}/print1.png'); p2 = cv2.imread(f'{ASSETS}/print2.png')
     tw, th = 512, 716
