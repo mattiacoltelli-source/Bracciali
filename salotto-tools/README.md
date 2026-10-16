@@ -66,6 +66,9 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
      campionati con la posa; il pavimento che l'arco non lascia vedere si completa a specchio. L'intonaco e' a colori per vertice col gradiente di luce visto nella foto (luce calda dall'alto).
      Nel pacchetto sono prim `vmesh` con `deep: 1`: `real.js` li mostra solo da dentro la stanza, insieme all'imbotte (con `corridor` nel manifesto i piani procedurali di stipiti, architrave e tunnel non si usano piu').
      I ritagli (foglia, stampe, pavimento, imbotte) stanno in `CONSOLE_ASSETS/corr` (foto di casa, fuori dal repository). La fascia sinistra della parete TV (x 0-0,47, a sinistra dell'arco) e' ricostruita per diffusione (`WALL_EXCL`): le foto la cuocevano a chiazze.
+     Il disimpegno e' percorribile: `corridor_obj.ZONE` (x 0,02-2,80, z da -0,40 a -1,40, altezza 2,70, apertura dell'arco) va nel manifesto (`corridor`); `real.js` tiene le parti `deep` in un gruppo a parte
+     (`corrGroup`, visibile da dentro la stanza e da dentro il disimpegno: il gruppo del muro TV sparisce guardando da dietro) e `walk.js` somma il passaggio dell'arco e il disimpegno alla zona percorribile.
+     Il retro della parete TV (z = -0,40, con il buco dell'arco) e il suo zoccolo stanno in `corr_walls` e `corr_trim`.
    - le due porte (`reg/door_obj.py`): la porta interna chiusa sulla parete A e il portone blindato d'ingresso sulla parete F, in rilievo davanti al muro (prima erano dipinte nella texture della parete, con doppie
      immagini e angoli sbavati). Le foto frontali dell'utente (non registrate: 81d8e52c e afd7ab79) si tolgono dalla distorsione radiale e si raddrizzano con l'omografia dei quattro angoli esterni del coprifilo
      (`console/door_prep.py`, 600 px/m; angoli letti a mano con `console/gcrop2.py`, `gbright.py` schiarisce le zone in ombra). Le misure del coprifilo (A: 0,886 x 2,035 m, bordo sinistro a z = 3,439; F: 1,236 x 2,24 m,

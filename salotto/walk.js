@@ -17,6 +17,15 @@ export function createWalk(ctx) {
 
   const colliders = () => real.colliders;
   const inRoom = (x, z) => x >= R + 0.04 && x <= ROOM.L - R - 0.04 && z >= R + 0.04 && z <= ROOM.W - R - 0.04;
+  // dietro l'arco: il passaggio (l'imbotte e' profondo 40 cm) e il disimpegno, se il pacchetto li ha; i centri restano a R + 4 cm da muri e stipiti
+  function inCorridor(x, z) {
+    const c = real.corridor; if (!c) return false;
+    const m = R + 0.04, [a0, a1] = c.arch;
+    const passage = x >= a0 + m && x <= a1 - m && z >= c.zn - 0.3 && z <= m;
+    const hall = x >= c.x0 + m && x <= c.x1 - m && z >= c.zf + m && z <= c.zn - m;
+    return passage || hall;
+  }
+  const walkable = (x, z) => inRoom(x, z) || inCorridor(x, z);
   // quanto il corpo (cerchio) entra nei mobili: >0 = dentro; serve a uscire da un mobile se ci si trova dentro (teletrasporto) senza attraversarlo
   function pen(x, z) {
     let worst = -1;
@@ -33,7 +42,7 @@ export function createWalk(ctx) {
   }
   function move(dx, dz) {
     const p0 = pen(st.x, st.z);
-    const ok = (x, z) => inRoom(x, z) && (() => { const p = pen(x, z); return p <= 0 || p <= p0 + 1e-6; })();
+    const ok = (x, z) => walkable(x, z) && (() => { const p = pen(x, z); return p <= 0 || p <= p0 + 1e-6; })();
     const nx = st.x + dx, nz = st.z + dz;
     if (ok(nx, nz)) { st.x = nx; st.z = nz; }
     else if (ok(nx, st.z)) st.x = nx;

@@ -16,6 +16,9 @@ DOOR = dict(x0=0.385, x1=0.953, y1=1.867, arch_w=0.065)            # foglia dell
 DOORWAY = dict(x_out=1.870, x0=1.940, x1=2.720, y1=1.890, arch_w=0.070)  # secondo vano: cornice marrone e interno buio (a destra la cornice simmetrica)
 PRINTS = [dict(x0=1.194, x1=1.672, y0=1.399, y1=2.065, tile=0), dict(x0=1.198, x1=1.686, y0=0.632, y1=1.302, tile=1)]   # le due stampe (circa 48 x 67 cm)
 BASE_H = 0.07
+ARCH_H = 1.989                       # altezza dell'architrave dell'arco (come nell'imbotte)
+# per l'app: il disimpegno (da dove si cammina) e il passaggio dell'arco
+ZONE = dict(x0=X_L, x1=X_R, zn=Z_N, zf=Z_F, h=H, arch=[ARCH[0], ARCH[1], ARCH_H])
 
 # gradiente di luce sul muro di fondo (colori letti nella foto, dal basso verso l'alto): la luce calda arriva dall'alto
 GRAD = [(0.00, (140, 122, 95)), (0.25, (155, 136, 111)), (0.70, (173, 155, 125)), (1.20, (197, 182, 148)), (1.70, (236, 213, 181)), (1.95, (253, 231, 195)), (2.20, (255, 236, 200)), (2.70, (255, 236, 202))]
@@ -127,6 +130,10 @@ def build():
     _band_quad(walls, (X_L, 0, Z_N), (X_L, 0, Z_F), 0, H, 0.80, refc)                     # muro sinistro
     _band_quad(walls, (X_R, 0, Z_F), (X_R, 0, Z_N), 0, H, 0.80, refc)                     # muro destro
     walls.quad((X_L, H, Z_N), (X_R, H, Z_N), (X_R, H, Z_F), (X_L, H, Z_F), tuple(plaster(2.4, 0.80)), ref=refc, two=True)       # soffitto
+    # retro della parete TV (z = Z_N) visto da dentro il disimpegno, con il buco dell'arco: stesso intonaco e stesso gradiente di luce
+    _band_quad(walls, (X_L, 0, Z_N), (ARCH[0], 0, Z_N), 0, H, 0.84, refc)
+    _band_quad(walls, (ARCH[1], 0, Z_N), (X_R, 0, Z_N), 0, H, 0.84, refc)
+    _band_quad(walls, (ARCH[0], 0, Z_N), (ARCH[1], 0, Z_N), ARCH_H, H, 0.84, refc)
     parts.append(dict(name='corr_walls', mesh=walls, map=None))
     # --- zoccolo di marmo bruno e cornici ---
     trim = Mesh()
@@ -136,6 +143,8 @@ def build():
     _box(trim, X_L, X_R, 0, BASE_H, Z_F, Z_F + 0.012, base, faces=dict([('+z', base), ('+y', base_top), ('+x', base), ('-x', base)]))              # fondo
     _box(trim, X_L, X_L + 0.012, 0, BASE_H, Z_F, Z_N, base, faces=dict([('+x', base), ('+y', base_top), ('+z', base), ('-z', base)]))               # sinistro
     _box(trim, X_R - 0.012, X_R, 0, BASE_H, Z_F, Z_N, base, faces=dict([('-x', base), ('+y', base_top), ('+z', base), ('-z', base)]))              # destro
+    _box(trim, X_L, ARCH[0], 0, BASE_H, Z_N - 0.012, Z_N, base, faces=dict([('-z', base), ('+y', base_top), ('+x', base), ('-x', base)]))          # retro della parete TV, a sinistra dell'arco
+    _box(trim, ARCH[1], X_R, 0, BASE_H, Z_N - 0.012, Z_N, base, faces=dict([('-z', base), ('+y', base_top), ('+x', base), ('-x', base)]))          # e a destra
     d = DOOR; aw = d['arch_w']; fz = Z_F
     frame = (66, 32, 19); frame_hi = (88, 45, 28)
     def casing(x0, x1, y1, w, zc=0.0, deep=0.011):
