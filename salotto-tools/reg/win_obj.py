@@ -1,17 +1,20 @@
-"""La finestra della parete W (z 0,72-1,63 m), in 3D: buco nel muro, spalle in ottone e telaio con i vetri 13 cm piu' dentro.
-Prima il telaio era cotto nella texture del muro: le foto registrate lo vedono da 5-7 m con pose diverse e, siccome sta 13 cm dietro il filo del muro, finiva sfocato e sdoppiato.
-Ora: il telaio e' un piano a parte (x = 7,10 + 0,13) con la foto frontale dell'utente (non registrata) rimappata a 800 px/m, e le quattro spalle sono strisce campionate dalla stessa foto
-(console/win_prep.py: omografia con ECC sul riferimento metrico, camera dalla decomposizione, riflessi del fotografo coperti). Il buco ha le misure dell'apertura (letta sugli angoli esterni
-delle spalle): z 0,725-1,631, y 0,9225-2,466; il manifesto lo dice a real.js (`holes`), che ritaglia la parete e attacca le parti alla parete, come per le porte.
-Le texture si portano alla luce del muro (guadagno per canale = intonaco cotto nel pacchetto / intonaco della foto frontale)."""
+"""La finestra della parete W (z 0,73-1,63 m), in 3D: buco nel muro, spalle svasate in ottone e telaio con i vetri 12 cm piu' dentro.
+Prima il telaio era cotto nella texture del muro: le foto registrate lo vedono da 5-7 m con pose diverse e, siccome sta dietro il filo del muro, finiva sfocato e sdoppiato.
+Ora: il telaio e' un piano a parte (x = 7,10 + 0,12) con la foto frontale dell'utente (non registrata) rimappata a 800 px/m, e le quattro spalle sono facce piane svasate fra l'apertura nel muro e il
+contorno del telaio (piu' stretto di 4 cm per lato: nel muro l'apertura e' 0,904 m, il telaio 0,829 m), campionate dalla stessa foto con omografie esatte (console/win_prep.py: raddrizzamento con gli
+otto angoli dei vetri e un riquadro ideale simmetrico, quindi il telaio esce dritto e simmetrico; riflessi del fotografo coperti). Apertura e telaio sono rettangoli esatti: z 0,726-1,630 e 0,7635-1,5925,
+y 0,925-2,466 e 0,9786-2,4644 (centro z = 1,178; bordo basso dei vetri a y = 0,995; scala 0,329 m per larghezza di vetro). Il manifesto lo dice a real.js (`holes`), che ritaglia la parete e attacca le
+parti alla parete, come per le porte. Le texture si portano alla luce del muro (guadagno per canale = intonaco cotto nel pacchetto / intonaco della foto frontale); i riflessi speculari dell'ottone
+si comprimono per non avere macchie bianche."""
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np, cv2
 from meshlib import Mesh
 
 ASSETS = os.environ.get('WIN_ASSETS', '/tmp/claude-0/s/st3/assets/win')
-X_WALL = 7.10; D = 0.13                                           # filo del muro e profondita' del telaio
-HOLE = dict(z0=0.725, z1=1.631, y0=0.9225, y1=2.466)
+X_WALL = 7.10; D = 0.12                                           # filo del muro e profondita' del telaio
+HOLE = dict(z0=0.726, z1=1.630, y0=0.925, y1=2.466)               # apertura nel muro
+FRAME = dict(z0=0.7635, z1=1.5925, y0=0.9786, y1=2.4644)          # contorno del telaio (faccia esterna)
 GAIN = (1.10, 1.12, 1.14)                                         # RGB
 PPM_L = 700; PADR = 2
 
@@ -28,23 +31,28 @@ def wall_rects(margin_l=0.10, margin_r=0.14, margin_t=0.10, margin_low=0.035):
 def jpg(img, q=90):
     ok, b = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, q, cv2.IMWRITE_JPEG_OPTIMIZE, 1]); assert ok; return b.tobytes()
 
+def compress_highlights(img, knee=205.0, k=0.35):
+    """i riflessi speculari dell'ottone (nella foto) sono macchie quasi bianche: sopra `knee` la luminosita' si comprime"""
+    f = img.astype(np.float32); L = f.max(axis=2, keepdims=True); gain = np.where(L > knee, (knee + (L - knee) * k) / np.maximum(L, 1.0), 1.0)
+    return np.clip(f * gain, 0, 255).astype(np.uint8)
+
 def build():
     """parti: lista di dict(name, mesh, map, wall) e immagini jpeg"""
     g = np.array(GAIN[::-1], np.float32)[None, None, :]
     fr = np.clip(cv2.imread(f'{ASSETS}/frame_clean.png').astype(np.float32) * g, 0, 255).astype(np.uint8)
-    at = np.clip(cv2.imread(f'{ASSETS}/lining_atlas.png').astype(np.float32) * g, 0, 255).astype(np.uint8)
+    at = compress_highlights(np.clip(cv2.imread(f'{ASSETS}/lining_atlas.png').astype(np.float32) * g, 0, 255).astype(np.uint8))
     imgs = {'win_t': jpg(fr, 90), 'win_l': jpg(at, 88)}
-    z0, z1, y0, y1 = (HOLE[k] for k in ('z0', 'z1', 'y0', 'y1')); xf = X_WALL + D; xw = X_WALL
-    white = [(255, 255, 255)] * 4
+    z0, z1, y0, y1 = (HOLE[k] for k in ('z0', 'z1', 'y0', 'y1')); fz0, fz1, fy0, fy1 = (FRAME[k] for k in ('z0', 'z1', 'y0', 'y1'))
+    xf = X_WALL + D; xw = X_WALL; white = [(255, 255, 255)] * 4
     m1 = Mesh()
-    m1._add([(xf, y0, z0), (xf, y0, z1), (xf, y1, z1), (xf, y1, z0)], white, [(0, 1, 2), (0, 2, 3)], [(0, 0), (1, 0), (1, 1), (0, 1)])
+    m1._add([(xf, fy0, fz0), (xf, fy0, fz1), (xf, fy1, fz1), (xf, fy1, fz0)], white, [(0, 1, 2), (0, 2, 3)], [(0, 0), (1, 0), (1, 1), (0, 1)])
     AH, AW = at.shape[:2]; nd = int(round(D * PPM_L)); m2 = Mesh()
-    nzs = int(round((z1 - z0) * PPM_L)); nys = int(round((y1 - y0) * PPM_L))
-    # (riga della striscia nell'atlante, lunghezza in texel, punto sul lato del telaio e sul lato del muro all'inizio e alla fine della striscia)
-    strips = [(0, nzs, ((xf, y1, z0), (xf, y1, z1)), ((xw, y1, z0), (xw, y1, z1))),                        # alto (sotto)
-              (1, nzs, ((xf, y0, z0), (xf, y0, z1)), ((xw, y0, z0), (xw, y0, z1))),                        # basso (davanzale)
-              (2, nys, ((xf, y0, z0), (xf, y1, z0)), ((xw, y0, z0), (xw, y1, z0))),                        # sinistra
-              (3, nys, ((xf, y0, z1), (xf, y1, z1)), ((xw, y0, z1), (xw, y1, z1)))]                        # destra
+    n_top = int(round(0.87 * PPM_L)); n_side = int(round(1.505 * PPM_L))
+    # (indice della striscia nell'atlante, lunghezza in texel, punti del contorno del telaio, punti dell'apertura nel muro) all'inizio e alla fine della striscia
+    strips = [(0, n_top, ((xf, fy1, fz0), (xf, fy1, fz1)), ((xw, y1, z0), (xw, y1, z1))),                  # alto (sotto)
+              (1, n_top, ((xf, fy0, fz0), (xf, fy0, fz1)), ((xw, y0, z0), (xw, y0, z1))),                  # basso (davanzale)
+              (2, n_side, ((xf, fy0, fz0), (xf, fy1, fz0)), ((xw, y0, z0), (xw, y1, z0))),                 # sinistra
+              (3, n_side, ((xf, fy0, fz1), (xf, fy1, fz1)), ((xw, y0, z1), (xw, y1, z1)))]                 # destra
     for i, n, (fa, fb), (wa, wb) in strips:
         r0 = i * (nd + PADR); u1 = n / AW; vf = 1 - r0 / AH; vw = 1 - (r0 + nd) / AH
         m2._add([fa, fb, wb, wa], white, [(0, 1, 2), (0, 2, 3)], [(0, vf), (u1, vf), (u1, vw), (0, vw)])

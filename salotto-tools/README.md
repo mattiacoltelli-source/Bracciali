@@ -68,14 +68,19 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
      pomolo, leva, cilindro e spioncino). Le texture si riportano alla luce dei muri (guadagno per canale = intonaco cotto nel pacchetto / intonaco della foto frontale). Nella texture dei muri A e F la fascia della
      porta e' ricostruita per diffusione (`WALL_EXCL`, da 10 cm da terra: lo zoccolo di marmo resta) e il pavimento lungo la parete d'ingresso (z > 4,20) si rifa con marmo specchiato (`build_pack.floor`):
      l'anta scura vi si proiettava (macchia scura) con una zona beige accanto. Nel pacchetto sono prim `vmesh` con `wall`: `real.js` li lega al gruppo della parete, che sparisce quando la si guarda da fuori.
-   - la finestra della parete W (`reg/win_obj.py`): buco nel muro, spalle in ottone e telaio con i vetri 13 cm piu' dentro. Prima il telaio era cotto nella texture del muro e veniva sfocato e sdoppiato: sta 13 cm
-     dietro il filo del muro e le foto registrate lo vedono da 5-7 m con pose diverse (`console/win_sweep.py` cerca la profondita' in cui le foto concordano di piu': 13 cm). Ora il telaio e' un piano a parte
-     con la foto frontale dell'utente (non registrata, 25d46ef1) rimappata a 800 px/m (`console/win_prep.py`): riferimento metrico del piano cotto da UNA foto registrata (36b5d801), omografia foto -> riferimento da 6
-     angoli dei vetri a mano e poi ECC sulle mappe di 'ottone' (ignora riflessi e cio' che si vede dai vetri), camera dalla decomposizione dell'omografia (con K le colonne sono ortonormali entro l'1%: la f e' giusta).
-     Controllo: gli angoli esterni delle spalle, riportati sul piano del muro, danno bordi orizzontali concordi a 5 mm e verticali a 2 cm; l'apertura e' z 0,725-1,631, y 0,9225-2,466. Le quattro spalle sono strisce
-     campionate dalla stessa foto con la camera (oltre il bordo vero si prolunga l'ultimo colore d'ottone: il bordo non e' un rettangolo perfetto), e il riflesso del fotografo e del vaso nei vetri si copre con la griglia a
-     persiane copiata da 9 stecche sopra. Nel manifesto `holes` dice a `real.js` di ritagliare la parete (`wallWithHoles` ora tiene anche il pezzo sotto l'apertura) e i prim con `wall: 'W'` restano legati alla parete.
-     Nella texture del muro la fascia della finestra e il telaio sdoppiato (arriva a z = 1,72) sono ricostruiti per diffusione (`WALL_EXCL['W']`, morbido). La nicchia e il radiatore restano cotti nel muro.
+   - la finestra della parete W (`reg/win_obj.py`): buco nel muro, spalle svasate in ottone e telaio con i vetri 12 cm piu' dentro. Prima il telaio era cotto nella texture del muro e veniva sfocato e sdoppiato:
+     sta dietro il filo del muro e le foto registrate lo vedono da 5-7 m con pose diverse (`console/win_sweep.py` cerca la profondita' in cui le foto concordano di piu': 12-13 cm). Ora il telaio e' un piano a parte
+     con la foto frontale dell'utente (non registrata, 25d46ef1) rimappata a 800 px/m (`console/win_prep.py`).
+     Come si raddrizza (la prima versione usava un riferimento cotto da una foto registrata e un ECC: usciva leggermente storta e asimmetrica): otto angoli dei vetri letti a mano nella foto ingrandita
+     (`console/gcrop2.py`), omografia foto -> riquadro ideale con due vetri uguali e simmetrici e bordi alto/basso allineati; si cercano insieme l'omografia e il riquadro (distanza fra i vetri; l'altezza, in
+     larghezze di vetro, non si ricava dai soli angoli: la si trova imponendo che le colonne della rotazione siano ortonormali con la K della camera). Residuo di 1 px sugli otto angoli, h = 4,359, camera a
+     2,35 m dal telaio. Il rendering dell'app dalla posa della foto (camera della decomposizione, f = 3024,6) si sovrappone alla foto senza doppie immagini: telaio, apertura e spalle sono nel posto giusto.
+     Misure: scala 0,329 m per larghezza di vetro; asse centrale a z = 1,178, bordo basso dei vetri a y = 0,995. Apertura nel muro (angoli esterni delle spalle letti a mano, riportati sul piano del muro con la
+     camera): z 0,726-1,630, y 0,925-2,466; contorno del telaio (faccia esterna, simmetrico): z 0,7635-1,5925, y 0,9786-2,4644. Le quattro spalle sono facce piane svasate fra i due rettangoli,
+     raddrizzate dalla foto con la loro omografia esatta. Il riflesso del fotografo e del vaso nei vetri si copre con la griglia a persiane copiata da 9 stecche sopra; nelle spalle i riflessi dell'ottone
+     (bianco pieno nella foto) si sostituiscono con il colore della striscia (`deglare`), e oltre il bordo vero l'ultimo colore d'ottone si prolunga (`strip_plaster`: intonaco = poco saturo e non bruciato).
+     Nel manifesto `holes` dice a `real.js` di ritagliare la parete (`wallWithHoles` ora tiene anche il pezzo sotto l'apertura) e i prim con `wall: 'W'` restano legati alla parete. Nella texture del muro W
+     la fascia della finestra e il telaio sdoppiato (arriva a z = 1,72) sono ricostruiti per diffusione (`WALL_EXCL['W']`, morbido). La nicchia e il radiatore restano cotti nel muro.
 6. `reg/build_pack.py TAG_MURI TAG_PAV TAG_FACCE salotto.bin` — toglie i quadri dai muri, riempie i buchi, mette l'ombra sotto i mobili sospesi,
    impacchetta atlante, divano, voxel e primitive e cifra tutto con AES-256-GCM.
 
