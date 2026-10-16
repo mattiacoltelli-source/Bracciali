@@ -14,6 +14,11 @@ X_L, X_R, H = 0.02, 2.80, 2.70      # lati del disimpegno e altezza del soffitto
 ARCH = (0.46, 1.53)                  # apertura dell'arco nella parete TV (come in room.js)
 DOOR = dict(x0=0.385, x1=0.953, y1=1.867, arch_w=0.065)            # foglia della porta chiusa (la sinistra e' nascosta dietro lo stipite dell'arco: l'attacco della maniglia dice 0,385)
 DOORWAY = dict(x_out=1.870, x0=1.940, x1=2.720, y1=1.890, arch_w=0.070)  # secondo vano: cornice marrone e interno buio (a destra la cornice simmetrica)
+# terza porta, sul muro sinistro del disimpegno (foto C, vista da destra attraverso l'arco): stessa porta di mogano con maniglia e serratura sul lato verso l'angolo (a destra per chi guarda il muro).
+# Il bordo esterno della cornice verso l'angolo sta a z = -1,25 (letto sulla foto con lo spigolo del fondo a z = -1,40 come riferimento); la foglia e' larga come quella di fondo; il lato verso l'arco resta nascosto dallo stipite nella foto
+LDOOR = dict(z_out=-1.25, leaf_w=0.568, y1=1.867, arch_w=0.065)
+LDOOR['zb'] = LDOOR['z_out'] + LDOOR['arch_w']          # bordo della foglia verso l'angolo (z minore)
+LDOOR['za'] = LDOOR['zb'] + LDOOR['leaf_w']             # bordo della foglia verso l'arco (z maggiore)
 PRINTS = [dict(x0=1.194, x1=1.672, y0=1.399, y1=2.065, tile=0), dict(x0=1.198, x1=1.686, y0=0.632, y1=1.302, tile=1)]   # le due stampe (circa 48 x 67 cm)
 BASE_H = 0.07
 ARCH_H = 1.989                       # altezza dell'architrave dell'arco (come nell'imbotte)
@@ -163,6 +168,18 @@ def build():
     # secondo vano: anche questa porta e' chiusa (nelle foto era aperta, con l'interno buio). Foglia uguale a quella di sinistra (stessa texture, riflessa: la maniglia sta sul lato lontano
     # dall'arco, che da dentro la stanza resta nascosto dallo stipite destro), alla stessa profondita'; la cornice e' quella di prima
     fz2 = fz + 0.014
+    # terza porta sul muro sinistro: cornice a due gradini che sporge verso +x (come quelle del fondo); u cresce verso l'angolo (z minore)
+    ld = LDOOR; za, zb, ly1, lw = ld['za'], ld['zb'], ld['y1'], ld['arch_w']; xw = X_L
+    def casing_left(za, zb, y1, w, deep=0.011):
+        side = dict([('+x', frame_hi), ('+z', frame), ('-z', frame), ('+y', frame)])
+        _box(trim, xw, xw + deep, 0.0, y1 + w, za, za + w, frame_hi, faces=side)                      # montante dal lato dell'arco
+        _box(trim, xw, xw + deep, 0.0, y1 + w, zb - w, zb, frame_hi, faces=side)                      # montante dal lato dell'angolo
+        _box(trim, xw, xw + deep, y1, y1 + w, zb - w, za + w, frame_hi, faces=dict([('+x', frame_hi), ('+y', frame), ('-y', frame), ('+z', frame), ('-z', frame)]))   # traverso
+        iw = w * 0.45
+        _box(trim, xw, xw + deep + 0.012, 0.0, y1 + iw, za, za + iw, frame, faces=dict([('+x', frame), ('-z', frame_hi)]))
+        _box(trim, xw, xw + deep + 0.012, 0.0, y1 + iw, zb - iw, zb, frame, faces=dict([('+x', frame), ('+z', frame_hi)]))
+        _box(trim, xw, xw + deep + 0.012, y1, y1 + iw, zb - iw, za + iw, frame, faces=dict([('+x', frame), ('-y', frame_hi)]))
+    casing_left(za, zb, ly1, lw)
     reveal(trim)
     parts.append(dict(name='corr_trim', mesh=trim, map=None))
     # --- foglia della porta (texture rettificata dalla foto) ---
@@ -176,6 +193,10 @@ def build():
     d2 = Mesh()
     d2._add([(w2['x0'], 0.02, fz2), (w2['x1'], 0.02, fz2), (w2['x1'], w2['y1'], fz2), (w2['x0'], w2['y1'], fz2)], [(255, 255, 255)] * 4, [(0, 1, 2), (0, 2, 3)], [(1, 0), (0, 0), (0, 1), (1, 1)])
     parts.append(dict(name='corr_leaf2', mesh=d2, map='corr_door'))
+    # foglia della terza porta: stessa texture di quella di fondo, riflessa (maniglia a destra per chi guarda il muro, cioe' verso l'angolo); 1,4 cm davanti al muro come le altre
+    d3 = Mesh(); xl = X_L + 0.014
+    d3._add([(xl, 0.02, za), (xl, 0.02, zb), (xl, ly1, zb), (xl, ly1, za)], [(255, 255, 255)] * 4, [(0, 1, 2), (0, 2, 3)], [(1, 0), (0, 0), (0, 1), (1, 1)])
+    parts.append(dict(name='corr_leaf3', mesh=d3, map='corr_door'))
     # --- stampe ---
     p1 = cv2.imread(f'{ASSETS}/print1.png'); p2 = cv2.imread(f'{ASSETS}/print2.png')
     tw, th = 512, 716
