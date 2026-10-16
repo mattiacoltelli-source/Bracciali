@@ -1,4 +1,4 @@
-// Oggetti di prova nella stanza (tavolo, tavolino, sedia, mobile, tappeto, scatola, statua, statua di lei): forme semplici a misura, che si spostano sul pavimento
+// Oggetti di prova nella stanza (tavolo, tavolino, sedia, mobile, tappeto, scatola, statua): forme semplici a misura, che si spostano sul pavimento
 // e si salvano nel telefono. Lo stato sta qui; app.js gestisce selezione, schede e tocchi sulla scena.
 import * as THREE from 'three';
 import { ROOM, WALLS } from './room.js';
@@ -20,13 +20,10 @@ export const KINDS = {
   rug: { label: 'Tappeto', w: 2.0, d: 1.4, h: 0.015, mat: 'beige', round: true, faces: ['top'] },
   box: { label: 'Scatola', w: 1.0, d: 0.6, h: 1.0, mat: 'grigio', round: false, faces: ['front', 'top'] },
   statue: { label: 'Statua', w: 0.5, d: 0.5, h: 2.0, mat: 'marmo', round: false, faces: [] }, // misure del basamento e altezza totale
-  sagoma: { label: 'Statua di lei', w: 0.6, d: 0.35, h: 1.74, mat: 'marmo', round: false, faces: [], asset: 'sagoma' }, // la figura sta nel pacchetto cifrato della stanza: compare solo con la chiave
 };
 export const MATS = { rovere: ['Rovere', '#c2a47c'], noce: ['Noce', '#5e3d2a'], bianco: ['Bianco', '#e8e6df'], beige: ['Beige', '#d2c7b2'], grigio: ['Grigio', '#868a90'], nero: ['Nero', '#26262a'], rosso: ['Rosso', '#9e302b'], marmo: ['Marmo', '#f1efea'] };
 const LIGHT = 0.8; // le luci della scena sommano piu' di 1: senza questo i colori chiari escono bruciati (il rovere diventava giallo acceso)
 const PHOTO_HINT = { table: 'La foto va sul piano: per esempio un marmo o un legno.', coffee: 'La foto va sul piano: per esempio un marmo o un legno.', rug: 'La foto va sopra il tappeto.', cabinet: 'Scegli se metterla davanti o sopra.', box: 'Scegli se metterla davanti o sopra.' };
-
-let getAsset = () => null; // parti 3D del pacchetto cifrato (real.js: asset), solo a stanza a foto aperta
 
 // ---- misure e posizione ----
 const eff = (o) => ({ w: o.w, d: o.round ? o.w : o.d, h: o.h }); // il tavolo rotondo ha un diametro solo
@@ -157,15 +154,6 @@ function build(o, tex) {
       ball(0, 1.538, 0.1, 0.009, 0.017, 0.015);                                        // naso: indica il davanti
       break;
     }
-    case 'sagoma': { // la statua a rilievo da una foto: basamento di marmo e, sopra, la figura (davanti la foto, dietro i colori di capelli e vestito)
-      const ph = 0.06; box(w, ph, d, 0, ph / 2, 0, main);
-      const A = getAsset('sagoma');
-      if (A) {
-        A.scale.setScalar(Math.max(0.05, h - ph) / A.userData.h); A.position.y = ph;
-        A.traverse((c) => { if (c.isMesh) { c.userData.oid = o.id; c.userData.shared = true; } }); g.add(A);
-      }
-      break;
-    }
     case 'rug':
       if (o.round) drum(w / 2, h, 0, h / 2, 0, main, top); else box(w, h, d, 0, h / 2, 0, m6(top, main));
       break;
@@ -177,7 +165,6 @@ function build(o, tex) {
 
 export function createObjects(ctx) {
   const { scene, camera, render } = ctx;
-  getAsset = ctx.asset || (() => null);
   let seq = 0, tab = 'move', drag = null, kind = 'table', ostep = 5; // ostep: passo dei tasti in cm
   const nodes = new Map(), texs = new Map();
   const newId = () => 'o' + Date.now().toString(36) + (seq++).toString(36);
@@ -200,15 +187,6 @@ export function createObjects(ctx) {
     } catch { return []; }
   }
   let items = load();
-  // una statua di partenza in mezzo alla stanza, una volta sola per telefono: si elimina come ogni altro oggetto e non torna
-  try {
-    const keyed = /[#&]k=/.test(location.hash) || !!localStorage.getItem('salotto.key'); // con la chiave la statua di partenza e' quella di lei (arriva con il pacchetto)
-    if (!keyed && !localStorage.getItem('salotto.seed.statua')) {
-      localStorage.setItem('salotto.seed.statua', '1');
-      const K = KINDS.statue; items.push({ id: newId(), kind: 'statue', mat: K.mat, round: false, w: K.w, d: K.d, h: K.h, x: ROOM.L / 2, z: ROOM.W / 2, rot: 0, face: null, img: null });
-      save();
-    }
-  } catch { /* senza archivio non c'e' la statua */ }
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(items.map(({ img, ...r }) => ({ ...r, photo: !!img })))); return true; }
     catch { ctx.showErr('Spazio del telefono pieno: gli oggetti non vengono salvati. Togli qualche foto o oggetto.'); return false; }
@@ -241,14 +219,13 @@ export function createObjects(ctx) {
     const eg = o.round ? new THREE.EdgesGeometry(new THREE.CylinderGeometry(w / 2 + 0.01, w / 2 + 0.01, h + 0.01, 48), 30) : new THREE.EdgesGeometry(new THREE.BoxGeometry(w + 0.02, h + 0.01, d + 0.02));
     const outline = new THREE.LineSegments(eg, new THREE.LineBasicMaterial({ color: ACCENT }));
     outline.position.y = h / 2 + 0.005; outline.visible = !!selected; group.add(outline);
-    if (KINDS[o.kind].asset && !getAsset(KINDS[o.kind].asset)) group.visible = false; // la figura non c'e' ancora: senza chiave non si vede niente
     scene.add(group); nodes.set(o.id, { group, outline });
     place(o);
   }
   function drop(id) {
     const n = nodes.get(id); if (!n) return;
     scene.remove(n.group);
-    n.group.traverse((c) => { if (c.userData.shared) return; c.geometry?.dispose(); if (c.material) (Array.isArray(c.material) ? c.material : [c.material]).forEach((m) => m.dispose()); }); // le parti del pacchetto sono condivise: non si buttano
+    n.group.traverse((c) => { c.geometry?.dispose(); if (c.material) (Array.isArray(c.material) ? c.material : [c.material]).forEach((m) => m.dispose()); });
     nodes.delete(id);
   }
   function rebuild(o) { const n = nodes.get(o.id); const was = n ? n.outline.visible : false; drop(o.id); make(o, was); render(); }
@@ -378,24 +355,10 @@ export function createObjects(ctx) {
     add(kind, { w: read('n-w', LIM.w, K.w), d: read('n-d', LIM.d, K.d), h: read('n-h', LIM.h, K.h) });
   };
 
-  // dopo l'apertura della stanza a foto: compare il tipo "Statua di lei" e, la prima volta, la statua al centro (al posto di quella di marmo di partenza, se e' ancora com'era)
-  function assetsReady() {
-    const has = !!getAsset('sagoma');
-    document.querySelectorAll('[data-kind="sagoma"]').forEach((b) => { b.hidden = !has; });
-    if (!has) return;
-    items.filter((o) => KINDS[o.kind].asset).forEach(rebuild);
-    try { if (localStorage.getItem('salotto.seed.lei')) return; localStorage.setItem('salotto.seed.lei', '1'); } catch { return; }
-    const old = items.find((o) => o.kind === 'statue' && o.mat === 'marmo' && o.w === 0.5 && o.d === 0.5 && o.h === 2 && o.rot === 0 && o.x === ROOM.L / 2 && o.z === ROOM.W / 2);
-    if (old) remove(old);
-    const K = KINDS.sagoma, o = { id: newId(), kind: 'sagoma', mat: K.mat, round: false, w: K.w, d: K.d, h: K.h, x: ROOM.L / 2, z: ROOM.W / 2, rot: 0, face: null, img: null };
-    items.push(o); make(o, false); save(); render(); ctx.refresh();
-  }
-
   return {
     items: () => items,
-    assetsReady,
     get,
-    pickables: () => { const out = []; for (const n of nodes.values()) if (n.group.visible) n.group.traverse((c) => { if (c.isMesh && c.userData.oid) out.push(c); }); return out; },
+    pickables: () => { const out = []; for (const n of nodes.values()) n.group.traverse((c) => { if (c.isMesh && c.userData.oid) out.push(c); }); return out; },
     setOutline(id, on) { const n = nodes.get(id); if (n) { n.outline.visible = on; render(); } },
     renderList, syncEditor, syncInfo,
     // trascinare sul pavimento: il punto toccato resta sotto il dito
