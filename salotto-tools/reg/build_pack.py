@@ -375,7 +375,7 @@ def main():
     man = dict(v=1, images=imap, walls={w: f'wall_{w}' for w in 'TWFA'}, floor='floor', atlas='atlas', atlasSize=[at.shape[1], at.shape[0]],
                boxes=boxes, prims=prims, items=ITEMS, art=art, spawn=spawn)
     man['holes'] = win_obj.holes()
-    if corridor: man['corridor'] = 1
+    if corridor: man['corridor'] = corridor_obj.ZONE      # il disimpegno dietro l'arco: l'app lo mostra da dentro la stanza e ci si puo' camminare
     if sofa: man['sofa'] = sofa
     if voxs: man['vox'] = voxs
     mj = json.dumps(man, separators=(',', ':')).encode()

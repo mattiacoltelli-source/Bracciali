@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { ROOM, WALLS, OPENINGS } from './room.js';
 
-const PACK_URL = 'pack/salotto.bin?v=20'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
+const PACK_URL = 'pack/salotto.bin?v=21'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
 const KEY_STORE = 'salotto.key';
 const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 
@@ -311,6 +311,9 @@ export function createReal(ctx) {
   const group = new THREE.Group();
   group.visible = false;
   roomRoot.add(group);
+  const corrGroup = new THREE.Group(); // il disimpegno dietro l'arco: sta a parte (non nel gruppo del muro TV, che sparisce guardando dal corridoio) e si vede da dentro la stanza e da dentro il disimpegno
+  corrGroup.visible = false;
+  group.add(corrGroup);
   // il modello a blocchi si nasconde quando si guarda la stanza a foto (i quadri restano); travi, binari e cornicione si rifanno qui
   const gset = new Set(Object.values(groups));
   const blockTop = roomRoot.children.filter((o) => o !== group && !gset.has(o) && !o.userData.keep);
@@ -318,7 +321,7 @@ export function createReal(ctx) {
   const wallMeshes = [], wallObjs = [];
   const archSets = []; // archi: parti con profondita' (da dentro la stanza) e versione piatta (da fuori)
   let archDeep = false;
-  const applyArch = () => { for (const a of archSets) { a.deep.forEach((m) => { m.visible = on && archDeep; }); a.flat.visible = on && !archDeep; } };
+  const applyArch = () => { for (const a of archSets) { a.deep.forEach((m) => { m.visible = on && archDeep; }); a.flat.visible = on && !archDeep; } corrGroup.visible = on && archDeep; };
   const arts = {};
   let pack = null, loading = null, on = false;
   const loader = new THREE.TextureLoader();
@@ -543,7 +546,7 @@ export function createReal(ctx) {
     for (const it of man.items || []) stage.add(softItem(it));
     const blob = (name) => { const im = man.images[name]; return plain.slice(base + im.o, base + im.o + im.n); };
     const deepPrims = [], wallPrims = [];
-    for (const p of man.prims || []) { const m = primMesh(p, T, blob); if (p.deep) { m.visible = false; deepPrims.push(m); } else if (p.wall) wallPrims.push([p.wall, m]); else stage.add(m); } // piccoli oggetti: lampada, vasi, portabottiglie, mensole con pianta e fumetti; i 'deep' (corridoio) seguono l'arco; i 'wall' (le porte) restano attaccati alla loro parete
+    for (const p of man.prims || []) { const m = primMesh(p, T, blob); if (p.deep) { deepPrims.push(m); } else if (p.wall) wallPrims.push([p.wall, m]); else stage.add(m); } // piccoli oggetti: lampada, vasi, portabottiglie, mensole con pianta e fumetti; i 'deep' (corridoio) seguono l'arco; i 'wall' (le porte) restano attaccati alla loro parete
     for (const id of Object.keys(man.art || {})) arts[id] = T[man.art[id]];
     group.add(stage);
     for (const m of walls) { groups[m.userData.wall].add(m); pieces.push(m); wallMeshes.push(m); }
@@ -552,8 +555,8 @@ export function createReal(ctx) {
       const h = new THREE.Group(); h.applyMatrix4(groups[wid].matrix.clone().invert()); h.add(m); h.visible = false;
       groups[wid].add(h); wallObjs.push(h);
     }
-    if (deepPrims.length && extras.length) for (const m of deepPrims) { extras[0].deep.push(m); groups[extras[0].wall].add(m); }
-    pack = { solid, spawn: man.spawn || { pos: [1.6, 1.6, 3.9], yaw: 0 }, floorTex: T[man.floor] };
+    for (const m of deepPrims) corrGroup.add(m);
+    pack = { solid, spawn: man.spawn || { pos: [1.6, 1.6, 3.9], yaw: 0 }, floorTex: T[man.floor], corridor: man.corridor && man.corridor.x1 ? man.corridor : null };
   }
 
   const api = {
@@ -561,6 +564,7 @@ export function createReal(ctx) {
     get on() { return on; },
     get colliders() { return pack ? pack.solid : []; },
     get spawn() { return pack?.spawn; },
+    get corridor() { return pack?.corridor || null; }, // {x0, x1, zn, zf, h, arch: [x0, x1, h]}: il disimpegno dietro l'arco e il suo passaggio
     art: (id) => arts[id] || null,
     // 'ok' | 'nokey' | 'badkey' | 'assente' | 'rete' | 'pacchetto' | 'errore'
     load(onStatus) {
@@ -585,7 +589,10 @@ export function createReal(ctx) {
     // da chiamare a ogni frame: dentro la stanza l'arco ha la profondita', da fuori resta la foto piatta; ritorna true se qualcosa e' cambiato
     update(cam) {
       if (!pack) return false;
-      const p = cam.position, inside = p.x > 0.02 && p.x < ROOM.L - 0.02 && p.z > 0.02 && p.z < ROOM.W - 0.02 && p.y < ROOM.H;
+      const p = cam.position, c = pack.corridor;
+      const room = p.x > 0.02 && p.x < ROOM.L - 0.02 && p.z > 0.02 && p.z < ROOM.W - 0.02 && p.y < ROOM.H;
+      const corr = !!c && p.x > c.x0 && p.x < c.x1 && p.z <= 0.02 && p.z > c.zf && p.y < c.h; // dentro il passaggio o il disimpegno
+      const inside = room || corr;
       if (inside === archDeep) return false;
       archDeep = inside; applyArch();
       return on;
