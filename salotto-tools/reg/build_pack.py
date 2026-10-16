@@ -5,7 +5,7 @@ sys.path.insert(0, '/tmp/claude-0/s/reg')
 import numpy as np, cv2
 from fill import diffuse_fill, scene_complete, wall_fill
 from scene_def import BOXES, PRIMS, ITEMS
-import shelf_unit, shelf_tex, console_obj, ledges, credenza_obj, wall_obj, corridor_obj, door_obj
+import shelf_unit, shelf_tex, console_obj, ledges, credenza_obj, wall_obj, corridor_obj, door_obj, win_obj
 
 R = '/tmp/claude-0/s/reg/out'
 KEYFILE = '/tmp/claude-0/s/pack.key'
@@ -26,7 +26,8 @@ def erode_valid(valid, k=7):
 # (u0, u1, y0, y1, morbido) in metri, sistema nuovo: fasce della parete TV da rifare per diffusione. A sinistra e sopra il mobile a mensole (x 3,54-4,25) la pianta e i tralci si proiettavano sul muro
 # (morbido = tiene anche l'intonaco piu' scuro, per non schiarire il gradiente della luce); dietro alle mensole portaquadri e ai sei quadretti, ora in 3D, la parete va ripulita (fill nitido).
 WALL_EXCL = {'T': [(3.18, 3.58, 0.55, 2.68, True), (3.18, 4.50, 2.20, 2.68, True), (4.70, 5.84, 1.94, 2.34, False), (5.98, 7.10, 1.94, 2.34, False), (0.0, 0.47, 0.05, 1.55, True)],
-             'A': wall_obj.wall_rects(L_A_O) + door_obj.wall_rects('A', L_A_O), 'F': wall_obj.wall_rects_F(L) + door_obj.wall_rects('F', L)}       # parete A: interruttore e presa (ora in 3D, nella texture avevano la doppia immagine); A e F: le porte, ora in 3D (door_obj)
+             'A': wall_obj.wall_rects(L_A_O) + door_obj.wall_rects('A', L_A_O), 'F': wall_obj.wall_rects_F(L) + door_obj.wall_rects('F', L),
+             'W': win_obj.wall_rects()}       # parete A: interruttore e presa (ora in 3D, nella texture avevano la doppia immagine); A e F: le porte, ora in 3D (door_obj)
 
 def walls(tag):
     P = json.load(open(f'{R}/paintings_final.json'))
@@ -330,6 +331,14 @@ def main():
         if dp.get('map'): d['map'] = dp['map']
         prims.append(d)
     print('porte: parti', len(dparts), flush=True)
+    xparts, ximgs = win_obj.build(); images.update(ximgs)      # finestra della parete W: telaio con la foto frontale e spalle, dentro il buco del muro (manifesto: holes)
+    for xp in xparts:
+        meta, blob_x = xp['mesh'].pack(); bins[f"cm_{xp['name']}"] = blob_x
+        d = dict(t='vmesh', bin=f"cm_{xp['name']}", nv=meta['nv'], ni=meta['ni'], wall=xp['wall'])
+        if meta.get('uv'): d['uv'] = 1
+        if xp.get('map'): d['map'] = xp['map']
+        prims.append(d)
+    print('finestra: parti', len(xparts), flush=True)
     if USE_CONSOLE:       # vaso grande, portabottiglie con etichette e ciotola di rame sulla credenza (colori cotti dalle foto registrate)
         credenza_obj.MASKS = os.environ.get('VASE_MASKS', os.environ['CONSOLE_ASSETS'])        # maschere del vaso e ritagli delle etichette stanno con gli altri ritagli
         qparts, qimgs = credenza_obj.build(); images.update(qimgs); nvq = 0
@@ -361,6 +370,7 @@ def main():
         imap[name] = dict(o=len(blob), n=len(data), t='application/octet-stream'); blob += data
     man = dict(v=1, images=imap, walls={w: f'wall_{w}' for w in 'TWFA'}, floor='floor', atlas='atlas', atlasSize=[at.shape[1], at.shape[0]],
                boxes=boxes, prims=prims, items=ITEMS, art=art, spawn=spawn)
+    man['holes'] = win_obj.holes()
     if corridor: man['corridor'] = 1
     if sofa: man['sofa'] = sofa
     if voxs: man['vox'] = voxs
