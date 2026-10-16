@@ -60,6 +60,14 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
      campionati con la posa; il pavimento che l'arco non lascia vedere si completa a specchio. L'intonaco e' a colori per vertice col gradiente di luce visto nella foto (luce calda dall'alto).
      Nel pacchetto sono prim `vmesh` con `deep: 1`: `real.js` li mostra solo da dentro la stanza, insieme all'imbotte (con `corridor` nel manifesto i piani procedurali di stipiti, architrave e tunnel non si usano piu').
      I ritagli (foglia, stampe, pavimento, imbotte) stanno in `CONSOLE_ASSETS/corr` (foto di casa, fuori dal repository). La fascia sinistra della parete TV (x 0-0,47, a sinistra dell'arco) e' ricostruita per diffusione (`WALL_EXCL`): le foto la cuocevano a chiazze.
+   - le due porte (`reg/door_obj.py`): la porta interna chiusa sulla parete A e il portone blindato d'ingresso sulla parete F, in rilievo davanti al muro (prima erano dipinte nella texture della parete, con doppie
+     immagini e angoli sbavati). Le foto frontali dell'utente (non registrate: 81d8e52c e afd7ab79) si tolgono dalla distorsione radiale e si raddrizzano con l'omografia dei quattro angoli esterni del coprifilo
+     (`console/door_prep.py`, 600 px/m; angoli letti a mano con `console/gcrop2.py`, `gbright.py` schiarisce le zone in ombra). Le misure del coprifilo (A: 0,886 x 2,035 m, bordo sinistro a z = 3,439; F: 1,236 x 2,24 m,
+     bordo sinistro a x = 1,624) vengono dagli angoli letti in foto registrate (A: 6d89137e; F: 6eac1b0f e 79eb58fc, che concordano a 2 mm) e riportati sul piano della parete. La stessa immagine copre coprifilo e
+     foglia: quattro quadri (due montanti, traverso, foglia rientrata di 2-4 mm) piu' i bordi a tinta unita; ferramenta in 3D con le posizioni lette sulla texture rettificata (leva e rosetta, bocchetta; placca,
+     pomolo, leva, cilindro e spioncino). Le texture si riportano alla luce dei muri (guadagno per canale = intonaco cotto nel pacchetto / intonaco della foto frontale). Nella texture dei muri A e F la fascia della
+     porta e' ricostruita per diffusione (`WALL_EXCL`, da 10 cm da terra: lo zoccolo di marmo resta) e il pavimento lungo la parete d'ingresso (z > 4,20) si rifa con marmo specchiato (`build_pack.floor`):
+     l'anta scura vi si proiettava (macchia scura) con una zona beige accanto. Nel pacchetto sono prim `vmesh` con `wall`: `real.js` li lega al gruppo della parete, che sparisce quando la si guarda da fuori.
 6. `reg/build_pack.py TAG_MURI TAG_PAV TAG_FACCE salotto.bin` — toglie i quadri dai muri, riempie i buchi, mette l'ombra sotto i mobili sospesi,
    impacchetta atlante, divano, voxel e primitive e cifra tutto con AES-256-GCM.
 

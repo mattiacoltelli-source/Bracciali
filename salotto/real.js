@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { ROOM, WALLS, OPENINGS } from './room.js';
 
-const PACK_URL = 'pack/salotto.bin?v=13'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
+const PACK_URL = 'pack/salotto.bin?v=14'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
 const KEY_STORE = 'salotto.key';
 const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 
@@ -315,7 +315,7 @@ export function createReal(ctx) {
   const gset = new Set(Object.values(groups));
   const blockTop = roomRoot.children.filter((o) => o !== group && !gset.has(o) && !o.userData.keep);
   const blockWall = Object.values(groups).flatMap((g) => g.children.filter((o) => !o.userData.keep));
-  const wallMeshes = [];
+  const wallMeshes = [], wallObjs = [];
   const archSets = []; // archi: parti con profondita' (da dentro la stanza) e versione piatta (da fuori)
   let archDeep = false;
   const applyArch = () => { for (const a of archSets) { a.deep.forEach((m) => { m.visible = on && archDeep; }); a.flat.visible = on && !archDeep; } };
@@ -541,12 +541,16 @@ export function createReal(ctx) {
     if (man.vox && man.vox.length) stage.add(buildVox(man.vox, plain, base, man));
     for (const it of man.items || []) stage.add(softItem(it));
     const blob = (name) => { const im = man.images[name]; return plain.slice(base + im.o, base + im.o + im.n); };
-    const deepPrims = [];
-    for (const p of man.prims || []) { const m = primMesh(p, T, blob); if (p.deep) { m.visible = false; deepPrims.push(m); } else stage.add(m); } // piccoli oggetti: lampada, vasi, portabottiglie, mensole con pianta e fumetti; i 'deep' (corridoio) seguono l'arco
+    const deepPrims = [], wallPrims = [];
+    for (const p of man.prims || []) { const m = primMesh(p, T, blob); if (p.deep) { m.visible = false; deepPrims.push(m); } else if (p.wall) wallPrims.push([p.wall, m]); else stage.add(m); } // piccoli oggetti: lampada, vasi, portabottiglie, mensole con pianta e fumetti; i 'deep' (corridoio) seguono l'arco; i 'wall' (le porte) restano attaccati alla loro parete
     for (const id of Object.keys(man.art || {})) arts[id] = T[man.art[id]];
     group.add(stage);
     for (const m of walls) { groups[m.userData.wall].add(m); pieces.push(m); wallMeshes.push(m); }
     for (const a of extras) { a.deep.forEach((e) => groups[a.wall].add(e)); groups[a.wall].add(a.flat); archSets.push(a); }
+    for (const [wid, m] of wallPrims) { // le coordinate del pacchetto sono quelle della stanza: il contenitore annulla la matrice della parete, e sparisce insieme a lei da fuori
+      const h = new THREE.Group(); h.applyMatrix4(groups[wid].matrix.clone().invert()); h.add(m); h.visible = false;
+      groups[wid].add(h); wallObjs.push(h);
+    }
     if (deepPrims.length && extras.length) for (const m of deepPrims) { extras[0].deep.push(m); groups[extras[0].wall].add(m); }
     pack = { solid, spawn: man.spawn || { pos: [1.6, 1.6, 3.9], yaw: 0 }, floorTex: T[man.floor] };
   }
@@ -590,6 +594,7 @@ export function createReal(ctx) {
       blockTop.forEach((o) => { o.visible = !on; });
       blockWall.forEach((o) => { o.visible = !on; });
       wallMeshes.forEach((o) => { o.visible = on; });
+      wallObjs.forEach((o) => { o.visible = on; });
       applyArch();
       group.visible = on;
       render();

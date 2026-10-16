@@ -5,7 +5,7 @@ sys.path.insert(0, '/tmp/claude-0/s/reg')
 import numpy as np, cv2
 from fill import diffuse_fill, scene_complete, wall_fill
 from scene_def import BOXES, PRIMS, ITEMS
-import shelf_unit, shelf_tex, console_obj, ledges, credenza_obj, wall_obj, corridor_obj
+import shelf_unit, shelf_tex, console_obj, ledges, credenza_obj, wall_obj, corridor_obj, door_obj
 
 R = '/tmp/claude-0/s/reg/out'
 KEYFILE = '/tmp/claude-0/s/pack.key'
@@ -26,7 +26,7 @@ def erode_valid(valid, k=7):
 # (u0, u1, y0, y1, morbido) in metri, sistema nuovo: fasce della parete TV da rifare per diffusione. A sinistra e sopra il mobile a mensole (x 3,54-4,25) la pianta e i tralci si proiettavano sul muro
 # (morbido = tiene anche l'intonaco piu' scuro, per non schiarire il gradiente della luce); dietro alle mensole portaquadri e ai sei quadretti, ora in 3D, la parete va ripulita (fill nitido).
 WALL_EXCL = {'T': [(3.18, 3.58, 0.55, 2.68, True), (3.18, 4.50, 2.20, 2.68, True), (4.70, 5.84, 1.94, 2.34, False), (5.98, 7.10, 1.94, 2.34, False), (0.0, 0.47, 0.05, 1.55, True)],
-             'A': wall_obj.wall_rects(L_A_O), 'F': wall_obj.wall_rects_F(L)}       # parete A: interruttore e presa (ora in 3D, nella texture avevano la doppia immagine)
+             'A': wall_obj.wall_rects(L_A_O) + door_obj.wall_rects('A', L_A_O), 'F': wall_obj.wall_rects_F(L) + door_obj.wall_rects('F', L)}       # parete A: interruttore e presa (ora in 3D, nella texture avevano la doppia immagine); A e F: le porte, ora in 3D (door_obj)
 
 def walls(tag):
     P = json.load(open(f'{R}/paintings_final.json'))
@@ -125,6 +125,16 @@ def floor(tag):
         else:
             print('pavimento: ATTENZIONE nessuna sorgente per il buco centrale: riempimento sfumato', flush=True)
     out = diffuse_fill(work, v, down=4, feather=3)
+    # fascia lungo la parete d'ingresso, davanti al portone (z > 4,20): le foto la vedono di striscio e l'anta scura vi si proiettava (macchia scura) con una zona beige accanto;
+    # si rifa con il marmo della fascia di sopra, specchiato (le pantofole rosse si tolgono prima), sfumando i bordi
+    z0, z1 = int(4.20 * PPM_F), Hh; xa, xb = int(0.62 * PPM_F), int(3.05 * PPM_F); hh = z1 - z0
+    srcb = out[z0 - hh:z0, xa:xb].copy(); b_, g_, r_ = [srcb[..., i].astype(np.int32) for i in range(3)]
+    red = (((r_ - g_ > 28) & (r_ - b_ > 28) & (r_ > 70)) | ((r_ > 130) & (g_ > 105) & (r_ - b_ > 60))).astype(np.uint8) * 255      # rosso e giallo delle pantofole
+    if red.any(): srcb = cv2.inpaint(srcb, cv2.dilate(red, np.ones((21, 21), np.uint8)), 7, cv2.INPAINT_TELEA)
+    patch = srcb[::-1].astype(np.float32); ph, pw = patch.shape[:2]
+    al = np.ones((ph, pw), np.float32); f = int(0.05 * PPM_F)
+    al[:f] *= np.linspace(0, 1, f)[:, None]; al[:, :f] *= np.linspace(0, 1, f)[None, :]; al[:, -f:] *= np.linspace(1, 0, f)[None, :]
+    dst = out[z0:z1, xa:xb].astype(np.float32); out[z0:z1, xa:xb] = (dst * (1 - al[..., None]) + patch * al[..., None]).clip(0, 255).astype(np.uint8)
     # ombra sotto i mobili sospesi (il pavimento li' non si vede nelle foto: e' buio)
     shade = np.ones((Hh, Ww), np.float32)
     for b in BOXES:
@@ -312,6 +322,14 @@ def main():
     for wp in wparts:
         meta, blob_w = wp['mesh'].pack(); bins[f"cm_{wp['name']}"] = blob_w
         prims.append(dict(t='vmesh', bin=f"cm_{wp['name']}", nv=meta['nv'], ni=meta['ni']))
+    dparts, dimgs = door_obj.build(); images.update(dimgs)      # porta interna (parete A) e portone d'ingresso (parete F), in rilievo davanti al muro
+    for dp in dparts:
+        meta, blob_d = dp['mesh'].pack(); bins[f"cm_{dp['name']}"] = blob_d
+        d = dict(t='vmesh', bin=f"cm_{dp['name']}", nv=meta['nv'], ni=meta['ni'], wall=dp['wall'])
+        if meta.get('uv'): d['uv'] = 1
+        if dp.get('map'): d['map'] = dp['map']
+        prims.append(d)
+    print('porte: parti', len(dparts), flush=True)
     if USE_CONSOLE:       # vaso grande, portabottiglie con etichette e ciotola di rame sulla credenza (colori cotti dalle foto registrate)
         credenza_obj.MASKS = os.environ.get('VASE_MASKS', os.environ['CONSOLE_ASSETS'])        # maschere del vaso e ritagli delle etichette stanno con gli altri ritagli
         qparts, qimgs = credenza_obj.build(); images.update(qimgs); nvq = 0
