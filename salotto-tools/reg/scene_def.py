@@ -31,6 +31,7 @@ BOXES = [
     N('pilastro', 3.855, 4.25, 0.945, 2.245, 0.0, 0.236, '#b3ad9f', ['-x', '+z'], ['+x', '+y'], **TV),   # il mobile e' sospeso al muro: sotto c'e' solo la parete (con l'ombra pannello), non un gambo fino al mobile TV
     N('pannello', 3.802, 4.415, 0.945, 2.245, 0.237, 0.26, '#8a8d92', ['+z'], ['-x', '+x', '+y'], **TV),
     N('ostacolo_mensole', 3.54, 3.855, 0.945, 2.213, 0.0, 0.24, '#000000', [], [], hidden=True, **TV),
+    N('ostacolo_robot', 6.45, 7.08, 0.0, 0.40, 1.29, 1.69, '#000000', [], [], hidden=True),       # robot aspirapolvere e base (rad_obj): solo ostacolo per la camminata
     B('cassettone', 4.24, 6.79, 0.34, 0.71, 0.0, 0.40, '#bcb4a6', ['+z', '-x'], ['+y', '+x'], **TV),
     B('ripiano', 5.00, 7.25, 0.71, 0.76, 0.0, 0.40, '#4a2f20', [], ['+z', '+y', '+x', '-x'], **TV),
     # vano a destra del mobile TV: un quadrato normale in noce, aperto davanti, con il vaso rosso dentro (non ha divisori ne' un secondo vano: quello che sembrava un divisorio e'

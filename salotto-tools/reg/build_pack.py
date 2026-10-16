@@ -5,7 +5,7 @@ sys.path.insert(0, '/tmp/claude-0/s/reg')
 import numpy as np, cv2
 from fill import diffuse_fill, scene_complete, wall_fill
 from scene_def import BOXES, PRIMS, ITEMS
-import shelf_unit, shelf_tex, console_obj, ledges, credenza_obj, wall_obj, corridor_obj, door_obj, win_obj
+import shelf_unit, shelf_tex, console_obj, ledges, credenza_obj, wall_obj, corridor_obj, door_obj, win_obj, rad_obj
 
 R = '/tmp/claude-0/s/reg/out'
 KEYFILE = '/tmp/claude-0/s/pack.key'
@@ -27,7 +27,7 @@ def erode_valid(valid, k=7):
 # (morbido = tiene anche l'intonaco piu' scuro, per non schiarire il gradiente della luce); dietro alle mensole portaquadri e ai sei quadretti, ora in 3D, la parete va ripulita (fill nitido).
 WALL_EXCL = {'T': [(3.18, 3.58, 0.55, 2.68, True), (3.18, 4.50, 2.20, 2.68, True), (4.70, 5.84, 1.94, 2.34, False), (5.98, 7.10, 1.94, 2.34, False), (0.0, 0.47, 0.05, 1.55, True)],
              'A': wall_obj.wall_rects(L_A_O) + door_obj.wall_rects('A', L_A_O), 'F': wall_obj.wall_rects_F(L) + door_obj.wall_rects('F', L),
-             'W': win_obj.wall_rects() + [(1.85, 4.50, 0.0, 0.88, True)]}       # parete A: interruttore e presa (ora in 3D, nella texture avevano la doppia immagine); A e F: le porte, ora in 3D (door_obj); W: il muro dietro il divano (nessuna foto lo vede sotto 0,85 m: il riempimento "solo intonaco chiaro" dava un blocco piu' chiaro con bordo netto, ora segue le ombre vicine)
+             'W': win_obj.wall_rects() + rad_obj.wall_rects() + [(1.85, 4.50, 0.0, 0.88, True)]}       # parete A: interruttore e presa (ora in 3D, nella texture avevano la doppia immagine); A e F: le porte, ora in 3D (door_obj); W: il muro dietro il divano (nessuna foto lo vede sotto 0,85 m: il riempimento "solo intonaco chiaro" dava un blocco piu' chiaro con bordo netto, ora segue le ombre vicine)
 
 # tag del bake per parete, se diverso da quello generale: la parete d'ingresso (F) si cuoce anche con le foto scattate dal corridoio (run_walls9.py, esclusa la foto buia dal fondo del corridoio), che la vedono
 # quasi di fronte con un'esposizione coerente. Nel bake generale la parete usciva beige (R-B ~ 18, nelle foto ~ 10) e con la striscia a destra della porta scura e bluastra: ora e' neutra (R-B ~ 12)
@@ -87,6 +87,7 @@ def floor(tag):
     d = np.load(f'{R}/floor3_{tag}.npz'); img, valid = d['img'], d['valid']
     Hh, Ww = valid.shape
     v = erode_valid(valid, 9)
+    for fx0, fx1, fz0, fz1 in rad_obj.floor_excl(): v[int(fz0 * PPM_F):int(fz1 * PPM_F), int(fx0 * PPM_F):int(fx1 * PPM_F)] = False     # robot e base (ora in 3D): la macchia cotta si rifa
     n, lab = cv2.connectedComponents((~valid).astype(np.uint8), connectivity=4)
     # buco centrale (quello piu' grande che non tocca divano/TV): il piu' grande con centro dentro la stanza e lontano dai mobili
     best = None
@@ -98,6 +99,12 @@ def floor(tag):
         if 2.0 < cx < 4.4 and 0.7 < cz < 2.5 and (best is None or m.sum() > best[1]): best = (i, m.sum())
     work = img.copy()
     work[~v] = cv2.inpaint(img, (~v).astype(np.uint8) * 255, 6, cv2.INPAINT_TELEA)[~v]
+    # robot e base: al loro posto un pezzo di marmo copiato piu' in la' (x - 0,55 m) e fuso, invece del riempimento liscio (un rettangolo grigio sotto il robot)
+    for fx0, fx1, fz0, fz1 in rad_obj.floor_excl():
+        r0, r1, c0, c1 = int(fz0 * PPM_F), int(fz1 * PPM_F), int(fx0 * PPM_F), int(fx1 * PPM_F); sh = -int(0.55 * PPM_F)
+        if c0 + sh >= 0 and v[r0:r1, c0 + sh:c1 + sh].all():
+            m_ = np.full((r1 - r0, c1 - c0), 255, np.uint8); m_[:3] = 0; m_[-3:] = 0; m_[:, :3] = 0; m_[:, -3:] = 0
+            work = cv2.seamlessClone(work[r0:r1, c0 + sh:c1 + sh].copy(), work, m_, ((c0 + c1) // 2, (r0 + r1) // 2), cv2.NORMAL_CLONE); v[r0:r1, c0:c1] = True
     if best:
         central = cv2.dilate((lab == best[0]).astype(np.uint8), np.ones((25, 25), np.uint8)).astype(bool) & ~v
         allowed = np.zeros_like(v); allowed[0:int(3.1 * PPM_F), int(0.0 * PPM_F):int(2.6 * PPM_F)] = True
@@ -343,6 +350,13 @@ def main():
         if xp.get('map'): d['map'] = xp['map']
         prims.append(d)
     print('finestra: parti', len(xparts), flush=True)
+    rparts = rad_obj.build()      # nicchia e termosifone (legati alla parete W), base e robot aspirapolvere (sul pavimento)
+    for rp in rparts:
+        meta, blob_r = rp['mesh'].pack(); bins[f"cm_{rp['name']}"] = blob_r
+        d = dict(t='vmesh', bin=f"cm_{rp['name']}", nv=meta['nv'], ni=meta['ni'])
+        if rp.get('wall'): d['wall'] = rp['wall']
+        prims.append(d)
+    print('termosifone e robot: parti', len(rparts), flush=True)
     if USE_CONSOLE:       # vaso grande, portabottiglie con etichette e ciotola di rame sulla credenza (colori cotti dalle foto registrate)
         credenza_obj.MASKS = os.environ.get('VASE_MASKS', os.environ['CONSOLE_ASSETS'])        # maschere del vaso e ritagli delle etichette stanno con gli altri ritagli
         qparts, qimgs = credenza_obj.build(); images.update(qimgs); nvq = 0
@@ -374,7 +388,7 @@ def main():
         imap[name] = dict(o=len(blob), n=len(data), t='application/octet-stream'); blob += data
     man = dict(v=1, images=imap, walls={w: f'wall_{w}' for w in 'TWFA'}, floor='floor', atlas='atlas', atlasSize=[at.shape[1], at.shape[0]],
                boxes=boxes, prims=prims, items=ITEMS, art=art, spawn=spawn)
-    man['holes'] = win_obj.holes()
+    man['holes'] = win_obj.holes(); man['holes']['W'] = man['holes']['W'] + rad_obj.holes()['W']      # finestra e nicchia del termosifone (la parete W li ritaglia in pezzi)
     if corridor: man['corridor'] = corridor_obj.ZONE      # il disimpegno dietro l'arco: l'app lo mostra da dentro la stanza e ci si puo' camminare
     if sofa: man['sofa'] = sofa
     if voxs: man['vox'] = voxs
