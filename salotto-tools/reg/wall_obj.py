@@ -116,7 +116,7 @@ def plate4(mesh):
 def wall_rects_F(wall_len=7.1, margin=0.04):
     """fasce (u0, u1, y0, y1, morbido) della parete F (u = lunghezza - x) da rifare per diffusione: applique con il loro alone, citofono, cornetta e placca; il portone comincia a x = 1,63"""
     out = []
-    for (x0, x1, y0, y1) in ((1.93, 2.50, 1.30, 2.40), (1.645, 1.96, 1.02, 1.70)):
+    for (x0, x1, y0, y1) in ((1.645, 2.50, 1.30, 2.40), (1.645, 1.96, 1.02, 1.70)):          # il primo arriva fino al portone: a destra delle applique restava un blocco d'alone caldo con il bordo netto
         out.append((wall_len - x1, wall_len - x0, y0, y1, True))
     return out
 

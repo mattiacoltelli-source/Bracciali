@@ -27,13 +27,17 @@ def erode_valid(valid, k=7):
 # (morbido = tiene anche l'intonaco piu' scuro, per non schiarire il gradiente della luce); dietro alle mensole portaquadri e ai sei quadretti, ora in 3D, la parete va ripulita (fill nitido).
 WALL_EXCL = {'T': [(3.18, 3.58, 0.55, 2.68, True), (3.18, 4.50, 2.20, 2.68, True), (4.70, 5.84, 1.94, 2.34, False), (5.98, 7.10, 1.94, 2.34, False), (0.0, 0.47, 0.05, 1.55, True)],
              'A': wall_obj.wall_rects(L_A_O) + door_obj.wall_rects('A', L_A_O), 'F': wall_obj.wall_rects_F(L) + door_obj.wall_rects('F', L),
-             'W': win_obj.wall_rects()}       # parete A: interruttore e presa (ora in 3D, nella texture avevano la doppia immagine); A e F: le porte, ora in 3D (door_obj)
+             'W': win_obj.wall_rects() + [(1.85, 4.50, 0.0, 0.88, True)]}       # parete A: interruttore e presa (ora in 3D, nella texture avevano la doppia immagine); A e F: le porte, ora in 3D (door_obj); W: il muro dietro il divano (nessuna foto lo vede sotto 0,85 m: il riempimento "solo intonaco chiaro" dava un blocco piu' chiaro con bordo netto, ora segue le ombre vicine)
+
+# tag del bake per parete, se diverso da quello generale: la parete d'ingresso (F) si cuoce anche con le foto scattate dal corridoio (run_walls9.py, esclusa la foto buia dal fondo del corridoio), che la vedono
+# quasi di fronte con un'esposizione coerente. Nel bake generale la parete usciva beige (R-B ~ 18, nelle foto ~ 10) e con la striscia a destra della porta scura e bluastra: ora e' neutra (R-B ~ 12)
+WALL_TAG = {'F': 'v15d'}
 
 def walls(tag):
     P = json.load(open(f'{R}/paintings_final.json'))
     out = {}
     for wid in 'TWFA':
-        d = np.load(f'{R}/wall3_{wid}_{tag}.npz'); img, valid = d['img'], d['valid']
+        d = np.load(f'{R}/wall3_{wid}_{WALL_TAG.get(wid, tag)}.npz'); img, valid = d['img'], d['valid']
         v = erode_valid(valid, 7)
         for pid, p in P.items():
             if p['wall'] != wid: continue
