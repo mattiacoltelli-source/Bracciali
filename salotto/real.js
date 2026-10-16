@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { ROOM, WALLS, OPENINGS } from './room.js';
 
-const PACK_URL = 'pack/salotto.bin?v=23'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
+const PACK_URL = 'pack/salotto.bin?v=24'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
 const KEY_STORE = 'salotto.key';
 const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 
@@ -198,9 +198,14 @@ function wallWithHoles(w, ops) {
     for (const [u, y] of [[ua, ya], [ub, ya], [ub, yb], [ua, yb]]) { pos.push(u, y, 0); uv.push(u / w.len, y / ROOM.H); }
     idx.push(i0, i0 + 1, i0 + 2, i0, i0 + 2, i0 + 3);
   };
-  let cur = 0;
-  for (const o of ops) { rect(cur, o.u0, 0, ROOM.H); rect(o.u0, o.u1, o.y1, ROOM.H); if (o.y0 > 0.005) rect(o.u0, o.u1, 0, o.y0); cur = o.u1; }
-  rect(cur, w.len, 0, ROOM.H);
+  // si taglia la parete in strisce verticali ai bordi dei buchi; in ogni striscia restano i pezzi fra un buco e l'altro (buchi sovrapposti in larghezza, come la finestra e la nicchia sotto)
+  const us = [...new Set([0, w.len, ...ops.flatMap((o) => [o.u0, o.u1])])].sort((a, b) => a - b);
+  for (let i = 0; i + 1 < us.length; i++) {
+    const ua = us[i], ub = us[i + 1], mid = (ua + ub) / 2;
+    let y = 0;
+    for (const [a, b] of ops.filter((o) => o.u0 <= mid && mid <= o.u1).map((o) => [o.y0, o.y1]).sort((p, q) => p[0] - q[0])) { rect(ua, ub, y, a); y = Math.max(y, b); }
+    rect(ua, ub, y, ROOM.H);
+  }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));

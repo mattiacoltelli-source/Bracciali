@@ -82,15 +82,14 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
      pomolo, leva, cilindro e spioncino). Le texture si riportano alla luce dei muri (guadagno per canale = intonaco cotto nel pacchetto / intonaco della foto frontale). Nella texture dei muri A e F la fascia della
      porta e' ricostruita per diffusione (`WALL_EXCL`, da 10 cm da terra: lo zoccolo di marmo resta) e il pavimento lungo la parete d'ingresso (z > 4,20) si rifa con marmo specchiato (`build_pack.floor`):
      l'anta scura vi si proiettava (macchia scura) con una zona beige accanto. Nel pacchetto sono prim `vmesh` con `wall`: `real.js` li lega al gruppo della parete, che sparisce quando la si guarda da fuori.
-   - la finestra della parete W (`reg/win_obj.py`): buco nel muro, spalle svasate d'intonaco e telaio con i vetri 12 cm piu' dentro. Prima il telaio era cotto nella texture del muro e veniva sfocato e sdoppiato:
+   - la finestra della parete W (`reg/win_obj.py`): buco nel muro e telaio **a filo del muro** (1 cm piu' dentro; prima 12 cm dietro, con spalle d'ottone e poi d'intonaco: l'utente ha detto che la finestra e' pari al muro e a incassarsi e' il termosifone). Prima il telaio era cotto nella texture del muro e veniva sfocato e sdoppiato:
      sta dietro il filo del muro e le foto registrate lo vedono da 5-7 m con pose diverse (`console/win_sweep.py` cerca la profondita' in cui le foto concordano di piu': 12-13 cm). Ora il telaio e' un piano a parte
      con la foto frontale dell'utente (non registrata, 25d46ef1) rimappata a 800 px/m (`console/win_prep.py`).
      Come si raddrizza (la prima versione usava un riferimento cotto da una foto registrata e un ECC: usciva leggermente storta e asimmetrica): otto angoli dei vetri letti a mano nella foto ingrandita
      (`console/gcrop2.py`), omografia foto -> riquadro ideale con due vetri uguali e simmetrici e bordi alto/basso allineati; si cercano insieme l'omografia e il riquadro (distanza fra i vetri; l'altezza, in
      larghezze di vetro, non si ricava dai soli angoli: la si trova imponendo che le colonne della rotazione siano ortonormali con la K della camera). Residuo di 1 px sugli otto angoli, h = 4,359, camera a
      2,35 m dal telaio. Il rendering dell'app dalla posa della foto (camera della decomposizione, f = 3024,6) si sovrappone alla foto senza doppie immagini: telaio, apertura e spalle sono nel posto giusto.
-     Misure: scala 0,329 m per larghezza di vetro; asse centrale a z = 1,178, bordo basso dei vetri a y = 0,995. Apertura nel muro (angoli esterni delle spalle letti a mano, riportati sul piano del muro con la
-     camera): z 0,726-1,630, y 0,925-2,466; contorno del telaio (faccia esterna, simmetrico): z 0,7635-1,5925, y 0,9786-2,4644. Le quattro spalle sono facce piane svasate fra i due rettangoli,
+     Misure: scala 0,329 m per larghezza di vetro; asse centrale a z = 1,178, bordo basso dei vetri a y = 0,995. Apertura nel muro = contorno del telaio + 4 mm per lato (z 0,7595-1,5965, y 0,9746-2,4684; prima, a mano dai vetri: z 0,726-1,630, y 0,925-2,466); contorno del telaio (faccia esterna, simmetrico): z 0,7635-1,5925, y 0,9786-2,4644. Le quattro spalle sono facce piane svasate fra i due rettangoli,
      tinta unita d'intonaco (mediana del muro attorno al buco, scurita verso il telaio): prima erano ottone raddrizzato dalla foto e da un fianco la banda lontana, grossa e dorata, contro la vicina,
      sottile e senza riflessi, faceva sembrare il contorno asimmetrico; nelle foto la finestra sta in uno sguardo d'intonaco bianco. Il riflesso del fotografo e del vaso nei vetri si copre con la griglia a persiane copiata da 9 stecche sopra; nelle spalle i riflessi dell'ottone
      (bianco pieno nella foto) si sostituiscono con il colore della striscia (`deglare`), e oltre il bordo vero l'ultimo colore d'ottone si prolunga (`strip_plaster`: intonaco = poco saturo e non bruciato).
@@ -109,3 +108,9 @@ Il pacchetto si apre solo con la chiave (43 caratteri). **Non va mai messa nel r
 
 ## Aggiornare il pacchetto
 Copiare il nuovo file in `salotto/pack/salotto.bin` e alzare il numero in `PACK_URL` (`?v=`) in `salotto/real.js`: la cache del telefono lo rinnova.
+
+   - nicchia e termosifone, base e robot aspirapolvere (`reg/rad_obj.py`): sotto la finestra la parete ha un buco (manifesto `holes`, stesso z dell'apertura vecchia, dal pavimento a y = 0,92) con fondo e fianchi d'intonaco profondi 10 cm;
+     dentro, il termosifone in ghisa a 13 elementi (z 0,79-1,57, y 0,09-0,75; misure dal muro cotto e dalla foto frontale: in metri veri ma a +-3 cm) con nervatura in rilievo, testata con apertura scura, lamiera forata,
+     valvola a sinistra e testa termostatica a destra. Base (17 x 25 x 30 cm, logo arancione) e robot (disco di 32 cm con torretta e vetro) stanno sul pavimento contro il muro, davanti all'estremita' destra: ostacolo per la camminata
+     (`scene_def`: `ostacolo_robot`); nel pavimento le due impronte si rifanno con un pezzo di marmo copiato 0,55 m piu' in la' e fuso (`floor()`), nel muro con la diffusione (`wall_rects`).
+     `real.js` taglia la parete anche con buchi sovrapposti in larghezza (`wallWithHoles`: strisce verticali ai bordi dei buchi), serve alla finestra e alla nicchia sotto.

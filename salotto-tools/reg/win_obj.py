@@ -1,4 +1,5 @@
-"""La finestra della parete W (z 0,73-1,63 m), in 3D: buco nel muro, spalle svasate d'intonaco e telaio con i vetri 12 cm piu' dentro.
+"""La finestra della parete W (z 0,76-1,60 m), in 3D: buco nel muro e telaio a filo del muro (1 cm piu' dentro, come dice l'utente: a incassarsi nel muro e' il termosifone sotto, `rad_obj`).
+Versioni precedenti: telaio 12 cm dietro il muro con spalle d'ottone e poi d'intonaco; da un fianco il contorno risultava asimmetrico.
 Prima il telaio era cotto nella texture del muro: le foto registrate lo vedono da 5-7 m con pose diverse e, siccome sta dietro il filo del muro, finiva sfocato e sdoppiato.
 Ora: il telaio e' un piano a parte (x = 7,10 + 0,12) con la foto frontale dell'utente (non registrata) rimappata a 800 px/m, e le quattro spalle sono facce piane svasate fra l'apertura nel muro e il
 contorno del telaio (piu' stretto di 4 cm per lato: nel muro l'apertura e' 0,904 m, il telaio 0,829 m). Il telaio esce dritto e simmetrico (console/win_prep.py: raddrizzamento con gli
@@ -13,9 +14,10 @@ import numpy as np, cv2
 from meshlib import Mesh
 
 ASSETS = os.environ.get('WIN_ASSETS', '/tmp/claude-0/s/st3/assets/win')
-X_WALL = 7.10; D = 0.12                                           # filo del muro e profondita' del telaio
-HOLE = dict(z0=0.726, z1=1.630, y0=0.925, y1=2.466)               # apertura nel muro
+X_WALL = 7.10; D = 0.012                                          # filo del muro e profondita' del telaio: la finestra e' a filo del muro (1 cm piu' dentro), a incassarsi e' il termosifone
 FRAME = dict(z0=0.7635, z1=1.5925, y0=0.9786, y1=2.4644)          # contorno del telaio (faccia esterna)
+GAP = 0.004                                                        # l'apertura nel muro e' il contorno del telaio piu' 4 mm per lato (spalle piccolissime, d'intonaco)
+HOLE = dict(z0=FRAME['z0'] - GAP, z1=FRAME['z1'] + GAP, y0=FRAME['y0'] - GAP, y1=FRAME['y1'] + GAP)
 GAIN = (1.10, 1.12, 1.14)                                         # RGB
 PLASTER = (205, 204, 200)                                          # intonaco attorno al buco: mediana RGB della texture del muro W (anello di 12-22 cm, senza il lato basso)
 DEEP = 0.80                                                       # le spalle si scuriscono verso il telaio (ombra d'angolo)
