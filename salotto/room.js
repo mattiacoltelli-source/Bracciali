@@ -15,7 +15,7 @@ export const WALLS = {
 
 export const OPENINGS = {
   T: [{ s0: 0.46, s1: 1.53, y0: 0, y1: 2.0, kind: 'passage' }], // arco senza porta (altezza: stima)
-  W: [{ s0: 0.71, s1: 1.63, y0: 0.95, y1: 2.51, kind: 'window' }],
+  W: [{ s0: 0.725, s1: 1.631, y0: 0.9225, y1: 2.466, kind: 'window' }], // finestra: bordi esterni delle spalle, letti nella foto frontale
   F: [{ s0: 0.388, s1: 1.624, y0: 0, y1: 2.24, kind: 'door-closed' }], // portone: bordi esterni del coprifilo letti nelle foto registrate
   A: [{ s0: 1.061, s1: 1.947, y0: 0, y1: 2.035, kind: 'door-closed', handle: 'right' }], // porta interna, chiusa (come nella foto frontale): bordi esterni del coprifilo
 };

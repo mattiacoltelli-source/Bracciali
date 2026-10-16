@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { ROOM, WALLS, OPENINGS } from './room.js';
 
-const PACK_URL = 'pack/salotto.bin?v=15'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
+const PACK_URL = 'pack/salotto.bin?v=16'; // alzare il numero quando il pacchetto cambia: la cache del telefono lo rinnova
 const KEY_STORE = 'salotto.key';
 const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 
@@ -199,7 +199,7 @@ function wallWithHoles(w, ops) {
     idx.push(i0, i0 + 1, i0 + 2, i0, i0 + 2, i0 + 3);
   };
   let cur = 0;
-  for (const o of ops) { rect(cur, o.u0, 0, ROOM.H); rect(o.u0, o.u1, o.y1, ROOM.H); cur = o.u1; }
+  for (const o of ops) { rect(cur, o.u0, 0, ROOM.H); rect(o.u0, o.u1, o.y1, ROOM.H); if (o.y0 > 0.005) rect(o.u0, o.u1, 0, o.y0); cur = o.u1; }
   rect(cur, w.len, 0, ROOM.H);
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -476,9 +476,10 @@ export function createReal(ctx) {
       const w = WALLS[id];
       const ops = (OPENINGS[id] || []).filter((o) => o.kind === 'passage')
         .map((o) => ({ ...o, u0: Math.min(w.toU(o.s0), w.toU(o.s1)), u1: Math.max(w.toU(o.s0), w.toU(o.s1)) })).sort((a, b) => a.u0 - b.u0);
+      const holes = ((man.holes || {})[id] || []).map(([u0, u1, y0, y1]) => ({ u0, u1, y0, y1 })); // finestre: buco nel muro, il telaio e le spalle stanno nel pacchetto (prim con `wall`)
       let m;
-      if (ops.length) {
-        m = new THREE.Mesh(wallWithHoles(w, ops), basic(T[man.walls[id]], { side: THREE.DoubleSide }));
+      if (ops.length || holes.length) {
+        m = new THREE.Mesh(wallWithHoles(w, [...ops, ...holes].sort((a, b) => a.u0 - b.u0)), basic(T[man.walls[id]], { side: THREE.DoubleSide }));
         for (const o of ops) { const a = archParts(w, o, T[man.walls[id]], !!man.corridor); a.wall = id; a.deep.forEach((e) => { e.visible = false; }); a.flat.visible = false; extras.push(a); }
       } else {
         m = new THREE.Mesh(new THREE.PlaneGeometry(w.len, ROOM.H), basic(T[man.walls[id]]));
