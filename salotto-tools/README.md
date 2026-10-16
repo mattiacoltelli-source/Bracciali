@@ -58,7 +58,7 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
    - applique, citofono e placca sulla parete d'ingresso F (`reg/wall_obj.py`): due applique nere (asta da 1 cm e cilindro da 5,6 cm contro il muro, l'asta davanti al cilindro), pannello e cornetta bianchi del citofono
      (cavo a spirale), placca nera a quattro tasti. Posizioni dai raggi di tre foto registrate (79eb58fc, 6eac1b0f, 8a00d20d) intersecati col piano della parete (z = 4,5: il quadro dell'Islanda torna a 1 cm),
      dimensioni dalle stesse foto. Le fasce della parete F con le loro vecchie immagini doppie (e l'alone caldo delle applique accese) sono ricostruite per diffusione (`WALL_EXCL['F']`).
-   - corridoio dietro l'arco (`reg/corridor_obj.py`): un disimpegno di 2,8 x 1,4 m con le due porte di mogano chiuse (la seconda, nelle foto aperta, usa la stessa foglia riflessa), le due stampe manga in bianco e nero e il pavimento di marmo.
+   - corridoio dietro l'arco (`reg/corridor_obj.py`): un disimpegno di 2,8 x 1,4 m con le tre porte di mogano chiuse (la seconda, nelle foto aperta, usa la stessa foglia riflessa; la terza sta sul muro sinistro, vedi sotto), le due stampe manga in bianco e nero e il pavimento di marmo.
      Le foto del corridoio dell'utente (verticali, non registrate nel modello) si mettono nel riferimento della stanza con una PnP (`console/corr_pose.py`): angoli dell'arco e tre punti della parete TV letti in una foto
      registrata (b4bfa2ec). Il muro di fondo sta a z = -1,40: il pavimento letto in due foto indipendenti (la PnP e la registrata) lo da' a -1,40 e stampe da 48 x 68 cm; il confronto fotometrico fra foto
      registrate dava -2,15 ma dipende troppo dalle pose relative. L'imbotte dell'arco e' profondo 40 cm (lo dice il bordo posteriore dell'architrave nella foto), non 25.
@@ -69,6 +69,11 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
      Il disimpegno e' percorribile: `corridor_obj.ZONE` (x 0,02-2,80, z da -0,40 a -1,40, altezza 2,70, apertura dell'arco) va nel manifesto (`corridor`); `real.js` tiene le parti `deep` in un gruppo a parte
      (`corrGroup`, visibile da dentro la stanza e da dentro il disimpegno: il gruppo del muro TV sparisce guardando da dietro) e `walk.js` somma il passaggio dell'arco e il disimpegno alla zona percorribile.
      Il retro della parete TV (z = -0,40, con il buco dell'arco) e il suo zoccolo stanno in `corr_walls` e `corr_trim`.
+     La terza porta, sul muro sinistro (x = 0,02), e' `corridor_obj.LDOOR`: cornice a due gradini in `corr_trim` e foglia `corr_leaf3` (stessa texture della porta di fondo, riflessa: maniglia verso l'angolo).
+     Si vede solo nella foto presa da destra attraverso l'arco: `console/corr_pose_side.py` ricava la posa (PnP sui punti vicini dell'imbotte e della targa, ancorata al campo lontano con lo spigolo
+     muro sinistro / fondo a z = -1,40) e da li' il bordo esterno della cornice verso l'angolo (z = -1,25) e la sua quota (1,92); il lato verso l'arco sta dietro lo stipite, quindi la larghezza della foglia e' quella di fondo (0,568 m).
+     Nella stessa foto si vedono, sul muro di fondo a sinistra della porta di fondo, un interruttore e un router attaccato alla presa (non ancora nel modello) e la porta di fondo comincia piu' a destra di dove la mette
+     il modello (bordo esterno della cornice a x >= 0,37 invece di 0,32): da rimisurare con la foto frontale.
    - le due porte (`reg/door_obj.py`): la porta interna chiusa sulla parete A e il portone blindato d'ingresso sulla parete F, in rilievo davanti al muro (prima erano dipinte nella texture della parete, con doppie
      immagini e angoli sbavati). Le foto frontali dell'utente (non registrate: 81d8e52c e afd7ab79) si tolgono dalla distorsione radiale e si raddrizzano con l'omografia dei quattro angoli esterni del coprifilo
      (`console/door_prep.py`, 600 px/m; angoli letti a mano con `console/gcrop2.py`, `gbright.py` schiarisce le zone in ombra). Le misure del coprifilo (A: 0,886 x 2,035 m, bordo sinistro a z = 3,439; F: 1,236 x 2,24 m,
