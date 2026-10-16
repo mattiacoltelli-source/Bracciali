@@ -103,7 +103,7 @@ function buildOpening(g, o, u0, u1) {
   if (o.kind === 'door-closed') {
     inset(0.12, M.white); frame(0.08, M.brown);
     box(g, w - 0.16, h - 0.08, 0.05, M.brown, cx, o.y0, -0.03);
-    box(g, 0.1, 0.03, 0.05, M.brass, u0 + 0.2, 1.0, 0.03);
+    box(g, 0.1, 0.03, 0.05, M.brass, o.handle === 'right' ? u1 - 0.2 : u0 + 0.2, 1.0, 0.03);
   }
   if (o.kind === 'window') {
     inset(0.3, M.white);

@@ -16,8 +16,8 @@ export const WALLS = {
 export const OPENINGS = {
   T: [{ s0: 0.46, s1: 1.53, y0: 0, y1: 2.0, kind: 'passage' }], // arco senza porta (altezza: stima)
   W: [{ s0: 0.71, s1: 1.63, y0: 0.95, y1: 2.51, kind: 'window' }],
-  F: [{ s0: 0.82, s1: 1.92, y0: 0, y1: 2.1, kind: 'door-closed' }], // portone (larghezza: stima)
-  A: [{ s0: 0.96, s1: 1.86, y0: 0, y1: 2.1, kind: 'door-open' }], // porta interna (posizione: stima)
+  F: [{ s0: 0.388, s1: 1.624, y0: 0, y1: 2.24, kind: 'door-closed' }], // portone: bordi esterni del coprifilo letti nelle foto registrate
+  A: [{ s0: 1.061, s1: 1.947, y0: 0, y1: 2.035, kind: 'door-closed', handle: 'right' }], // porta interna, chiusa (come nella foto frontale): bordi esterni del coprifilo
 };
 
 // Quadri già appesi (tutti 75x50). s = centro, y = centro dal pavimento. Posizioni misurate sulle foto registrate (±1 cm).
