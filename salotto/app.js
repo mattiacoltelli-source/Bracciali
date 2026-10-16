@@ -431,7 +431,6 @@ function syncLookUi() {
   document.querySelectorAll('[data-look]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.look === look)));
   $('walk-go').hidden = look !== 'real';
   $('copy-link').hidden = !realApi?.ready; // c'e' solo con la chiave giusta (la stanza e' stata aperta)
-  $('share').hidden = !realApi?.ready; // idem: il pulsante "Condividi" in alto a destra
 }
 async function setLook(next) {
   if (next === look) { syncLookUi(); return true; }
@@ -458,12 +457,10 @@ $('real-key-go').onclick = async () => {
   setLook('real');
 };
 // Il link con la chiave: chi lo apre vede subito la stanza a foto. L'app toglie la chiave dall'indirizzo dopo la prima apertura, quindi l'indirizzo della barra non basta: il link si ricompone qui.
-const roomLink = () => { const k = realMod?.readKey?.(); return k ? `${location.origin}${location.pathname}#k=${k}` : null; };
-let toastT = 0;
-const toast = (t, ms = 4500) => { const h = $('hint'); h.textContent = t; h.classList.remove('off'); clearTimeout(toastT); toastT = setTimeout(() => h.classList.add('off'), ms); };
-async function copyRoomLink() {
-  const link = roomLink();
-  if (!link) return;
+$('copy-link').onclick = async () => {
+  const k = realMod?.readKey?.();
+  if (!k) return;
+  const link = `${location.origin}${location.pathname}#k=${k}`;
   let done = false;
   try { await navigator.clipboard.writeText(link); done = true; } catch { /* provo il metodo vecchio */ }
   if (!done) {
@@ -474,19 +471,8 @@ async function copyRoomLink() {
   }
   if (!done) { prompt('Copia il link della stanza:', link); return; } // ultima strada: si copia a mano
   setStatus('Link copiato: chi lo apre vede la stanza a foto.');
-  toast('Link copiato · incollalo in un messaggio ai tuoi amici');
   const b = $('copy-link'); b.textContent = 'Link copiato';
   setTimeout(() => { b.textContent = 'Copia il link della stanza'; }, 2500);
-}
-$('copy-link').onclick = copyRoomLink;
-// "Condividi": sul telefono apre i fogli di condivisione (WhatsApp, Messaggi…); dove non c'e' (computer) copia il link.
-// Nessun await prima di share(): deve partire direttamente dal tocco, altrimenti Safari lo rifiuta.
-$('share').onclick = () => {
-  const url = roomLink();
-  if (!url) return;
-  if (!navigator.share) { copyRoomLink(); return; }
-  navigator.share({ title: 'Salotto 3D', text: 'Guarda il mio salotto in 3D', url })
-    .catch((e) => { if (e?.name !== 'AbortError') copyRoomLink(); }); // annullato = niente; altro errore = si copia
 };
 $('walk-go').onclick = () => {
   if (!realApi?.ready || look !== 'real') return;
