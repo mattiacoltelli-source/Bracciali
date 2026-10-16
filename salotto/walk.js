@@ -131,6 +131,11 @@ export function createWalk(ctx) {
   return {
     active: () => on,
     enter, exit, place,
+    lookAt(x, y, z) { // gira lo sguardo verso un punto (senza spostarsi)
+      const dx = x - st.x, dz = z - st.z, dy = y - st.eye;
+      st.yaw = Math.atan2(-dx, -dz); st.pitch = Math.max(-1.25, Math.min(1.25, Math.atan2(dy, Math.hypot(dx, dz))));
+      apply(); render();
+    },
     refov() { if (on) { camera.fov = fovFor(); camera.updateProjectionMatrix(); render(); } },
     // da chiamare a ogni frame: ritorna true se la vista è cambiata
     step(now) {

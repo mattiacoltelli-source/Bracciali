@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { ROOM, WALLS, PAINTINGS, OLD_POS } from './room.js';
 import { buildRoom, addLights, artTexture } from './scene.js';
+import { createObjects } from './objects.js';
 
 const $ = (id) => document.getElementById(id);
 const KEY = 'salotto.v1';
@@ -70,9 +71,17 @@ function resize() {
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   walkApi?.refov();
-  render();
+  fitView();
 }
 window.addEventListener('resize', resize);
+
+// Con una scheda aperta il centro della vista e' il centro di quello che resta visibile sopra la scheda: quello che guardi (e l'oggetto che metti a terra) non finisce dietro la scheda.
+function fitView() {
+  const sh = $('sheet'), W = window.innerWidth, H = window.innerHeight, cover = sh.hidden ? 0 : Math.min(sh.offsetHeight, H * 0.7);
+  if (cover > 0) camera.setViewOffset(W, H, 0, Math.round(cover / 2), W, H); else camera.clearViewOffset();
+  camera.updateProjectionMatrix(); render();
+}
+new ResizeObserver(fitView).observe($('sheet')); // la scheda cambia altezza con il contenuto (elenco, comandi, schede dell'oggetto)
 
 // ---------- stanza a foto + camminata (pacchetto cifrato, caricato solo quando serve) ----------
 let realApi = null, walkApi = null, realMod = null, realLoading = null, look = 'blocks';
@@ -198,16 +207,40 @@ function removeObj(id) {
 function rebuild(p) { removeObj(p.id); makeObj(p); if (selected === p.id) setOutline(true); }
 paintings.forEach(makeObj);
 
+// ---------- oggetti di prova (tavolo, sedia, tappeto...) ----------
+function viewRay() { // dove guarda la camera (con la scheda aperta e' il centro di quello che si vede, vedi fitView)
+  camera.getWorldDirection(ray.ray.direction); ray.ray.origin.copy(camera.position);
+  return ray;
+}
+const objApi = createObjects({ scene, camera, render, showErr, select: (id) => select(id), frame: (id) => { const o = objApi.get(id); if (o) { fitView(); frameAt(pv.set(o.x, o.h / 2, o.z)); } }, selected: () => selected, refresh: () => refreshPanels(), openTab: (n) => openTab(n), toDataUrl: (f, max) => toDataUrl(f, max), viewRay });
+
 // ---------- selezione e pannelli ----------
 let selected = null, step = 0.05;
 const byId = (id) => paintings.find((p) => p.id === id);
-function setOutline(on) { const o = objs.get(selected); if (o) { o.outline.visible = on; render(); } }
+function setOutline(on) { const o = objs.get(selected); if (o) { o.outline.visible = on; render(); } else if (selected) objApi.setOutline(selected, on); }
 function select(id) {
   setOutline(false);
+  if (id !== selected) $('sheet').scrollTop = 0;
   selected = id;
   setOutline(true);
   refreshPanels();
   if (id) openTab('paintings');
+  const ob = id && objApi.get(id), pq = id && objs.get(id);
+  const pt = ob ? pv.set(ob.x, ob.h / 2, ob.z) : pq ? pq.group.getWorldPosition(pv) : null;
+  if (pt) { fitView(); if (!inViewAt(pt)) frameAt(pt); } // quello che scegli resta visibile sopra la scheda
+}
+const pv = new THREE.Vector3(), pw = new THREE.Vector3();
+function inViewAt(p) { // il punto e' davanti alla camera e nella parte di schermo che non e' coperta dalla scheda?
+  pw.copy(p).applyMatrix4(camera.matrixWorldInverse);
+  if (pw.z > -0.1) return false;
+  pw.copy(p).project(camera);
+  const H = window.innerHeight, sh = $('sheet'), lo = -1 + (2 * (sh.hidden ? 0 : sh.offsetHeight)) / H, m = 0.12 * (1 - lo);
+  return Math.abs(pw.x) < 0.88 && pw.y > lo + m && pw.y < 1 - m;
+}
+function frameAt(p) { // punta la vista su un punto: in camminata gira lo sguardo, altrimenti sposta il punto guardato
+  if (walkApi?.active()) walkApi.lookAt(p.x, p.y, p.z);
+  else { controls.target.copy(p); controls.update(); }
+  render();
 }
 const cm = (v) => Math.round(v * 100);
 function info(p) {
@@ -230,14 +263,22 @@ function refreshPanels() {
     li.append(b);
     list.append(li);
   }
-  const p = byId(selected);
+  objApi.renderList($('olist'), selected, select);
+  const p = byId(selected), ob = objApi.get(selected);
   $('editor').hidden = !p;
-  $('plist').hidden = !!p; // con un quadro scelto la lista lascia spazio ai comandi
+  $('oeditor').hidden = !ob;
+  $('lists').hidden = !!(p || ob); // con un elemento scelto l'elenco lascia spazio ai comandi
+  $('back').hidden = !(p || ob);
+  $('sheet').classList.toggle('compact', !!ob); // i comandi dell'oggetto stanno in una scheda piu' bassa: la stanza resta visibile
+  $('sheet').classList.toggle('tall', !$('obj-form').hidden && !$('obj-form').closest('[data-panel]').hidden); // il modulo del nuovo oggetto ha bisogno di piu' spazio
   if (p) { $('e-name').textContent = p.name; $('e-info').textContent = info(p); }
+  if (ob) objApi.syncEditor(ob);
 }
+let lastTab = null;
 function openTab(name) {
   $('sheet').hidden = false;
   document.querySelectorAll('[data-panel]').forEach((el) => { el.hidden = el.dataset.panel !== name; });
+  if (name !== lastTab) { $('sheet').scrollTop = 0; lastTab = name; } // cambiando scheda si riparte dall'alto
   refreshPanels();
 }
 document.querySelectorAll('.bar [data-tab]').forEach((b) => { b.onclick = () => openTab(b.dataset.tab); });
@@ -259,7 +300,7 @@ document.querySelectorAll('[data-nudge]').forEach((b) => {
     place(p); save(); refreshPanels();
   };
 });
-$('e-back').onclick = () => select(null);
+$('back').onclick = () => select(null);
 $('e-rot').onclick = () => { const p = byId(selected); if (!p) return; [p.w, p.h] = [p.h, p.w]; rebuild(p); place(p); save(); refreshPanels(); };
 $('e-del').onclick = () => {
   const p = byId(selected);
@@ -287,16 +328,18 @@ function setRay(e) {
   ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(ndc, camera);
 }
-const pickPainting = () => ray.intersectObjects([...objs.values()].map((o) => o.box), false)[0];
+const pickItem = () => ray.intersectObjects([...[...objs.values()].map((o) => o.box), ...objApi.pickables()], false)[0]; // quadri e oggetti: il piu' vicino
 const pickWall = () => ray.intersectObjects(pieces, false)[0];
-let drag = null, down = null;
+let drag = null, down = null, odrag = false;
 const cv = renderer.domElement;
 cv.addEventListener('pointerdown', (e) => {
   $('hint').classList.add('off');
   setRay(e);
-  const hit = pickPainting();
-  down = { x: e.clientX, y: e.clientY, id: hit?.object.userData.pid || null, moved: false };
-  if (hit && hit.object.userData.pid === selected && !walkApi?.active()) {
+  const hit = pickItem(), hid = hit ? hit.object.userData.pid || hit.object.userData.oid : null;
+  down = { x: e.clientX, y: e.clientY, id: hid, moved: false };
+  if (hit && hid === selected && hit.object.userData.oid && !walkApi?.active()) { // oggetto scelto: si trascina sul pavimento
+    if (objApi.beginDrag(hid, ray)) { odrag = true; controls.enabled = false; cv.setPointerCapture(e.pointerId); }
+  } else if (hit && hid === selected && !walkApi?.active()) {
     const p = byId(selected), wh = pickWall();
     drag = { off: wh && wh.object.userData.wall === p.wall ? local(wh).map((v, i) => [p.u, p.y][i] - v) : [0, 0] };
     controls.enabled = false;
@@ -306,6 +349,7 @@ cv.addEventListener('pointerdown', (e) => {
 function local(wh) { const q = groups[wh.object.userData.wall].worldToLocal(wh.point.clone()); return [q.x, q.y]; }
 cv.addEventListener('pointermove', (e) => {
   if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) down.moved = true;
+  if (odrag) { setRay(e); objApi.dragTo(ray); return; }
   if (!drag) return;
   setRay(e);
   const wh = pickWall();
@@ -317,17 +361,18 @@ cv.addEventListener('pointermove', (e) => {
   refreshPanels();
 });
 function end() {
-  if (drag) { drag = null; controls.enabled = true; save(); }
+  if (odrag) { odrag = false; controls.enabled = true; objApi.endDrag(); }
+  else if (drag) { drag = null; controls.enabled = true; save(); }
   else if (down && !down.moved) select(down.id);
   down = null;
 }
 cv.addEventListener('pointerup', end);
-cv.addEventListener('pointercancel', () => { if (drag) { drag = null; controls.enabled = true; } down = null; });
+cv.addEventListener('pointercancel', () => { if (odrag) { odrag = false; objApi.endDrag(); controls.enabled = true; } if (drag) { drag = null; controls.enabled = true; } down = null; });
 
 // ---------- nuovo quadro ----------
-async function toDataUrl(file) {
+async function toDataUrl(file, max = 1024) {
   const bmp = await createImageBitmap(file);
-  const k = Math.min(1, 1024 / Math.max(bmp.width, bmp.height));
+  const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
   const c = document.createElement('canvas');
   c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
   c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
@@ -414,7 +459,7 @@ $('walk-go').onclick = () => {
   if (!realApi?.ready || look !== 'real') return;
   $('sheet').hidden = true;
   walkApi.enter();
-  const h = $('hint'); h.textContent = 'Joystick per muoverti · trascina per guardare · tocca un quadro per selezionarlo'; h.classList.remove('off');
+  const h = $('hint'); h.textContent = 'Joystick per muoverti · trascina per guardare · tocca un quadro o un oggetto per selezionarlo'; h.classList.remove('off');
   setTimeout(() => h.classList.add('off'), 6000);
 };
 
@@ -459,4 +504,4 @@ if ('serviceWorker' in navigator) {
     }).catch(() => { openTab('views'); }).finally(() => { roomRoot.visible = true; render(); });
   }
 }
-window.__salotto = { goTo, select, camera, controls, setLook, get look() { return look; }, get real() { return realApi; }, get walk() { return walkApi; } };
+window.__salotto = { goTo, select, camera, controls, scene, setLook, objects: objApi, get look() { return look; }, get real() { return realApi; }, get walk() { return walkApi; } };
