@@ -178,7 +178,10 @@ def atlas(tag):
     for (nm, fc), kind in SYN.items():
         bx = next((b for b in BOXES if b['name'] == nm), None)
         if bx and (nm, fc) in faces:
-            faces[(nm, fc)] = (shelf_tex.make_face(kind, faces[(nm, fc)][0].shape[:2], bounds=(bx['min'], bx['max'])), 1.0)
+            (bx0, by0, bz0), (bx1, by1, bz1) = bx['min'], bx['max']      # la forma segue la scatola di adesso (non quella con cui e' stato cotto l'atlante)
+            fw, fh = (bx1 - bx0, by1 - by0) if fc in ('+z', '-z') else (bz1 - bz0, by1 - by0)
+            shp = (max(4, int(round(fh * bx['ppm']))), max(4, int(round(fw * bx['ppm']))))
+            faces[(nm, fc)] = (shelf_tex.make_face(kind, shp, bounds=(bx['min'], bx['max'])), 1.0)
     # schermo della TV: spento (nelle foto c'e' un video diverso a ogni scatto)
     k = ('tv', '+z')
     if k in faces:

@@ -13,6 +13,12 @@ def N(name, x0, x1, *a, **k):
     """come B() ma con la x nel sistema nuovo (senza lo spostamento DX)"""
     return B(name, x0 + DX, x1 + DX, *a, **k)
 
+def tint(rgb, sh):
+    """colore a tinta unita che, con la luce della faccia (sh, come in real.js: moltiplicata in lineare), da' sullo schermo il colore sRGB misurato"""
+    lin = lambda c: ((c / 255 + 0.055) / 1.055) ** 2.4 if c / 255 > 0.04045 else c / 255 / 12.92
+    enc = lambda l: 255 * (12.92 * l if l <= 0.0031308 else 1.055 * l ** (1 / 2.4) - 0.055)
+    return '#%02x%02x%02x' % tuple(int(round(min(255.0, enc(min(1.0, lin(c) / sh))))) for c in rgb)
+
 TV = dict(ppm=300, margin=0.035, grp='tv')
 SOFA = dict(ppm=170, margin=0.07, grp='sofa')
 FAB = '#3b3d40'
@@ -22,18 +28,19 @@ BOXES = [
     # mobile a mensole accanto alla TV (coordinate del sistema NUOVO, tramite N()): fondo beige sottile, pilastro (il 'mobile quadrato'), pannello scuro davanti al pilastro.
     # Le mensole in noce, la pianta, i vasi e i fumetti sono una mesh a colori per vertice (shelf_unit.py). Il pannello e' un po' inclinato (a sinistra z 0,236, a destra 0,285): qui sta a 0,26 in media.
     N('dorso', 3.54, 3.855, 0.945, 2.213, 0.0, 0.034, '#b9b3a5', ['+z'], ['-x', '+y'], solid=False, **TV),
-    N('pilastro', 3.855, 4.25, 0.71, 2.245, 0.0, 0.236, '#b3ad9f', ['-x', '+z'], ['+x', '+y'], **TV),
+    N('pilastro', 3.855, 4.25, 0.945, 2.245, 0.0, 0.236, '#b3ad9f', ['-x', '+z'], ['+x', '+y'], **TV),   # il mobile e' sospeso al muro: sotto c'e' solo la parete (con l'ombra pannello), non un gambo fino al mobile TV
     N('pannello', 3.802, 4.415, 0.945, 2.245, 0.237, 0.26, '#8a8d92', ['+z'], ['-x', '+x', '+y'], **TV),
     N('ostacolo_mensole', 3.54, 3.855, 0.945, 2.213, 0.0, 0.24, '#000000', [], [], hidden=True, **TV),
     B('cassettone', 4.24, 6.79, 0.34, 0.71, 0.0, 0.40, '#bcb4a6', ['+z', '-x'], ['+y', '+x'], **TV),
-    B('ripiano', 5.00, 7.25, 0.71, 0.76, 0.0, 0.35, '#4a2f20', [], ['+z', '+y', '+x', '-x'], **TV),
-    # vano a destra del mobile TV: a sinistra il vano aperto con il vaso rosso (fondo in noce a 34 cm; in fondo la parete, scura), poi un divisorio e un secondo vano buio, fianco destro in noce.
-    # Facce a tinta unita con i colori misurati sulla foto 50f7be75 (le foto del vano da piu' angoli sbavano: il vano e' una rientranza, non un piano)
-    B('vano_pav', 6.79, 7.25, 0.274, 0.341, 0.0, 0.40, '#33190d', [], ['+y', '+z', '+x'], **TV),
-    B('vano_div', 7.06, 7.08, 0.341, 0.71, 0.0, 0.40, '#44291e', [], ['+z'], solid=False, **TV),          # il bordo davanti del divisorio, in noce
-    B('vano_sx', 7.055, 7.06, 0.341, 0.71, 0.0, 0.40, '#403630', [], ['-x'], ppm=100, margin=0.0, grp='tv', solid=False),   # la sua faccia verso il vaso: scura come il fondo
-    B('vano_dx', 7.08, 7.25, 0.341, 0.71, 0.0, 0.40, '#44291e', [], ['+z', '+x'], **TV),
-    B('vano_buio', 7.10, 7.23, 0.345, 0.66, 0.40, 0.402, '#251410', [], ['+z'], ppm=100, margin=0.0, grp='tv', solid=False),
+    B('ripiano', 5.00, 7.25, 0.71, 0.76, 0.0, 0.40, '#4a2f20', [], ['+z', '+y', '+x', '-x'], **TV),
+    # vano a destra del mobile TV: un quadrato normale in noce, aperto davanti, con il vaso rosso dentro (non ha divisori ne' un secondo vano: quello che sembrava un divisorio e'
+    # il fianco destro visto di sbieco). Dalla foto 50f7be75: fianco destro sottile (~6 cm), fondo grigio a ~19 cm dalla parete (lo spigolo fondo/pavimento sta a z ~ 0,19),
+    # pavimento in noce a 34 cm. Facce a tinta unita con i colori misurati sulla stessa foto (l'interno e' in ombra); tint() toglie l'ombreggiatura delle facce di real.js.
+    B('vano_pav', 6.79, 7.25, 0.274, 0.341, 0.0, 0.40, tint((50, 24, 12), 0.86), [], ['+z', '+x'], **TV),
+    B('vano_pav_su', 6.79, 7.25, 0.3405, 0.341, 0.19, 0.40, tint((36, 17, 11), 1.0), [], ['+y'], ppm=100, margin=0.0, grp='tv', solid=False),
+    B('vano_dx', 7.1895, 7.25, 0.341, 0.71, 0.0, 0.40, tint((54, 28, 18), 0.86), [], ['+z', '+x'], **TV),
+    B('vano_dx_in', 7.1895, 7.19, 0.341, 0.71, 0.19, 0.40, tint((37, 20, 14), 0.78), [], ['-x'], ppm=100, margin=0.0, grp='tv', solid=False),
+    B('vano_dorso', 6.79, 7.19, 0.341, 0.71, 0.19, 0.192, tint((50, 41, 37), 0.86), [], ['+z'], ppm=100, margin=0.0, grp='tv', solid=False),
     B('tv', 5.07, 6.60, 0.79, 1.68, 0.06, 0.12, '#0b0b0d', ['+z'], ['+y', '+x', '-x'], **TV),
     B('soundbar', 5.43, 6.18, 0.76, 0.83, 0.18, 0.30, '#17181a', ['+z'], ['+y', '+x', '-x'], **TV),
     B('speaker', 6.59, 6.845, 0.76, 1.07, 0.115, 0.27, '#141416', ['+z', '-x'], ['+y', '+x'], **TV),   # misure rifinite sui bordi delle foto (fitbox): largo 25,5 cm, profondo 15,5 cm
