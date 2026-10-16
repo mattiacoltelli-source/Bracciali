@@ -15,6 +15,10 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
    Attenzione: le foto registrate dopo (`sfm/reg_new.py`) hanno pose meno precise delle prime: per misurare si controlla sempre con due viste.
 4. Bake delle texture, ciascuna da più foto con occlusione (`reg/cams_sel.py` esclude le foto scattate dal corridoio). **Lanciarli con `FRAME_EXT=1`**: senza, usano solo le prime foto e non le 12 nuove:
    - `reg/run_walls7.py 400 TAG 0.5 T W F A` — le 4 pareti (400 px/m)
+   - `reg/run_walls9.py 400 TAG 0.5 F` — la parete d'ingresso (F) con anche le foto scattate dal corridoio, dietro l'arco: guardano la stanza di fronte alla parete con un'esposizione coerente (nel bake generale
+     usciva beige e con la striscia a destra della porta scura e bluastra). Un punto del muro usa una foto del corridoio solo se il raggio passa davvero dentro l'arco (`run_walls8.py`: due piani da attraversare dentro
+     l'apertura); il resto e' occluso. In parallelo (4 processi) e con l'occlusione solo dove la foto vede il muro: 2 minuti invece di 40. `EXCLUDE=71b0eb9f` scarta la foto buia dal fondo del corridoio (guadagno 3,9:
+     il muro veniva fuori bruciato). `build_pack.WALL_TAG` dice quale bake usare per quella parete.
    - `reg/run_floor7.py 350 TAG 0.5` — il pavimento
    - `reg/bake_furniture7.py 0.5 TAG` — le facce dei mobili
    - `reg/paintings.py` — misura i 5 quadri e ne estrae la foto
@@ -23,6 +27,8 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
    - divano: `scan/sofa_hf.py` → `sofa_hf2.py` → `sofa_hf3.py` ricavano un campo di quote a 2 cm (senza i cuscini, che hanno `cushions.py` / `cushions2.py`);
      `reg/sofa_bake.py` ne ricava la texture a 5 mm dalle foto (occlusione del campo stesso), `reg/sofa_export.py` riempie i buchi e prepara quote e texture
      `scan/sofa_cut.py` toglie dal campo di quote il bracciolo e il piano del tavolino con le rotelle che la scansione aveva incluso (parte sempre dall'originale)
+     `reg/sofa_clean.py DIR_IN DIR_OUT` ripulisce divano (quote + texture) senza nuove foto: le quote con riduzione del rumore a variazione totale (spiana le pieghe di qualche cm e tiene i gradini veri: bracciolo,
+     schienale, bordo della chaise), la texture ricostruendo per diffusione le macchie rosse e bianche (il tavolino e i cuscini proiettati sul divano) e portando la crominanza a un grigio neutro; `SOFA_DIR=DIR_OUT` per `build_pack.py`
    - oggetti sulla console (versione vecchia, ora non piu' nel pacchetto): `scan/cons_vox.py` li trasforma in voxel da 6 mm; `reg/vox_photo.py` li ricolora con le foto
    - oggetti sulla console in 3D vero (`reg/console_obj.py`): le figure Funko (Art, Pennywise, Mandalorian, Daredevil) sono rilievi fotografici: da una foto frontale si ricava la maschera della sagoma
      (`console/seglib.py` e gli script `console/seg_*.py`, GrabCut con semi a mano; `console/prep_console.py` salva ritagli e maschere in `CONSOLE_ASSETS`, fuori dal repository perche' sono foto di casa), la
@@ -82,7 +88,9 @@ Le foto e le scansioni 3D di casa **non** sono nel repo (il repo è pubblico): s
      Nel manifesto `holes` dice a `real.js` di ritagliare la parete (`wallWithHoles` ora tiene anche il pezzo sotto l'apertura) e i prim con `wall: 'W'` restano legati alla parete. Nella texture del muro W
      la fascia della finestra e il telaio sdoppiato (arriva a z = 1,72) sono ricostruiti per diffusione (`WALL_EXCL['W']`, morbido). La nicchia e il radiatore restano cotti nel muro.
 6. `reg/build_pack.py TAG_MURI TAG_PAV TAG_FACCE salotto.bin` — toglie i quadri dai muri, riempie i buchi, mette l'ombra sotto i mobili sospesi,
-   impacchetta atlante, divano, voxel e primitive e cifra tutto con AES-256-GCM.
+   impacchetta atlante, divano, voxel e primitive e cifra tutto con AES-256-GCM. Nella parete W il muro dietro il divano (z 1,85-4,50, sotto 0,88 m: nessuna foto lo vede)
+   si ricostruisce con il riempimento morbido (`WALL_EXCL['W']`): quello "solo intonaco chiaro" lasciava un blocco piu' chiaro con il bordo netto. Nella parete F la fascia delle applique arriva fino al portone
+   (prima a destra restava un blocco d'alone caldo con il bordo netto).
 
 I percorsi di lavoro sono scritti nei file (cercare `/tmp/claude-0/s`): vanno adattati. Le scansioni si passano con la variabile `SPZ_FILE`.
 
