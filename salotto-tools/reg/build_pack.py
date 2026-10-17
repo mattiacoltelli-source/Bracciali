@@ -57,6 +57,8 @@ def walls(tag):
                 img2 = img.copy(); img2[~v2] = 0
                 fill2 = wall_fill(img2, v2, PPM_W, soft=soft).astype(np.float32)
                 al = np.clip(cv2.GaussianBlur(M, (0, 0), 0.035 * PPM_W) * 1.6, 0, 1)[..., None]
+                if wid == 'W':      # finestra e nicchia: il passaggio dal riempimento al muro cotto era di ~8 cm e si vedeva come una riga; ora il peso del riempimento sale con la distanza dal bordo (smoothstep su 12 cm)
+                    d_in = cv2.distanceTransform((M > 0.5).astype(np.uint8), cv2.DIST_L2, 3); t = np.clip(d_in / (0.12 * PPM_W), 0, 1); al = (t * t * (3 - 2 * t))[..., None]
                 out[wid] = (out[wid].astype(np.float32) * (1 - al) + fill2 * al).clip(0, 255).astype(np.uint8)
         # ombra morbida sulla parete sotto i mobili sospesi (li' le foto non vedono: si sarebbe riempito di bianco)
         Hh, Ww = out[wid].shape[:2]

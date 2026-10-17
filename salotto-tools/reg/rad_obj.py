@@ -12,7 +12,7 @@ import numpy as np
 from meshlib import Mesh
 
 X_WALL = 7.10
-NICHE = dict(z0=0.726, z1=1.630, y0=0.0, y1=0.86, d=0.10)
+NICHE = dict(z0=0.726, z1=1.630, y0=0.0, y1=0.90, d=0.10)
 RAD = dict(z0=0.788, z1=1.568, y0=0.09, y1=0.75, n=13, el_w=0.054, depth=0.085, gap_x=0.012)       # centrato nella nicchia (foto frontale)
 DOCK = dict(zc=1.41, w=0.17, d=0.25, h=0.30, x_back=X_WALL - 0.02)
 ROBOT = dict(zc=1.45, xc=6.69, r=0.16, h=0.092)
@@ -25,7 +25,7 @@ def holes():
 def wall_rects():
     """fasce della parete W da rifare per diffusione: attorno alla nicchia (il termosifone sbavava di qualche cm oltre i bordi) e la macchia della base del robot (sale fino a ~0,45 m)"""
     n = NICHE
-    return [(n['z0'] - 0.07, n['z1'] + 0.20, 0.0, n['y1'] + 0.03, True)]
+    return [(n['z0'] - 0.17, n['z1'] + 0.30, 0.0, n['y1'] + 0.13, True)]
 
 def floor_excl():
     """rettangoli (x0, x1, z0, z1) del pavimento da rifare: base e robot, con 3 cm di margine"""

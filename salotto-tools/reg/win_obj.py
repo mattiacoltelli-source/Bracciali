@@ -12,9 +12,9 @@ import numpy as np, cv2
 from meshlib import Mesh
 
 ASSETS = os.environ.get('WIN_ASSETS', '/tmp/claude-0/s/st3/assets/win')
-X_WALL = 7.10; D = 0.03                                           # filo del muro e profondita' del telaio: 3 cm (prima 12: dai fianchi la banda vicina spariva e quella lontana era grossa, il contorno sembrava asimmetrico)
-HOLE = dict(z0=0.726, z1=1.630, y0=0.925, y1=2.466)               # apertura nel muro
+X_WALL = 7.10; D = 0.025                                           # filo del muro e profondita' del telaio: 3 cm (prima 12: dai fianchi la banda vicina spariva e quella lontana era grossa, il contorno sembrava asimmetrico)
 FRAME = dict(z0=0.7635, z1=1.5925, y0=0.9786, y1=2.4644)          # contorno del telaio (faccia esterna)
+HOLE = dict(z0=FRAME['z0'] - 0.0125, z1=FRAME['z1'] + 0.0125, y0=FRAME['y0'] - 0.025, y1=FRAME['y1'] + 0.0125)   # apertura nel muro: l'anello d'ottone e' largo 1,25 cm (2,5 sotto, il davanzale): il bordo totale col telaio e' ~5 cm come nelle foto (prima 3,75 + il bordo: ~7,5 e i bordi risultavano troppo grossi)
 GAIN = (1.10, 1.12, 1.14)                                         # RGB
 PPM_L = 700; PADR = 2; D_ATLAS = 0.12                               # l'atlante e' stato cotto per 12 cm di profondita': le strisce si rimappano su D
 
@@ -22,7 +22,7 @@ def holes():
     """per il manifesto: buchi nelle pareti, (u0, u1, y0, y1) nel riferimento della parete (parete W: u = z)"""
     return {'W': [[HOLE['z0'], HOLE['z1'], HOLE['y0'], HOLE['y1']]]}
 
-def wall_rects(margin_l=0.10, margin_r=0.14, margin_t=0.10, margin_low=0.035):
+def wall_rects(margin_l=0.20, margin_r=0.26, margin_t=0.20, margin_low=0.035):
     """fascia (u0, u1, y0, y1, morbido) della parete W da rifare per diffusione: la finestra sfocata e le sue sbavature (a destra il telaio sdoppiato arriva a z = 1,72: la striscia d'ottone che restava);
     sotto si tiene un margine piccolo (li' comincia la nicchia del radiatore)"""
     h = HOLE
