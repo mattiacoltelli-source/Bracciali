@@ -6,7 +6,7 @@ due foto indipendenti). Texture: stampe e foglia della porta rettificate dalle f
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np, cv2
-from meshlib import Mesh
+from meshlib import Mesh, rot_x, rot_z
 
 ASSETS = os.environ.get('CORR_ASSETS', '/tmp/claude-0/s/st3/corr')
 Z_N, Z_F = -0.40, -1.40            # faccia interna della parete TV (l'imbotte dell'arco e' profondo 40 cm, misurato nella foto) e muro di fondo
@@ -125,6 +125,34 @@ def reveal(mesh):
 def jpg(img, q=88):
     ok, b = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, q, cv2.IMWRITE_JPEG_OPTIMIZE, 1]); assert ok; return b.tobytes()
 
+BRASS = (150, 110, 58); BRASS_D = (104, 74, 36); BRASS_L = (196, 160, 98); HOLE_DARK = (28, 12, 6)
+H_LEVER = 0.93                                                              # quota del centro della rosetta (dal pavimento): dalle foto 0,91-0,93 m
+H_KEY = 0.074                                                               # la bocchetta della serratura sta 7,4 cm sotto
+
+def _lever(m, axis, base, y, along, d):
+    """maniglia a leva d'ottone con rosetta e bocchetta della serratura. axis 'z': porta del muro di fondo (la faccia guarda +z, la leva corre lungo x); axis 'x': porta del muro sinistro (la faccia guarda +x, la leva corre lungo z).
+    base = piano della foglia, along = posizione della rosetta lungo la parete, d = +1/-1: verso dove va la leva (parte dalla rosetta, vicino al lato della serratura, verso il centro della porta)"""
+    def box(a0, a1, y0, y1, n0, n1, faces):          # a = lungo la parete, n = fuori dalla parete
+        if axis == 'z': m.box((min(a0, a1), y0, base + n0), (max(a0, a1), y1, base + n1), faces)
+        else: m.box((base + n0, y0, min(a0, a1)), (base + n1, y1, max(a0, a1)), faces)
+    front = '+z' if axis == 'z' else '+x'; side_p = '+x' if axis == 'z' else '+z'; side_m = '-x' if axis == 'z' else '-z'
+    rot = rot_x(np.pi / 2) if axis == 'z' else rot_z(-np.pi / 2)
+    c = (along, y, base) if axis == 'z' else (base, y, along)
+    m.lathe(c, [(0.0, 0.0, BRASS_D), (0.025, 0.0, BRASS_D), (0.025, 0.007, BRASS), (0.021, 0.010, BRASS_L), (0.0, 0.010, BRASS_L)], seg=26, caps=False, rot=rot)                 # rosetta
+    box(along - 0.008, along + 0.008, y - 0.008, y + 0.008, 0.009, 0.038, {front: BRASS, '+y': BRASS_L, '-y': BRASS_D, side_p: BRASS_D, side_m: BRASS_D})                       # collo
+    a_end = along + d * 0.098
+    box(along - d * 0.012, a_end, y - 0.009, y + 0.009, 0.034, 0.052, {front: BRASS, '+y': BRASS_L, '-y': BRASS_D, side_p: BRASS_D, side_m: BRASS_D})                          # leva
+    box(a_end - d * 0.004, a_end + d * 0.004, y - 0.0075, y + 0.0075, 0.036, 0.050, {front: BRASS_L})                                                                           # punta tonda
+    yk = y - H_KEY                                                                                                                                                                  # bocchetta
+    ck = (along, yk, base) if axis == 'z' else (base, yk, along)
+    m.lathe(ck, [(0.0, 0.0, BRASS_D), (0.0135, 0.0, BRASS_D), (0.0135, 0.004, BRASS), (0.0, 0.004, BRASS_L)], seg=20, caps=False, rot=rot)
+    box(along - 0.0035, along + 0.0035, yk - 0.0015, yk + 0.0045, 0.0041, 0.0049, {front: HOLE_DARK}); box(along - 0.0015, along + 0.0015, yk - 0.0085, yk - 0.0015, 0.0041, 0.0049, {front: HOLE_DARK})
+
+def _pull(m, xc, base, y):
+    """maniglia incassata (l'anta di destra del fondo): barra d'ottone verticale in una sede scura, vicino al lato della serratura"""
+    m.box((xc - 0.012, y - 0.065, base), (xc + 0.012, y + 0.065, base + 0.0016), {'+z': HOLE_DARK})
+    m.box((xc - 0.0055, y - 0.052, base + 0.0016), (xc + 0.0055, y + 0.052, base + 0.0075), {'+z': BRASS_L, '+x': BRASS, '-x': BRASS_D, '+y': BRASS_L, '-y': BRASS_D})
+
 def build():
     """parti del corridoio: lista di dict(name, mesh, map) e immagini jpeg"""
     parts = []; imgs = {}
@@ -185,7 +213,9 @@ def build():
     # --- foglia della porta (texture rettificata dalla foto) ---
     door = cv2.imread(f'{ASSETS}/door_raw.png'); ppm = 600
     c0 = int(round((d['x0'] - 0.34) * ppm)); c1 = int(round((d['x1'] - 0.34) * ppm)); r0 = int(round((1.95 - d['y1']) * ppm)); r1 = int(round((1.95 - 0.02) * ppm))
-    leaf = door[r0:r1, c0:c1]
+    leaf = door[r0:r1, c0:c1].copy()
+    mk = np.zeros(leaf.shape[:2], np.uint8); mk[490:532, 0:40] = 255                      # la sbavatura d'ottone sta a ~1,02 m dal pavimento nella texture (la maniglia vera, dalla foto frontale, sta a 0,93)
+    leaf = cv2.inpaint(leaf, mk, 5, cv2.INPAINT_TELEA)                                   # niente piu' la sbavatura d'ottone al bordo: la maniglia ora e' 3D
     imgs['corr_door'] = jpg(leaf, 90)
     dm = Mesh(); dz = fz + 0.014
     dm._add([(d['x0'], 0.02, dz), (d['x1'], 0.02, dz), (d['x1'], d['y1'], dz), (d['x0'], d['y1'], dz)], [(255, 255, 255)] * 4, [(0, 1, 2), (0, 2, 3)], [(0, 0), (1, 0), (1, 1), (0, 1)])
@@ -197,6 +227,12 @@ def build():
     d3 = Mesh(); xl = X_L + 0.014
     d3._add([(xl, 0.02, za), (xl, 0.02, zb), (xl, ly1, zb), (xl, ly1, za)], [(255, 255, 255)] * 4, [(0, 1, 2), (0, 2, 3)], [(1, 0), (0, 0), (0, 1), (1, 1)])
     parts.append(dict(name='corr_leaf3', mesh=d3, map='corr_door'))
+    # --- maniglie (3D): leva con rosetta e serratura sulla porta di sinistra del fondo e su quella del muro sinistro (specchiata); maniglia incassata sull'anta di destra ---
+    hm = Mesh()
+    _lever(hm, 'z', dz, H_LEVER, d['x0'] + 0.105, +1)                      # fondo, sinistra: serratura a sinistra, la leva va verso il centro (a destra)
+    _lever(hm, 'x', X_L + 0.014, H_LEVER, LDOOR['zb'] + 0.105, +1)         # muro sinistro: serratura verso l'angolo (z minore), la leva va verso l'arco (z maggiore)
+    _pull(hm, w2['x0'] + 0.06, fz2, 0.95)                                  # fondo, destra: maniglia incassata a sinistra
+    parts.append(dict(name='corr_handles', mesh=hm, map=None))
     # --- stampe ---
     p1 = cv2.imread(f'{ASSETS}/print1.png'); p2 = cv2.imread(f'{ASSETS}/print2.png')
     tw, th = 512, 716
