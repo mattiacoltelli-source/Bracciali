@@ -12,9 +12,10 @@ import numpy as np, cv2
 from meshlib import Mesh
 
 ASSETS = os.environ.get('WIN_ASSETS', '/tmp/claude-0/s/st3/assets/win')
-X_WALL = 7.10; D = 0.025                                           # filo del muro e profondita' del telaio: 3 cm (prima 12: dai fianchi la banda vicina spariva e quella lontana era grossa, il contorno sembrava asimmetrico)
+X_WALL = 7.10; D = 0.03                                           # filo del muro e profondita' del telaio: 3 cm (prima 12: dai fianchi la banda vicina spariva e quella lontana era grossa, il contorno sembrava asimmetrico)
 FRAME = dict(z0=0.7635, z1=1.5925, y0=0.9786, y1=2.4644)          # contorno del telaio (faccia esterna)
-HOLE = dict(z0=FRAME['z0'] - 0.0125, z1=FRAME['z1'] + 0.0125, y0=FRAME['y0'] - 0.025, y1=FRAME['y1'] + 0.0125)   # apertura nel muro: l'anello d'ottone e' largo 1,25 cm (2,5 sotto, il davanzale): il bordo totale col telaio e' ~5 cm come nelle foto (prima 3,75 + il bordo: ~7,5 e i bordi risultavano troppo grossi)
+RING = dict(side=0.045, top=0.035, bottom=0.060)                  # anello d'ottone fuori dal contorno del telaio, misurato sulla foto della finestra (console/measure_gold.py): il bordo d'oro intero (anello + bordo del telaio) e' ~8,5% della larghezza ai lati, ~8% sopra, ~8,5% sotto
+HOLE = dict(z0=FRAME['z0'] - RING['side'], z1=FRAME['z1'] + RING['side'], y0=FRAME['y0'] - RING['bottom'], y1=FRAME['y1'] + RING['top'])   # apertura nel muro = contorno esterno dell'ottone
 GAIN = (1.10, 1.12, 1.14)                                         # RGB
 PPM_L = 700; PADR = 2; D_ATLAS = 0.12                               # l'atlante e' stato cotto per 12 cm di profondita': le strisce si rimappano su D
 
