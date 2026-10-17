@@ -48,7 +48,7 @@ def tex_size():
 
 def wall_rects():
     """fascia (u0, u1, y0, y1, morbido) della parete A da rifare: lo split cotto con la sua ombra e le strisce di luce attorno (la cornice resta)"""
-    return [(U_C - W / 2 - 0.16, U_C + W / 2 + 0.16, Y_TOP - CHIN_BOT[0] - 0.14, 2.88, True)]
+    return [(U_C - W / 2 - 0.30, U_C + W / 2 + 0.55, Y_TOP - CHIN_BOT[0] - 0.26, 2.88, True)]      # a destra e sotto restano le strisce di luce (la lente delle foto), che scendono in diagonale
 
 def shadow(img, ppm, H=3.0, strength=0.085):
     """ombra morbida sul muro (luce dall'alto a destra: cade in basso a sinistra): scurisce il muro attorno all'apparecchio; img = texture della parete A (BGR uint8), u verso destra, riga 0 = alto"""
