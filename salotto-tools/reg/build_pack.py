@@ -5,7 +5,7 @@ sys.path.insert(0, '/tmp/claude-0/s/reg')
 import numpy as np, cv2
 from fill import diffuse_fill, scene_complete, wall_fill
 from scene_def import BOXES, PRIMS, ITEMS
-import shelf_unit, shelf_tex, console_obj, ledges, credenza_obj, wall_obj, corridor_obj, door_obj, win_obj, rad_obj
+import shelf_unit, shelf_tex, console_obj, ledges, credenza_obj, wall_obj, corridor_obj, door_obj, win_obj, rad_obj, ac_obj
 
 R = '/tmp/claude-0/s/reg/out'
 KEYFILE = '/tmp/claude-0/s/pack.key'
@@ -26,7 +26,7 @@ def erode_valid(valid, k=7):
 # (u0, u1, y0, y1, morbido) in metri, sistema nuovo: fasce della parete TV da rifare per diffusione. A sinistra e sopra il mobile a mensole (x 3,54-4,25) la pianta e i tralci si proiettavano sul muro
 # (morbido = tiene anche l'intonaco piu' scuro, per non schiarire il gradiente della luce); dietro alle mensole portaquadri e ai sei quadretti, ora in 3D, la parete va ripulita (fill nitido).
 WALL_EXCL = {'T': [(3.18, 3.58, 0.55, 2.68, True), (3.18, 4.50, 2.20, 2.68, True), (4.70, 5.84, 1.94, 2.34, False), (5.98, 7.10, 1.94, 2.34, False), (0.0, 0.47, 0.05, 1.55, True)],
-             'A': wall_obj.wall_rects(L_A_O) + door_obj.wall_rects('A', L_A_O), 'F': wall_obj.wall_rects_F(L) + door_obj.wall_rects('F', L),
+             'A': wall_obj.wall_rects(L_A_O) + door_obj.wall_rects('A', L_A_O) + ac_obj.wall_rects(), 'F': wall_obj.wall_rects_F(L) + door_obj.wall_rects('F', L),
              'W': win_obj.wall_rects() + rad_obj.wall_rects() + [(1.85, 4.50, 0.0, 0.88, True)]}       # parete A: interruttore e presa (ora in 3D, nella texture avevano la doppia immagine); A e F: le porte, ora in 3D (door_obj); W: il muro dietro il divano (nessuna foto lo vede sotto 0,85 m: il riempimento "solo intonaco chiaro" dava un blocco piu' chiaro con bordo netto, ora segue le ombre vicine)
 
 # tag del bake per parete, se diverso da quello generale: la parete d'ingresso (F) si cuoce anche con le foto scattate dal corridoio (run_walls9.py, esclusa la foto buia dal fondo del corridoio), che la vedono
@@ -78,6 +78,7 @@ def walls(tag):
                 sh[:, x0b:x1b] = np.minimum(sh[:, x0b:x1b], prof[:, None])
             sh = cv2.GaussianBlur(sh, (0, 0), 0.03 * PPM_W)
             out[wid] = (out[wid].astype(np.float32) * sh[..., None]).clip(0, 255).astype(np.uint8)
+        if wid == 'A': out[wid] = ac_obj.shadow(out[wid], PPM_W, H)      # ombra morbida dello split Daikin (ora in 3D)
         if wid == 'T':   # fondo del vano di destra del mobile TV: la parete li' dentro e' in ombra (le foto la vedono solo di striscio, il resto sarebbe intonaco bianco)
             r0, r1, c0, c1 = int((H - 0.70) * PPM_W), int((H - 0.341) * PPM_W), int(6.49 * PPM_W), int(6.76 * PPM_W)
             dark = np.array([48, 55, 66], np.float32)     # BGR di (66,55,48): (48,40,35) misurato nella foto x il guadagno di normalizzazione delle texture
@@ -344,6 +345,14 @@ def main():
         if dp.get('map'): d['map'] = dp['map']
         prims.append(d)
     print('porte: parti', len(dparts), flush=True)
+    aparts, aimgs = ac_obj.build(); images.update(aimgs)      # split Daikin della parete A (sopra la porta interna): fronte dalla foto frontale dell'utente, corpo in colore pieno
+    for ap in aparts:
+        meta, blob_a = ap['mesh'].pack(); bins[f"cm_{ap['name']}"] = blob_a
+        d = dict(t='vmesh', bin=f"cm_{ap['name']}", nv=meta['nv'], ni=meta['ni'], wall=ap['wall'])
+        if meta.get('uv'): d['uv'] = 1
+        if ap.get('map'): d['map'] = ap['map']
+        prims.append(d)
+    print('split: parti', len(aparts), flush=True)
     xparts, ximgs = win_obj.build(); images.update(ximgs)      # finestra della parete W: telaio con la foto frontale e spalle, dentro il buco del muro (manifesto: holes)
     for xp in xparts:
         meta, blob_x = xp['mesh'].pack(); bins[f"cm_{xp['name']}"] = blob_x
